@@ -22,8 +22,8 @@
             --text-dim: #888888;
             --accent: #333333;
             --danger: #ff5555;
-            /* iPhone Corner Matching */
-            --iphone-radius: 38px; 
+            /* Ultra-smooth iPhone Corner */
+            --iphone-radius: 42px; 
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -104,21 +104,21 @@
             font-size: 12px;
         }
 
-        /* IPHONE MATCHED FOOTER */
+        /* FLUSH-MOUNTED IPHONE FOOTER */
         #footer {
             position: fixed;
-            /* Nudged down to sit flush with the bottom curve */
-            bottom: max(10px, env(safe-area-inset-bottom)); 
-            left: 10px;
-            right: 10px;
-            background: rgba(30, 30, 30, 0.95);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            /* Pulling it down slightly to match the bottom curve better */
+            bottom: calc(env(safe-area-inset-bottom) * 0.4); 
+            left: 8px;
+            right: 8px;
+            background: rgba(30, 30, 30, 0.96);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--border);
-            /* Matched border radius */
             border-radius: var(--iphone-radius);
-            padding: 24px 20px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.4);
+            /* Extra bottom padding to keep button text away from swipe bar */
+            padding: 20px 20px calc(15px + env(safe-area-inset-bottom));
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -136,7 +136,7 @@
             border: 1px solid var(--border);
             color: white;
             padding: 14px;
-            border-radius: 18px; /* Slightly more rounded inputs */
+            border-radius: 18px;
             font-size: 16px;
             flex: 1;
             min-width: 0;
@@ -147,12 +147,12 @@
             color: #000000;
             border: none;
             padding: 16px;
-            border-radius: 18px;
+            border-radius: 20px;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 15px;
             width: 100%;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         .save-btn:active { transform: scale(0.97); background: #eee; }
@@ -164,7 +164,7 @@
 <div id="app">
     <div id="nav-bar">
         <div id="planner-tabs"></div>
-        <div style="color: var(--text-dim); font-size: 24px; padding-left: 10px;" onclick="createNewPlanner()">+</div>
+        <div style="color: var(--text-dim); font-size: 24px; padding-left: 10px; cursor: pointer;" onclick="createNewPlanner()">+</div>
     </div>
 
     <div id="content">
@@ -182,7 +182,7 @@
 </div>
 
 <script>
-    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Assignments', 'Game releases'];
+    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Grades', 'Game Releases'];
     let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
     let activePlanner = planners[0];
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
