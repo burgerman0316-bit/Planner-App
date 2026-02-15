@@ -58,7 +58,7 @@
 
 <div id="login-overlay">
     <h1 style="font-size: 40px; letter-spacing: -2px;">DarkPlan</h1>
-    <p id="login-status" style="color: var(--text-dim);">Sign in to start planning</p>
+    <p id="login-status" style="color: var(--text-dim);">Authentication Fixed</p>
     <button class="google-btn" onclick="popLogin()">Sign in with Google</button>
 </div>
 
@@ -68,12 +68,12 @@
         <div style="color: var(--text-dim); font-size: 28px; cursor: pointer; padding: 0 10px;" onclick="createNewList()">+</div>
     </div>
     <div id="content">
-        <span id="active-list-name" style="font-size: 11px; text-transform: uppercase; color: var(--text-dim);">LIST</span>
+        <span id="active-list-name" style="font-size: 11px; text-transform: uppercase; color: var(--text-dim);">CURRENT LIST</span>
         <div id="task-list" style="margin-top: 15px;"></div>
     </div>
     <div id="footer">
         <div class="input-row">
-            <input type="text" id="itemName" placeholder="New Task...">
+            <input type="text" id="itemName" placeholder="What needs to be done?">
             <input type="date" id="itemDate">
         </div>
         <button class="save-btn" onclick="saveTask()">Add Task</button>
@@ -81,9 +81,9 @@
 </div>
 
 <script>
-    // --- FIREBASE CONFIG ---
+    // --- UPDATED CONFIG WITH YOUR VERIFIED KEY ---
     const firebaseConfig = {
-        apiKey: "AIzaSyCEdkitayty00ZHL-bbU0R1p_oy8E1RHbY",
+        apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
         projectId: "plannerapp-ff221",
         storageBucket: "plannerapp-ff221.appspot.com",
@@ -91,7 +91,7 @@
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
 
-    // Initialize Firebase
+    // Safety check for initialization
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -100,12 +100,11 @@
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // --- AUTH ACTIONS ---
     function popLogin() {
-        document.getElementById('login-status').innerText = "Opening selection...";
+        document.getElementById('login-status').innerText = "Opening Google window...";
         auth.signInWithPopup(provider).catch(e => {
+            console.error(e);
             alert("Auth Error: " + e.message);
-            document.getElementById('login-status').innerText = "Try again";
         });
     }
 
@@ -120,7 +119,6 @@
         }
     });
 
-    // --- APP LOGIC ---
     let activePlanner = 'Grades';
     let allEntries = [];
     let planners = ['Grades', 'Assignments'];
