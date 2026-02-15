@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DarkPlan Pro</title>
-
+    <title>Planero</title>
+    
+    <link rel="icon" type="image/png" href="https://img.icons8.com/pulsar-line/48/ffffff/calendar.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/pulsar-line/180/ffffff/calendar.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121212">
@@ -35,7 +38,6 @@
         }
         #app { display: none; flex-direction: column; height: 100%; }
         
-        /* Original Header Style */
         #nav-bar {
             background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border);
             padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
@@ -54,51 +56,34 @@
         }
 
         #footer {
-            position: fixed; 
-            bottom: 10px; /* Keeps it floating */
-            left: 8px; 
-            right: 8px;
-            background: rgba(30, 30, 30, 0.98); 
-            backdrop-filter: blur(40px);
+            position: fixed; bottom: 10px; left: 8px; right: 8px;
+            background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid var(--border); 
-            border-radius: var(--iphone-radius);
-            
-            /* UPDATED LINE BELOW: Top=20, Left/Right=20, Bottom=8 */
-            padding: 20px 20px 5px 20px; 
-            
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            z-index: 1000;
+            border: 1px solid var(--border); border-radius: var(--iphone-radius);
+            /* Tightened bottom padding to 6px as requested */
+            padding: 18px 18px 6px 18px; 
+            display: flex; flex-direction: column; gap: 10px; z-index: 1000;
+        }
+        .input-row { display: flex; gap: 10px; width: 100%; }
+        
+        input { 
+            background: #000; border: 1px solid var(--border); color: white; 
+            padding: 12px 15px; border-radius: var(--pill); flex: 1; font-size: 15px;
+            min-width: 0; height: 48px; -webkit-appearance: none;
+            display: flex; align-items: center;
         }
 
         input[type="date"] {
             color-scheme: dark;
-            position: relative;
-        }
-        
-        /* Forces the date text to be visible on iOS */
-        input[type="date"]::-webkit-date-and-time-value {
-            text-align: left;
-            min-height: 20px;
+            display: block;
+            line-height: 1.2;
         }
 
-        /* Also, make sure the help text doesn't have its own margin */
-        .help-tip {
-            text-align: center; 
-            font-size: 9px; 
-            color: var(--text-dim); 
-            margin: 0; /* Ensures no extra space below the text */
-            padding-bottom: 5px; /* Tiny bit of breathing room */
+        input[type="date"]::-webkit-date-and-time-value {
+            text-align: left;
+            padding-left: 5px;
+            min-height: 20px;
         }
-        .input-row { display: flex; gap: 10px; width: 100%; }
-        input { 
-            background: #000; border: 1px solid var(--border); color: white; 
-            padding: 14px 20px; border-radius: var(--pill); flex: 1; font-size: 14px;
-            min-width: 0; /* Prevents input from pushing out of flex box */
-        }
-        input[type="date"] { color-scheme: dark; }
 
         .save-btn { 
             background: #ffffff; color: #000; border: none; padding: 16px; 
@@ -128,7 +113,7 @@
             <input type="date" id="itemDate">
         </div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
-        <div style="text-align:center; font-size: 9px; color: var(--text-dim); margin-top: -5px;">USE THIS PLANNER FOR ANYTHING!</div>
+        <div style="text-align:center; font-size: 9px; color: var(--text-dim); margin-top: -5px;">USE THIS PLANNER FOR ANYTHING INCLUDING GRADES GAME RELEASES AND MORE</div>
     </div>
 </div>
 
@@ -142,13 +127,16 @@
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
     function popLogin() {
-        auth.signInWithPopup(provider).catch(e => alert(e.message));
+        auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message));
     }
 
     auth.onAuthStateChanged((user) => {
@@ -164,7 +152,7 @@
 
     let activePlanner = 'Grades';
     let allEntries = [];
-    let planners = ['Assignments', 'Game Releases'];
+    let planners = ['Grades', 'Assignments'];
 
     function loadData(uid) {
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
