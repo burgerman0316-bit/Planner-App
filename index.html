@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner Pro | Dark</title>
+    <title>DarkPlan | Personal Planner</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
-        /* CSS Variables based on your provided style */
         :root {
             --bg-main: #1e1e1e;
             --sidebar-bg: #2c2c2c;
@@ -16,12 +16,13 @@
             --accent-btn: #585858;
             --accent-hover: #4a4a4a;
             --input-bg: #383838;
+            --danger: #ff5555;
         }
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #121212; /* Deep background */
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #121212;
             color: var(--text-main);
             display: flex;
             justify-content: center;
@@ -29,22 +30,21 @@
             min-height: 100vh;
         }
 
-        /* Container matching your chat app layout */
         #container {
             display: flex;
             width: 95%;
-            max-width: 1100px;
-            height: 85vh;
+            max-width: 1000px;
+            height: 90vh;
             background: var(--bg-main);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             border: 1px solid var(--border);
         }
 
-        /* User Info Sidebar style for "Planners" list */
+        /* Sidebar - Your User Info Style */
         #sidebar {
-            width: 220px;
+            width: 200px;
             padding: 15px;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
@@ -54,210 +54,256 @@
         }
 
         #sidebar h2 {
-            font-size: 1.1em;
+            font-size: 1rem;
             color: #fff;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .planner-nav-item {
-            padding: 10px;
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 8px 12px;
             cursor: pointer;
-            border-radius: 4px;
-            margin-bottom: 5px;
-            transition: background 0.2s;
             color: var(--text-dim);
+            border-radius: 4px;
+            margin-bottom: 4px;
+            transition: 0.2s;
         }
 
-        .planner-nav-item:hover {
+        .nav-item:hover {
             background-color: #383838;
             color: #fff;
         }
 
-        .planner-nav-item.active {
+        .nav-item.active {
             background-color: var(--accent-btn);
             color: #fff;
             font-weight: bold;
         }
 
-        /* Main Content Area */
-        #main-content {
+        /* Main Area */
+        #main-area {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
+            min-width: 0;
         }
 
-        #header {
-            padding: 15px 20px;
-            background-color: var(--header-bg);
-            border-bottom: 1px solid var(--border);
+        #header-title {
+            padding: 10px 15px;
             font-weight: bold;
             font-size: 1.2em;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--header-bg);
         }
 
-        /* Task Area */
-        #task-display {
+        #task-list {
             flex-grow: 1;
             padding: 20px;
             overflow-y: auto;
-            background: var(--bg-main);
         }
 
-        /* Input Form Area - styled like the messageForm */
+        /* Task Cards */
+        .entry-card {
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .entry-card:hover {
+            border-color: #666;
+        }
+
+        .entry-info b { display: block; color: #fff; }
+        .entry-info span { font-size: 0.85em; color: var(--text-dim); }
+
+        /* Hover Remove Button */
+        .remove-btn {
+            opacity: 0;
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .entry-card:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .remove-btn:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        /* Footer Input Area */
         #input-footer {
-            padding: 20px;
+            padding: 15px;
             background-color: var(--sidebar-bg);
             border-top: 1px solid var(--border);
         }
 
-        .input-group {
+        .input-row {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
         }
 
-        input, select {
-            background-color: var(--input-bg);
-            color: var(--text-main);
+        input {
+            flex: 1;
+            background: var(--input-bg);
             border: 1px solid #555;
+            color: #fff;
             padding: 10px;
             border-radius: 4px;
-            flex: 1;
-            min-width: 150px;
         }
 
-        /* The Button - Matches your specific style */
-        .btn-action {
-            padding: 10px 20px;
-            border-radius: 4px;
-            border: none;
+        .btn-primary {
             background-color: var(--accent-btn);
             color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.2s;
         }
 
-        .btn-action:hover {
+        .btn-primary:hover {
             background-color: var(--accent-hover);
         }
 
-        /* Entry Cards (bubbles style) */
-        .entry-card {
-            background: var(--sidebar-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .entry-card .date {
-            font-size: 0.85em;
-            color: var(--text-dim);
-        }
-
-        /* Scrollbar */
-        #task-display::-webkit-scrollbar {
-            width: 8px;
-        }
-        #task-display::-webkit-scrollbar-thumb {
-            background-color: #555;
-            border-radius: 10px;
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e1e1e; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="container">
-        <div id="sidebar">
-            <h2>My Planners</h2>
-            <div id="planner-list">
-                <div class="planner-nav-item active" onclick="switchView('Grades')">Grades</div>
-                <div class="planner-nav-item" onclick="switchView('Games')">Game Releases</div>
+<div id="container">
+    <div id="sidebar">
+        <h2>Planners</h2>
+        <div id="planner-nav" class="nav-list">
             </div>
-            <hr style="border: 0; height: 1px; background: #444; margin: 15px 0;">
-            <button class="btn-action" style="width: 100%;" onclick="addNewPlanner()">+ Add New</button>
-        </div>
+        <hr style="border:0; height:1px; background:#444; margin:15px 0;">
+        <button class="btn-primary" onclick="createNewPlanner()" style="width:100%">+ New List</button>
+    </div>
 
-        <div id="main-content">
-            <div id="header">Planner: <span id="view-title">Grades</span></div>
-            
-            <div id="task-display">
-                </div>
-
-            <div id="input-footer">
-                <div class="input-group">
-                    <input type="text" id="taskName" placeholder="What's due?">
-                    <input type="date" id="taskDate">
-                    <button class="btn-action" onclick="addTask()">Save Entry</button>
-                </div>
+    <div id="main-area">
+        <div id="header-title">Planner: <span id="current-title">Grades</span></div>
+        <div id="task-list">
+            </div>
+        <div id="input-footer">
+            <div class="input-row">
+                <input type="text" id="itemName" placeholder="Task or Game name...">
+                <input type="date" id="itemDate">
+                <button class="btn-primary" onclick="saveEntry()">Add Entry</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        let currentType = 'Grades';
-        let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+<script>
+    // 1. DATA INITIALIZATION
+    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Grades', 'Games'];
+    let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
+    let activePlanner = planners[0];
 
-        function switchView(type) {
-            currentType = type;
-            document.getElementById('view-title').innerText = type;
-            
-            // Update active state in sidebar
-            document.querySelectorAll('.planner-nav-item').forEach(item => {
-                item.classList.remove('active');
-                if(item.innerText === type) item.classList.add('active');
-            });
+    // 2. EMAIL CONFIG (Optional - Get IDs from EmailJS dashboard)
+    (function(){
+        // emailjs.init("YOUR_PUBLIC_KEY"); 
+    })();
 
-            renderTasks();
+    // 3. CORE FUNCTIONS
+    function renderApp() {
+        // Render Sidebar
+        const nav = document.getElementById('planner-nav');
+        nav.innerHTML = '';
+        planners.forEach(p => {
+            const div = document.createElement('div');
+            div.className = `nav-item ${p === activePlanner ? 'active' : ''}`;
+            div.innerText = p;
+            div.onclick = () => { activePlanner = p; renderApp(); };
+            nav.appendChild(div);
+        });
+
+        document.getElementById('current-title').innerText = activePlanner;
+
+        // Render Tasks
+        const list = document.getElementById('task-list');
+        list.innerHTML = '';
+        entries.filter(e => e.type === activePlanner).forEach((entry, idx) => {
+            const card = document.createElement('div');
+            card.className = 'entry-card';
+            card.innerHTML = `
+                <div class="entry-info">
+                    <b>${entry.name}</b>
+                    <span>Due: ${entry.date}</span>
+                </div>
+                <button class="remove-btn" onclick="removeEntry(${entries.indexOf(entry)})">Remove</button>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function saveEntry() {
+        const name = document.getElementById('itemName').value;
+        const date = document.getElementById('itemDate').value;
+        
+        if(!name || !date) return alert("Fill out both fields!");
+
+        const newEntry = { name, date, type: activePlanner };
+        entries.push(newEntry);
+        
+        localStorage.setItem('myEntries', JSON.stringify(entries));
+        document.getElementById('itemName').value = '';
+        
+        // --- EMAIL TRIGGER START ---
+        // if (confirm("Send email reminder now?")) {
+        //    emailjs.send("service_id", "template_id", {
+        //        task_name: name,
+        //        due_date: date,
+        //        to_email: "your@email.com"
+        //    });
+        // }
+        // --- EMAIL TRIGGER END ---
+
+        renderApp();
+    }
+
+    function removeEntry(index) {
+        entries.splice(index, 1);
+        localStorage.setItem('myEntries', JSON.stringify(entries));
+        renderApp();
+    }
+
+    function createNewPlanner() {
+        const name = prompt("Enter New Planner Name:");
+        if(name && !planners.includes(name)) {
+            planners.push(name);
+            localStorage.setItem('myPlanners', JSON.stringify(planners));
+            activePlanner = name;
+            renderApp();
         }
+    }
 
-        function addTask() {
-            const name = document.getElementById('taskName').value;
-            const date = document.getElementById('taskDate').value;
-            if(!name || !date) return;
+    // Initial Start
+    renderApp();
+</script>
 
-            tasks.push({ name, date, type: currentType });
-            localStorage.setItem('myTasks', JSON.stringify(tasks));
-            
-            document.getElementById('taskName').value = '';
-            renderTasks();
-        }
-
-        function renderTasks() {
-            const display = document.getElementById('task-display');
-            display.innerHTML = '';
-            
-            const filtered = tasks.filter(t => t.type === currentType);
-            
-            filtered.forEach(task => {
-                const div = document.createElement('div');
-                div.className = 'entry-card';
-                div.innerHTML = `
-                    <span>${task.name}</span>
-                    <span class="date">${task.date}</span>
-                `;
-                display.appendChild(div);
-            });
-        }
-
-        function addNewPlanner() {
-            const name = prompt("Name your new planner:");
-            if(name) {
-                const list = document.getElementById('planner-list');
-                const div = document.createElement('div');
-                div.className = 'planner-nav-item';
-                div.innerText = name;
-                div.onclick = () => switchView(name);
-                list.appendChild(div);
-                switchView(name);
-            }
-        }
-
-        // Initial Load
-        renderTasks();
-    </script>
 </body>
 </html>
