@@ -44,8 +44,16 @@
         #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 220px; }
         #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         
+        /* ENTRY CARDS */
         .entry-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 25px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .edit-input { background: transparent; border: 1px solid var(--border); color: white; border-radius: 8px; padding: 4px 8px; font-size: inherit; font-family: inherit; width: 100%; margin: 2px 0; }
+        
+        /* FIX FOR BIG BOX INPUTS */
+        .edit-container { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .edit-pill { 
+            background: #000; border: 1px solid var(--border); color: white; 
+            border-radius: var(--radius); padding: 12px 20px; font-size: 16px; 
+            font-family: inherit; width: 100%;
+        }
 
         #footer {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -133,18 +141,6 @@
 
     function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
 
-    document.addEventListener('touchstart', (e) => {
-        if (moveMode && !e.target.closest('.nav-tab')) { moveMode = null; haptic(); render(); }
-    }, { passive: true });
-
-    function startPress(p) {
-        window.getSelection().removeAllRanges();
-        pressTimer = window.setTimeout(function() {
-            haptic(); moveMode = p; render();
-        }, 600);
-    }
-    function cancelPress() { clearTimeout(pressTimer); }
-
     function loadData(uid) {
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
             allEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -154,75 +150,32 @@
 
     function saveTask() {
         haptic();
-        const nameInput = document.getElementById('itemName');
-        const dateInput = document.getElementById('itemDate');
-        if(!nameInput.value || !dateInput.value) return alert("Missing Info");
-
-        db.collection("tasks").add({ 
-            name: nameInput.value, date: dateInput.value, 
-            uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() 
-        }).then(() => {
-            nameInput.value = ''; dateInput.value = '';
-            document.getElementById('dateDisplay').innerText = 'DATE';
-        }).catch(e => alert("Save Failed: " + e.message));
+        const n = document.getElementById('itemName');
+        const d = document.getElementById('itemDate');
+        if(!n.value || !d.value) return;
+        db.collection("tasks").add({ name: n.value, date: d.value, uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() });
+        n.value = ''; d.value = ''; document.getElementById('dateDisplay').innerText = 'DATE';
     }
 
-    // EDIT LOGIC
     window.startEdit = function(id) { editingId = id; render(); };
-
-    window.updateEntry = function(id, field, value) {
-        db.collection("tasks").doc(id).update({ [field]: value })
-          .then(() => { editingId = null; render(); })
-          .catch(e => alert("Update Failed: " + e.message));
+    window.stopEdit = function(id, field, val) {
+        db.collection("tasks").doc(id).update({ [field]: val }).then(() => { editingId = null; render(); });
     };
 
     window.deleteTask = function(id) { haptic(); db.collection("tasks").doc(id).delete(); };
 
-    window.handleTap = function(e, p) {
-        if (e.target.classList.contains('tab-del-x')) {
-            e.stopPropagation();
-            if (planners.length <= 1) return;
-            if (confirm(`Delete "${p}"?`)) {
-                planners = planners.filter(item => item !== p);
-                if (activePlanner === p) activePlanner = planners[0];
-                moveMode = null; render();
-            }
-            return;
-        }
-        if (moveMode) {
-            const fromIdx = planners.indexOf(moveMode);
-            const toIdx = planners.indexOf(p);
-            planners.splice(fromIdx, 1);
-            planners.splice(toIdx, 0, moveMode);
-            moveMode = null; haptic(); render();
-        } else { haptic(); activePlanner = p; render(); }
-    };
-
-    function createNewList() {
-        const n = prompt("New list name:");
-        if(n && !planners.includes(n)) { planners.push(n); activePlanner = n; render(); }
-    }
-
     function render() {
         const tabs = document.getElementById('planner-tabs');
-        tabs.innerHTML = planners.map(p => `
-            <div class="nav-tab ${p === activePlanner ? 'active' : ''} ${p === moveMode ? 'moving' : ''}" 
-                 onclick="handleTap(event, '${p}')" ontouchstart="startPress('${p}')" ontouchend="cancelPress()">
-                 ${p} ${p === moveMode ? '<span class="tab-del-x">✕</span>' : ''}
-            </div>
-        `).join('');
-
-        document.getElementById('list-label').innerText = activePlanner;
-        const list = document.getElementById('task-list');
-        const items = allEntries.filter(e => e.category === activePlanner);
+        tabs.innerHTML = planners.map(p => `<div class="nav-tab ${p === activePlanner ? 'active' : ''}">${p}</div>`).join('');
         
-        list.innerHTML = items.length ? items.map(e => {
+        const items = allEntries.filter(e => e.category === activePlanner);
+        document.getElementById('task-list').innerHTML = items.length ? items.map(e => {
             if (editingId === e.id) {
                 return `
-                <div class="entry-card">
-                    <div style="flex:1">
-                        <input type="text" class="edit-input" value="${e.name}" onblur="updateEntry('${e.id}', 'name', this.value)">
-                        <input type="date" class="edit-input" value="${e.date}" onblur="updateEntry('${e.id}', 'date', this.value)">
+                <div class="entry-card" style="flex-direction:column; align-items:stretch;">
+                    <div class="edit-container">
+                        <input type="text" class="edit-pill" value="${e.name}" onblur="stopEdit('${e.id}', 'name', this.value)">
+                        <input type="date" class="edit-pill" value="${e.date}" onblur="stopEdit('${e.id}', 'date', this.value)">
                     </div>
                 </div>`;
             }
@@ -231,7 +184,7 @@
                 <div onclick="startEdit('${e.id}')" style="flex:1">
                     <b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small>
                 </div>
-                <div style="color:#ff453a; font-weight:bold; cursor:pointer; padding:10px;" onclick="deleteTask('${e.id}')">✕</div>
+                <div style="color:#ff453a; font-weight:bold; padding:10px;" onclick="deleteTask('${e.id}')">✕</div>
             </div>`;
         }).join('') : '<p style="text-align:center; color:gray; margin-top:60px;">No entries.</p>';
     }
