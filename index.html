@@ -32,11 +32,10 @@
         }
         #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; }
         
-        /* Added user-select: none to prevent text highlighting during long-press */
         .nav-tab { 
             padding: 8px 18px; border-radius: 12px; color: var(--text-dim); 
             font-size: 15px; font-weight: 600; white-space: nowrap; 
-            user-select: none; -webkit-user-select: none;
+            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
         }
         .nav-tab.active { background: var(--accent); color: white; }
 
@@ -64,35 +63,27 @@
 
         .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         
+        /* --- BORDER RADIUS CONTROLS --- */
         input[type="text"] { 
             background: #000; border: 1px solid var(--border); color: white; 
-            padding: 0 18px; border-radius: 50px; font-size: 15px; flex: 1;
-            height: 48px; 
+            padding: 0 18px; border-radius: 15px; /* <--- CHANGE RADIUS HERE */
+            font-size: 15px; flex: 1; height: 48px; 
         }
 
         input[type="date"] { 
-            position: relative;
-            color-scheme: dark; 
-            background: #000; border: 1px solid var(--border);
-            color: white; border-radius: 50px; 
-            padding: 0 14px; font-size: 13px;
-            width: 140px;
-            height: 48px; 
-            text-align: center;
-            display: flex; align-items: center; justify-content: center;
+            position: relative; color-scheme: dark; background: #000; 
+            border: 1px solid var(--border); color: white; 
+            border-radius: 15px; /* <--- CHANGE RADIUS HERE */
+            padding: 0 14px; font-size: 13px; width: 140px; height: 48px; 
+            text-align: center; display: flex; align-items: center; justify-content: center;
         }
 
         input[type="date"]::before {
-            content: "SET DATE";
-            position: absolute; color: var(--text-dim);
-            left: 0; right: 0; 
-            top: 50%; transform: translateY(-50%); 
-            text-align: center;
-            background: #000; pointer-events: none;
-            font-weight: 600;
+            content: "SET DATE"; position: absolute; color: var(--text-dim);
+            left: 0; right: 0; top: 50%; transform: translateY(-50%); 
+            text-align: center; background: #000; pointer-events: none; font-weight: 600;
         }
-        input[type="date"]:focus::before,
-        input[type="date"]:valid::before { display: none; }
+        input[type="date"]:focus::before, input[type="date"]:valid::before { display: none; }
 
         .save-btn { 
             width: 100%; background: #ffffff; color: #000; border: none; 
@@ -188,23 +179,23 @@
     window.deleteTask = function(id) { db.collection("tasks").doc(id).delete(); };
     window.setTab = function(t) { activePlanner = t; render(); };
 
-    // Function to delete a planner
-    window.handleLongPress = function(plannerName) {
-        if (planners.length <= 1) {
-            alert("You must have at least one list.");
-            return;
-        }
-        if (confirm(`Delete the "${plannerName}" list and all its tasks?`)) {
-            // Remove tasks from Firebase first
-            const toDelete = allEntries.filter(e => e.category === plannerName);
-            toDelete.forEach(item => db.collection("tasks").doc(item.id).delete());
-            
-            // Remove planner from array
+    // --- ENHANCED LONG PRESS LOGIC ---
+    let pressTimer;
+    function startPress(planner) {
+        pressTimer = window.setTimeout(function() {
+            handleDeletePlanner(planner);
+        }, 800); // 800ms hold time
+    }
+    function cancelPress() { clearTimeout(pressTimer); }
+
+    function handleDeletePlanner(plannerName) {
+        if (planners.length <= 1) return alert("Must have one list.");
+        if (confirm(`Delete "${plannerName}"?`)) {
             planners = planners.filter(p => p !== plannerName);
             if (activePlanner === plannerName) activePlanner = planners[0];
             render();
         }
-    };
+    }
 
     function createNewList() {
         const n = prompt("New Category:");
@@ -217,8 +208,12 @@
             const isActive = p === activePlanner;
             return `
                 <div class="nav-tab ${isActive ? 'active' : ''}" 
-                     onclick="setTab('${p}')" 
-                     oncontextmenu="event.preventDefault(); handleLongPress('${p}')">
+                     onclick="setTab('${p}')"
+                     ontouchstart="startPress('${p}')"
+                     ontouchend="cancelPress()"
+                     onmousedown="startPress('${p}')"
+                     onmouseup="cancelPress()"
+                     oncontextmenu="event.preventDefault()">
                      ${p}
                 </div>
             `;
