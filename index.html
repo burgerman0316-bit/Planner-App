@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DarkPlan Pro</title>
     
-    <link rel="apple-touch-icon" href="https://img.icons8.com/pulsar-line/180/ffffff/calendar.png">
-    <link rel="icon" type="image/png" href="https://img.icons8.com/pulsar-line/48/ffffff/calendar.png">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121212">
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
@@ -20,7 +19,7 @@
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
             --accent: #333333; --iphone-radius: 50px; --pill: 100px; 
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-dark); color: var(--text-main); height: 100vh;
@@ -55,25 +54,25 @@
             padding: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;
         }
         .input-row { display: flex; gap: 10px; }
-        input { background: #000; border: 1px solid var(--border); color: white; padding: 14px 20px; border-radius: var(--pill); flex: 1; }
+        input { background: #000; border: 1px solid var(--border); color: white; padding: 14px 20px; border-radius: var(--pill); flex: 1; font-size: 16px; }
         .save-btn { background: #ffffff; color: #000; border: none; padding: 16px; border-radius: var(--pill); font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
-    <h1 style="font-size: 40px; letter-spacing: -2px; margin-bottom: 5px;">DarkPlan</h1>
-    <p id="login-status" style="color: var(--text-dim);">Syncing with Google...</p>
-    <button id="login-btn" class="google-btn">Sign in with Google</button>
+    <h1 style="font-size: 40px; letter-spacing: -2px;">DarkPlan</h1>
+    <p id="login-status" style="color: var(--text-dim);">Click to choose your Google account</p>
+    <button class="google-btn" onclick="popLogin()">Sign in with Google</button>
 </div>
 
 <div id="app">
     <div id="nav-bar">
         <div id="planner-tabs"></div>
-        <div id="add-list-btn" style="color: var(--text-dim); font-size: 28px; cursor: pointer; padding: 0 10px;">+</div>
+        <div style="color: var(--text-dim); font-size: 28px; cursor: pointer; padding: 0 10px;" onclick="createNewList()">+</div>
     </div>
     <div id="content">
-        <span id="active-list-name" style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); margin-left: 5px;">LIST</span>
+        <span id="active-list-name" style="font-size: 11px; text-transform: uppercase; color: var(--text-dim);">LIST</span>
         <div id="task-list" style="margin-top: 15px;"></div>
     </div>
     <div id="footer">
@@ -81,15 +80,11 @@
             <input type="text" id="itemName" placeholder="What's next?">
             <input type="date" id="itemDate">
         </div>
-        <button id="add-task-btn" class="save-btn">Add to List</button>
+        <button class="save-btn" onclick="saveTask()">Add to List</button>
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
+<script>
     const firebaseConfig = {
         apiKey: "AIzaSyCEdkitayty00ZHL-bbU0R1p_oy8E1RHbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -99,72 +94,76 @@
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getFirestore();
-    const provider = new GoogleAuthProvider();
-    emailjs.init("RsAYqiwym2mViUR8u");
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const provider = new firebase.auth.GoogleAuthProvider();
 
-    let activePlanner = 'Grades';
-    let allEntries = [];
-    let planners = ['Grades', 'Assignments'];
+    // --- POPUP LOGIC ---
+    function popLogin() {
+        document.getElementById('login-status').innerText = "Opening Account Selection...";
+        
+        auth.signInWithPopup(provider)
+        .then((result) => {
+            console.log("Logged in:", result.user.displayName);
+        })
+        .catch((error) => {
+            console.error(error);
+            if (error.code === 'auth/popup-blocked') {
+                alert("The popup was blocked! Look at your address bar and click 'Always allow popups' for this site.");
+            } else {
+                document.getElementById('login-status').innerText = "Error: " + error.message;
+            }
+        });
+    }
 
-    // --- REDIRECT HANDLER (Crucial for bypassing popups) ---
-    getRedirectResult(auth).then(() => {
-        console.log("Logged in via redirect");
-    }).catch(e => {
-        document.getElementById('login-status').innerText = e.message;
-    });
-
-    document.getElementById('login-btn').onclick = () => {
-        signInWithRedirect(auth, provider);
-    };
-
-    onAuthStateChanged(auth, (user) => {
+    auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
             loadData(user.uid);
-            runAutomation(user);
         } else {
             document.getElementById('login-overlay').style.display = 'flex';
             document.getElementById('app').style.display = 'none';
         }
     });
 
-    // --- DATA LOGIC ---
+    // --- THE REST OF YOUR APP LOGIC ---
+    let activePlanner = 'Grades';
+    let allEntries = [];
+    let planners = ['Grades', 'Assignments'];
+
     function loadData(uid) {
-        const q = query(collection(db, "tasks"), where("uid", "==", uid));
-        onSnapshot(q, (snapshot) => {
+        db.collection("tasks").where("uid", "==", uid).onSnapshot((snapshot) => {
             allEntries = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
             render();
         });
     }
 
-    document.getElementById('add-task-btn').onclick = async () => {
+    function saveTask() {
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
-        if(!name || !date || !auth.currentUser) return;
-        await addDoc(collection(db, "tasks"), {
+        if(!name || !date) return;
+        db.collection("tasks").add({
             name, date, uid: auth.currentUser.uid,
-            category: activePlanner, reminderSent: false
+            category: activePlanner, createdAt: Date.now()
         });
         document.getElementById('itemName').value = '';
-    };
+    }
 
-    window.deleteTask = async (id) => {
-        await deleteDoc(doc(db, "tasks", id));
-    };
+    function deleteTask(id) {
+        db.collection("tasks").doc(id).delete();
+    }
 
-    window.setTab = (t) => {
-        activePlanner = t;
-        render();
-    };
-
-    document.getElementById('add-list-btn').onclick = () => {
+    function createNewList() {
         const n = prompt("New Category:");
         if(n) { planners.push(n); activePlanner = n; render(); }
-    };
+    }
+
+    function setTab(t) {
+        activePlanner = t;
+        render();
+    }
 
     function render() {
         const tabs = document.getElementById('planner-tabs');
@@ -175,26 +174,14 @@
         document.getElementById('active-list-name').innerText = activePlanner;
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
-        list.innerHTML = items.length ? items.map(e => `
+        list.innerHTML = items.map(e => `
             <div class="entry-card">
                 <div><b>${e.name}</b><br><small style="color:gray">${e.date}</small></div>
                 <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
             </div>
-        `).join('') : '<p style="text-align:center; color:gray; margin-top:40px;">Empty list.</p>';
+        `).join('') || '<p style="color:gray;text-align:center;">Empty.</p>';
     }
 
-    async function runAutomation(user) {
-        const today = new Date().toISOString().split('T')[0];
-        const q = query(collection(db, "tasks"), where("uid", "==", user.uid), where("date", "==", today));
-        const snap = await getDocs(q);
-        snap.forEach(d => {
-            if(!d.data().reminderSent) {
-                emailjs.send("service_ow9m3kg", "template_vvxqygc", {
-                    to_email: user.email, task_name: d.data().name
-                }).then(() => updateDoc(doc(db, "tasks", d.id), {reminderSent: true}));
-            }
-        });
-    }
     render();
 </script>
 </body>
