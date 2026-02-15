@@ -31,7 +31,13 @@
             display: flex; align-items: center; justify-content: space-between;
         }
         #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; }
-        .nav-tab { padding: 8px 18px; border-radius: 12px; color: var(--text-dim); font-size: 15px; font-weight: 600; white-space: nowrap; }
+        
+        /* Added user-select: none to prevent text highlighting during long-press */
+        .nav-tab { 
+            padding: 8px 18px; border-radius: 12px; color: var(--text-dim); 
+            font-size: 15px; font-weight: 600; white-space: nowrap; 
+            user-select: none; -webkit-user-select: none;
+        }
         .nav-tab.active { background: var(--accent); color: white; }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
@@ -58,11 +64,10 @@
 
         .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         
-        /* Fixed Height for vertical alignment */
         input[type="text"] { 
             background: #000; border: 1px solid var(--border); color: white; 
             padding: 0 18px; border-radius: 15px; font-size: 15px; flex: 1;
-            height: 48px; /* Force vertical size */
+            height: 48px; 
         }
 
         input[type="date"] { 
@@ -72,7 +77,7 @@
             color: white; border-radius: 15px; 
             padding: 0 14px; font-size: 13px;
             width: 140px;
-            height: 48px; /* Must match text input height */
+            height: 48px; 
             text-align: center;
             display: flex; align-items: center; justify-content: center;
         }
@@ -81,7 +86,7 @@
             content: "SET DATE";
             position: absolute; color: var(--text-dim);
             left: 0; right: 0; 
-            top: 50%; transform: translateY(-50%); /* Perfect vertical center */
+            top: 50%; transform: translateY(-50%); 
             text-align: center;
             background: #000; pointer-events: none;
             font-weight: 600;
@@ -157,7 +162,7 @@
         }
     });
 
-    let activePlanner = 'Grades';
+    let activePlanner = 'Assignments';
     let allEntries = [];
     let planners = ['Assignments', 'Game Releases'];
 
@@ -177,21 +182,47 @@
             category: activePlanner, createdAt: Date.now()
         });
         document.getElementById('itemName').value = '';
+        document.getElementById('itemDate').value = '';
     }
 
     window.deleteTask = function(id) { db.collection("tasks").doc(id).delete(); };
     window.setTab = function(t) { activePlanner = t; render(); };
 
+    // Function to delete a planner
+    window.handleLongPress = function(plannerName) {
+        if (planners.length <= 1) {
+            alert("You must have at least one list.");
+            return;
+        }
+        if (confirm(`Delete the "${plannerName}" list and all its tasks?`)) {
+            // Remove tasks from Firebase first
+            const toDelete = allEntries.filter(e => e.category === plannerName);
+            toDelete.forEach(item => db.collection("tasks").doc(item.id).delete());
+            
+            // Remove planner from array
+            planners = planners.filter(p => p !== plannerName);
+            if (activePlanner === plannerName) activePlanner = planners[0];
+            render();
+        }
+    };
+
     function createNewList() {
         const n = prompt("New Category:");
-        if(n) { planners.push(n); activePlanner = n; render(); }
+        if(n && !planners.includes(n)) { planners.push(n); activePlanner = n; render(); }
     }
 
     function render() {
         const tabs = document.getElementById('planner-tabs');
-        tabs.innerHTML = planners.map(p => `
-            <div class="nav-tab ${p === activePlanner ? 'active' : ''}" onclick="setTab('${p}')">${p}</div>
-        `).join('');
+        tabs.innerHTML = planners.map(p => {
+            const isActive = p === activePlanner;
+            return `
+                <div class="nav-tab ${isActive ? 'active' : ''}" 
+                     onclick="setTab('${p}')" 
+                     oncontextmenu="event.preventDefault(); handleLongPress('${p}')">
+                     ${p}
+                </div>
+            `;
+        }).join('');
 
         document.getElementById('list-label').innerText = activePlanner;
         const list = document.getElementById('task-list');
