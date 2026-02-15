@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DarkPlan Pro</title>
 
-    <link rel="apple-touch-icon" href="https://your-icon-url.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2098/2098402.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2098/2098402.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -18,7 +20,7 @@
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
             --accent: #333333; 
-            --radius: 50px; /* Set to 50px for pill-shaped design */
+            --radius: 50px; 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
@@ -32,41 +34,37 @@
         
         #nav-bar {
             background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border);
-            padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
+            padding: 15px; 
+            padding-top: calc(10px + env(safe-area-inset-top)); 
             display: flex; align-items: center; justify-content: space-between;
         }
+
         #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; align-items: center; }
         
         .nav-tab { 
             position: relative;
             padding: 8px 18px; border-radius: 20px; color: var(--text-dim); 
             font-size: 15px; font-weight: 600; white-space: nowrap; 
-            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+            user-select: none; -webkit-user-select: none;
             transition: all 0.2s ease; border: 1px solid transparent;
             display: flex; align-items: center; gap: 8px;
         }
         .nav-tab.active { background: var(--accent); color: white; }
         
-        .tab-del-x {
-            display: none; color: #ff453a; font-size: 14px; font-weight: 800; padding: 0 2px;
-        }
-
-        .nav-tab.moving { 
-            border: 1px dashed #ffd60a; 
-            animation: shake 0.3s infinite;
-        }
+        .tab-del-x { display: none; color: #ff453a; font-size: 14px; font-weight: 800; padding: 0 2px; }
+        .nav-tab.moving { border: 1px dashed #ffd60a; animation: shake 0.3s infinite; }
         .nav-tab.moving .tab-del-x { display: inline-block; }
 
         @keyframes shake {
-            0% { transform: rotate(-1.5deg); }
-            50% { transform: rotate(1.5deg); }
-            100% { transform: rotate(-1.5deg); }
+            0% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+            100% { transform: rotate(-1deg); }
         }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
         .out-btn { background: #ffffff; color: #000; padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; cursor: pointer; }
 
-        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 240px; }
+        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 220px; }
         #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         
         .entry-card {
@@ -81,16 +79,20 @@
             border-top: 1px solid var(--border);
             border-radius: 30px 30px 0 0;
             padding: 20px; 
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            /* Cleaned up padding for Home Screen Web App use */
+            padding-bottom: 20px; 
             display: flex; flex-direction: column; gap: 12px; z-index: 1000;
         }
 
         .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
-        input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 22px; border-radius: var(--radius); font-size: 15px; flex: 1; height: 52px; }
-        input[type="date"] { position: relative; color-scheme: dark; background: #000; border: 1px solid var(--border); color: white; border-radius: var(--radius); padding: 0 14px; font-size: 13px; width: 140px; height: 52px; text-align: center; }
-        input[type="date"]::before { content: "SET DATE"; position: absolute; color: var(--text-dim); left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; background: #000; pointer-events: none; font-weight: 600; }
+        input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 22px; border-radius: var(--radius); font-size: 16px; flex: 1; height: 52px; }
+        input[type="date"] { position: relative; color-scheme: dark; background: #000; border: 1px solid var(--border); color: white; border-radius: var(--radius); padding: 0 14px; font-size: 13px; width: 120px; height: 52px; text-align: center; }
+        
+        input[type="date"]::before { content: "DATE"; position: absolute; color: var(--text-dim); left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; background: #000; pointer-events: none; font-weight: 600; }
         input[type="date"]:focus::before, input[type="date"]:valid::before { display: none; }
+        
         .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 52px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; cursor: pointer; }
+        
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -106,18 +108,12 @@
         <div id="planner-tabs"></div>
         <div class="header-btns">
             <span onclick="createNewList()" style="font-size: 24px; color: var(--text-dim); cursor: pointer; padding-left: 10px;">+</span>
-            <div onclick="auth.signOut()" class="out-btn">SIGN OUT</div>
+            <div onclick="auth.signOut()" class="out-btn">OUT</div>
         </div>
     </div>
-    <div id="content">
-        <span id="list-label">List</span>
-        <div id="task-list"></div>
-    </div>
+    <div id="content"><span id="list-label">List</span><div id="task-list"></div></div>
     <div id="footer">
-        <div class="input-row">
-            <input type="text" id="itemName" placeholder="Task Name...">
-            <input type="date" id="itemDate" required>
-        </div>
+        <div class="input-row"><input type="text" id="itemName" placeholder="Task Name..."><input type="date" id="itemDate" required></div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
     </div>
 </div>
@@ -150,7 +146,6 @@
 
     function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
 
-    // Exit move mode when tapping anywhere else
     document.addEventListener('click', (e) => {
         if (moveMode && !e.target.closest('.nav-tab')) {
             moveMode = null;
@@ -179,7 +174,7 @@
     window.handleTap = function(e, p) {
         if (e.target.classList.contains('tab-del-x')) {
             e.stopPropagation();
-            if (planners.length <= 1) return alert("You need at least one list.");
+            if (planners.length <= 1) return alert("Must have 1 list.");
             if (confirm(`Delete the "${p}" list?`)) {
                 planners = planners.filter(item => item !== p);
                 if (activePlanner === p) activePlanner = planners[0];
