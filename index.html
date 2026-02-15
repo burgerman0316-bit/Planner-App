@@ -22,8 +22,8 @@
             --text-dim: #888888;
             --accent: #333333;
             --danger: #ff5555;
-            /* Extra large radius to flow with the outer bezel */
-            --iphone-radius: 48px; 
+            /* Heavy radius to match iPhone bezel */
+            --iphone-radius: 50px; 
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -78,7 +78,8 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            padding-bottom: 250px; 
+            /* Space so scrolling items don't hide behind footer */
+            padding-bottom: 260px; 
         }
 
         .entry-card {
@@ -104,24 +105,24 @@
             font-size: 12px;
         }
 
-        /* THE DOCKED ISLAND */
+        /* THE HARDWARE-MATCHED FOOTER */
         #footer {
             position: fixed;
-            /* This moves the box physically closer to the bottom edge */
-            bottom: -5px; 
-            left: 5px;
-            right: 5px;
-            background: rgba(35, 35, 35, 0.98);
+            /* Manual override: Force it to sit only 10px from the absolute edge */
+            bottom: 10px; 
+            left: 10px;
+            right: 10px;
+            background: rgba(30, 30, 30, 0.98);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1.5px solid var(--border);
+            border: 1px solid var(--border);
             border-radius: var(--iphone-radius);
-            /* Increased bottom padding to keep button text safe while box is low */
-            padding: 24px 24px calc(25px + env(safe-area-inset-bottom));
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.7);
+            /* Internal padding: Keeps the button safe while the box stays low */
+            padding: 25px 25px calc(20px + env(safe-area-inset-bottom));
+            box-shadow: 0 -15px 40px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
             z-index: 1000;
         }
 
@@ -147,15 +148,15 @@
             color: #000000;
             border: none;
             padding: 18px;
-            border-radius: 22px;
+            border-radius: 25px;
             font-weight: 900;
             font-size: 14px;
             width: 100%;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
         }
 
-        .save-btn:active { transform: scale(0.95); background: #ddd; }
+        .save-btn:active { transform: scale(0.96); opacity: 0.9; }
 
     </style>
 </head>
@@ -182,6 +183,7 @@
 </div>
 
 <script>
+    // Using the "Grades" and "Game Releases" labels from your screenshots
     let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Grades', 'Game Releases'];
     let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
     let activePlanner = planners[0];
