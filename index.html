@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DarkPlan Pro</title>
     
     <link rel="apple-touch-icon" href="https://img.icons8.com/pulsar-line/180/ffffff/calendar.png">
@@ -44,7 +44,8 @@
             background-color: var(--sidebar-bg);
             border-bottom: 1px solid var(--border);
             padding: 15px;
-            padding-top: 55px; 
+            /* Using env(safe-area-inset-top) ensures it fills the screen height but keeps text below the island */
+            padding-top: calc(10px + env(safe-area-inset-top)); 
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -56,6 +57,7 @@
             overflow-x: auto;
             scrollbar-width: none;
         }
+        #planner-tabs::-webkit-scrollbar { display: none; }
 
         .nav-tab {
             padding: 10px 20px;
