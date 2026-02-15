@@ -21,86 +21,73 @@
             --accent: #333333; --radius: 50px; 
         }
         
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; user-select: none; }
         input { -webkit-user-select: text; user-select: text; }
 
-        html, body {
-            margin: 0; padding: 0; height: 100%; overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-dark); color: var(--text-main);
-        }
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; background-color: var(--bg-dark); color: var(--text-main); }
 
         #app { display: none; flex-direction: column; height: 100vh; }
         #nav-bar { background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border); padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); display: flex; align-items: center; justify-content: space-between; }
-        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; align-items: center; }
+        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; align-items: center; padding-right: 10px; }
         
-        .nav-tab { position: relative; padding: 8px 18px; border-radius: 20px; color: var(--text-dim); font-size: 15px; font-weight: 600; white-space: nowrap; transition: all 0.2s ease; border: 1px solid transparent; display: flex; align-items: center; gap: 8px; }
-        .nav-tab.active { background: var(--accent); color: white; }
-        .tab-del-x { color: #ff453a; font-size: 14px; font-weight: 800; padding: 0 2px; }
+        .nav-tab { position: relative; padding: 8px 18px; border-radius: 20px; color: var(--text-dim); font-size: 14px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; transition: 0.2s; }
+        .nav-tab.active { background: var(--accent); color: white; border-color: #444; }
+        .tab-del-x { color: #ff453a; margin-left: 8px; font-weight: 800; }
 
         .nav-tab.moving { border: 1px dashed #ffd60a; animation: shake 0.3s infinite; }
         @keyframes shake { 0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); } }
 
-        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 220px; }
-        #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
+        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 240px; }
+        .entry-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 25px; padding: 15px 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* ENTRY CARDS */
-        .entry-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 25px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .edit-fields { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+        .edit-input { background: #000; border: 1px solid var(--border); color: white; border-radius: 12px; padding: 8px; font-size: 14px; width: 90%; }
+
+        #footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(25, 25, 25, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); border-radius: 30px 30px 0 0; padding: 15px 20px; z-index: 1000; }
+        .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 20px; border-radius: var(--radius); font-size: 16px; flex: 1; height: 45px; }
         
-        /* FIX FOR BIG BOX INPUTS */
-        .edit-container { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        .edit-pill { 
-            background: #000; border: 1px solid var(--border); color: white; 
-            border-radius: var(--radius); padding: 12px 20px; font-size: 16px; 
-            font-family: inherit; width: 100%;
-        }
+        .date-btn-wrapper { position: relative; background: #000; border: 1px solid var(--border); border-radius: var(--radius); width: 110px; height: 45px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .date-btn-wrapper input { position: absolute; opacity: 0; width: 100%; height: 100%; }
+        .date-label { color: var(--text-main); font-size: 11px; font-weight: 700; }
 
-        #footer {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-            border-top: 1px solid var(--border); border-radius: 30px 30px 0 0;
-            padding: 15px 20px 10px 20px; display: flex; flex-direction: column; gap: 8px; z-index: 1000;
-        }
-
-        .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
-        input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 22px; border-radius: var(--radius); font-size: 16px; flex: 1; height: 50px; }
-        
-        .date-btn-wrapper { position: relative; background: #000; border: 1px solid var(--border); border-radius: var(--radius); width: 110px; height: 50px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .date-btn-wrapper input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-        .date-label { color: var(--text-main); font-size: 11px; font-weight: 800; pointer-events: none; }
-
-        .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 50px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; }
-        .footer-tip { text-align: center; font-size: 8px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+        .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 48px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; }
+        .footer-tip { text-align: center; font-size: 9px; color: var(--text-dim); text-transform: uppercase; margin-top: 8px; padding-bottom: env(safe-area-inset-bottom); }
 
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
 <div id="login-overlay">
-    <h1 style="color:white; font-size:32px; margin-bottom:20px;">Agenda</h1>
-    <button class="save-btn" style="width:auto; padding:0 40px;" onclick="popLogin()">Sign in with Google</button>
+    <h1 style="color:white;">Agenda</h1>
+    <button class="save-btn" style="width:auto; padding:0 40px;" onclick="auth.signInWithPopup(provider)">Google Sign In</button>
 </div>
 
 <div id="app">
     <div id="nav-bar">
         <div id="planner-tabs"></div>
-        <div class="header-btns" style="display:flex; align-items:center; gap:12px;">
-            <span onclick="createNewList()" style="font-size: 24px; color: var(--text-dim); cursor: pointer;">+</span>
-            <div onclick="auth.signOut()" class="out-btn">SIGN OUT</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span onclick="createNewList()" style="font-size: 28px; color: var(--text-dim);">+</span>
+            <div onclick="auth.signOut()" style="font-size:10px; background:#fff; color:#000; padding:5px 10px; border-radius:10px; font-weight:800;">OUT</div>
         </div>
     </div>
-    <div id="content"><span id="list-label">List</span><div id="task-list"></div></div>
+    
+    <div id="content">
+        <span id="list-label" style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">List</span>
+        <div id="task-list"></div>
+    </div>
+
     <div id="footer">
         <div class="input-row">
-            <input type="text" id="itemName" placeholder="Task Name...">
+            <input type="text" id="itemName" placeholder="New Task...">
             <div class="date-btn-wrapper">
                 <span class="date-label" id="dateDisplay">DATE</span>
                 <input type="date" id="itemDate" onchange="document.getElementById('dateDisplay').innerText = this.value">
             </div>
         </div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
-        <div class="footer-tip">Tap text to edit • Hold tabs to move/delete</div>
+        <div id="user-info" class="footer-tip"></div>
     </div>
 </div>
 
@@ -119,74 +106,103 @@
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    function popLogin() { auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message)); }
+    let activePlanner = 'Assignments';
+    let planners = ['Assignments', 'Game Releases'];
+    let allEntries = [];
+    let editingId = null;
+    let moveMode = null;
+    let pressTimer;
 
-    auth.onAuthStateChanged((user) => {
-        if (user) { 
-            document.getElementById('login-overlay').style.display = 'none'; 
-            document.getElementById('app').style.display = 'flex'; 
-            loadData(user.uid); 
-        } else { 
-            document.getElementById('login-overlay').style.display = 'flex'; 
-            document.getElementById('app').style.display = 'none'; 
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            document.getElementById('user-info').innerText = `Logged in as: ${user.email}`;
+            loadData(user.uid);
+        } else {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
         }
     });
 
-    let activePlanner = 'Assignments';
-    let allEntries = [];
-    let planners = ['Assignments', 'Game Releases'];
-    let moveMode = null;
-    let editingId = null;
-    let pressTimer;
-
-    function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
-
     function loadData(uid) {
-        db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
+        db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
             allEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
             render();
         });
     }
 
     function saveTask() {
-        haptic();
-        const n = document.getElementById('itemName');
-        const d = document.getElementById('itemDate');
-        if(!n.value || !d.value) return;
-        db.collection("tasks").add({ name: n.value, date: d.value, uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() });
-        n.value = ''; d.value = ''; document.getElementById('dateDisplay').innerText = 'DATE';
+        const name = document.getElementById('itemName').value;
+        const date = document.getElementById('itemDate').value;
+        if(!name || !date) return;
+        db.collection("tasks").add({ name, date, uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() });
+        document.getElementById('itemName').value = '';
+        document.getElementById('dateDisplay').innerText = 'DATE';
     }
 
-    window.startEdit = function(id) { editingId = id; render(); };
-    window.stopEdit = function(id, field, val) {
-        db.collection("tasks").doc(id).update({ [field]: val }).then(() => { editingId = null; render(); });
+    // TABS LOGIC
+    window.switchTab = (p) => { 
+        if(moveMode) {
+            const from = planners.indexOf(moveMode);
+            const to = planners.indexOf(p);
+            planners.splice(from, 1);
+            planners.splice(to, 0, moveMode);
+            moveMode = null;
+        } else {
+            activePlanner = p; 
+        }
+        render(); 
     };
 
-    window.deleteTask = function(id) { haptic(); db.collection("tasks").doc(id).delete(); };
+    window.startTabHold = (p) => {
+        pressTimer = setTimeout(() => { moveMode = p; render(); }, 600);
+    };
+
+    function createNewList() {
+        const n = prompt("List name:");
+        if(n && !planners.includes(n)) { planners.push(n); activePlanner = n; render(); }
+    }
+
+    // TASK EDITING
+    window.updateTask = (id, fields) => {
+        db.collection("tasks").doc(id).update(fields).then(() => { editingId = null; render(); });
+    };
 
     function render() {
         const tabs = document.getElementById('planner-tabs');
-        tabs.innerHTML = planners.map(p => `<div class="nav-tab ${p === activePlanner ? 'active' : ''}">${p}</div>`).join('');
-        
-        const items = allEntries.filter(e => e.category === activePlanner);
-        document.getElementById('task-list').innerHTML = items.length ? items.map(e => {
+        tabs.innerHTML = planners.map(p => `
+            <div class="nav-tab ${p === activePlanner ? 'active' : ''} ${p === moveMode ? 'moving' : ''}" 
+                 onclick="switchTab('${p}')" 
+                 ontouchstart="startTabHold('${p}')" 
+                 ontouchend="clearTimeout(pressTimer)">
+                ${p} ${moveMode === p ? '<span onclick="event.stopPropagation(); planners=planners.filter(x=>x!==\''+p+'\'); render();" class="tab-del-x">✕</span>' : ''}
+            </div>
+        `).join('');
+
+        const list = document.getElementById('task-list');
+        const filtered = allEntries.filter(e => e.category === activePlanner);
+        list.innerHTML = filtered.map(e => {
             if (editingId === e.id) {
                 return `
-                <div class="entry-card" style="flex-direction:column; align-items:stretch;">
-                    <div class="edit-container">
-                        <input type="text" class="edit-pill" value="${e.name}" onblur="stopEdit('${e.id}', 'name', this.value)">
-                        <input type="date" class="edit-pill" value="${e.date}" onblur="stopEdit('${e.id}', 'date', this.value)">
+                <div class="entry-card">
+                    <div class="edit-fields">
+                        <input type="text" class="edit-input" id="edName${e.id}" value="${e.name}">
+                        <input type="date" class="edit-input" id="edDate${e.id}" value="${e.date}">
                     </div>
+                    <div onclick="updateTask('${e.id}', {name: document.getElementById('edName${e.id}').value, date: document.getElementById('edDate${e.id}').value})" style="color:#34c759; font-weight:bold; padding:10px;">✓</div>
                 </div>`;
             }
             return `
             <div class="entry-card">
-                <div onclick="startEdit('${e.id}')" style="flex:1">
+                <div onclick="editingId='${e.id}'; render();" style="flex:1">
                     <b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small>
                 </div>
-                <div style="color:#ff453a; font-weight:bold; padding:10px;" onclick="deleteTask('${e.id}')">✕</div>
+                <div onclick="db.collection('tasks').doc('${e.id}').delete()" style="color:#ff453a; font-weight:bold; padding:10px;">✕</div>
             </div>`;
-        }).join('') : '<p style="text-align:center; color:gray; margin-top:60px;">No entries.</p>';
+        }).join('') || '<p style="text-align:center; color:gray; margin-top:50px;">No entries.</p>';
+        
+        document.getElementById('list-label').innerText = activePlanner;
     }
     render();
 </script>
