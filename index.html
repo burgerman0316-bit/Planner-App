@@ -3,153 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DarkPlan Pro</title>
+    <title>Planner Pro | Dark</title>
     <style>
+        /* CSS Variables based on your provided style */
         :root {
-            --bg: #121212;
-            --card: #1e1e1e;
-            --accent: #bb86fc;
-            --text: #e0e0e0;
+            --bg-main: #1e1e1e;
+            --sidebar-bg: #2c2c2c;
+            --header-bg: #383838;
+            --border: #444;
+            --text-main: #f0f0f0;
+            --text-dim: #aaa;
+            --accent-btn: #585858;
+            --accent-hover: #4a4a4a;
+            --input-bg: #383838;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
             margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Deep background */
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Container matching your chat app layout */
+        #container {
+            display: flex;
+            width: 95%;
+            max-width: 1100px;
+            height: 85vh;
+            background: var(--bg-main);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            border: 1px solid var(--border);
+        }
+
+        /* User Info Sidebar style for "Planners" list */
+        #sidebar {
+            width: 220px;
+            padding: 15px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            align-items: center;
+            flex-shrink: 0;
         }
 
-        .navbar {
-            width: 100%;
-            padding: 1rem;
-            background: var(--card);
-            display: flex;
-            justify-content: space-around;
-            border-bottom: 1px solid #333;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 600px;
-            margin-top: 20px;
-        }
-
-        .planner-card {
-            background: var(--card);
-            padding: 1.5rem;
-            border-radius: 12px;
+        #sidebar h2 {
+            font-size: 1.1em;
+            color: #fff;
             margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        button {
-            background: var(--accent);
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+        .planner-nav-item {
+            padding: 10px;
             cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            transition: background 0.2s;
+            color: var(--text-dim);
+        }
+
+        .planner-nav-item:hover {
+            background-color: #383838;
+            color: #fff;
+        }
+
+        .planner-nav-item.active {
+            background-color: var(--accent-btn);
+            color: #fff;
             font-weight: bold;
         }
 
+        /* Main Content Area */
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            padding: 15px 20px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* Task Area */
+        #task-display {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--bg-main);
+        }
+
+        /* Input Form Area - styled like the messageForm */
+        #input-footer {
+            padding: 20px;
+            background-color: var(--sidebar-bg);
+            border-top: 1px solid var(--border);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         input, select {
-            background: #333;
-            border: 1px solid #444;
-            color: white;
-            padding: 8px;
-            margin: 5px 0;
-            width: 100%;
-            border-radius: 4px;
-        }
-
-        .entry-list {
-            margin-top: 15px;
-            list-style: none;
-            padding: 0;
-        }
-
-        .entry-item {
-            background: #2a2a2a;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid #555;
             padding: 10px;
-            margin-bottom: 5px;
-            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        /* The Button - Matches your specific style */
+        .btn-action {
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            background-color: var(--accent-btn);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Entry Cards (bubbles style) */
+        .entry-card {
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+
+        .entry-card .date {
+            font-size: 0.85em;
+            color: var(--text-dim);
+        }
+
+        /* Scrollbar */
+        #task-display::-webkit-scrollbar {
+            width: 8px;
+        }
+        #task-display::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="navbar">
-        <h2 id="current-view">Planner: Grades</h2>
-        <button onclick="addNewPlanner()">+ New Planner</button>
-    </div>
-
-    <div class="container" id="app">
-        <div class="planner-card">
-            <h3>Add New Entry</h3>
-            <input type="text" id="taskName" placeholder="Task Name (e.g. Physics Final)">
-            <input type="date" id="taskDate">
-            <select id="plannerType">
-                <option value="Grades">Grades</option>
-                <option value="Games">Game Releases</option>
-            </select>
-            <button onclick="addTask()">Add to Planner</button>
+    <div id="container">
+        <div id="sidebar">
+            <h2>My Planners</h2>
+            <div id="planner-list">
+                <div class="planner-nav-item active" onclick="switchView('Grades')">Grades</div>
+                <div class="planner-nav-item" onclick="switchView('Games')">Game Releases</div>
+            </div>
+            <hr style="border: 0; height: 1px; background: #444; margin: 15px 0;">
+            <button class="btn-action" style="width: 100%;" onclick="addNewPlanner()">+ Add New</button>
         </div>
 
-        <div id="planners-container">
+        <div id="main-content">
+            <div id="header">Planner: <span id="view-title">Grades</span></div>
+            
+            <div id="task-display">
+                </div>
+
+            <div id="input-footer">
+                <div class="input-group">
+                    <input type="text" id="taskName" placeholder="What's due?">
+                    <input type="date" id="taskDate">
+                    <button class="btn-action" onclick="addTask()">Save Entry</button>
+                </div>
             </div>
+        </div>
     </div>
 
     <script>
+        let currentType = 'Grades';
         let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+
+        function switchView(type) {
+            currentType = type;
+            document.getElementById('view-title').innerText = type;
+            
+            // Update active state in sidebar
+            document.querySelectorAll('.planner-nav-item').forEach(item => {
+                item.classList.remove('active');
+                if(item.innerText === type) item.classList.add('active');
+            });
+
+            renderTasks();
+        }
 
         function addTask() {
             const name = document.getElementById('taskName').value;
             const date = document.getElementById('taskDate').value;
-            const type = document.getElementById('plannerType').value;
+            if(!name || !date) return;
 
-            if(!name || !date) return alert("Fill it out, chief.");
-
-            tasks.push({ name, date, type });
+            tasks.push({ name, date, type: currentType });
             localStorage.setItem('myTasks', JSON.stringify(tasks));
+            
+            document.getElementById('taskName').value = '';
             renderTasks();
         }
 
         function renderTasks() {
-            const container = document.getElementById('planners-container');
-            container.innerHTML = '';
+            const display = document.getElementById('task-display');
+            display.innerHTML = '';
             
-            const types = [...new Set(tasks.map(t => t.type))];
+            const filtered = tasks.filter(t => t.type === currentType);
             
-            types.forEach(type => {
-                const section = document.createElement('div');
-                section.className = 'planner-card';
-                section.innerHTML = `<h3>${type}</h3><div id="list-${type}"></div>`;
-                container.appendChild(section);
-
-                tasks.filter(t => t.type === type).forEach(task => {
-                    const item = document.createElement('div');
-                    item.className = 'entry-item';
-                    item.innerHTML = `<span>${task.name}</span> <span>${task.date}</span>`;
-                    document.getElementById(`list-${type}`).appendChild(item);
-                });
+            filtered.forEach(task => {
+                const div = document.createElement('div');
+                div.className = 'entry-card';
+                div.innerHTML = `
+                    <span>${task.name}</span>
+                    <span class="date">${task.date}</span>
+                `;
+                display.appendChild(div);
             });
         }
 
         function addNewPlanner() {
-            const name = prompt("Enter Planner Name:");
-            if (name) {
-                const opt = document.createElement('option');
-                opt.value = name;
-                opt.innerHTML = name;
-                document.getElementById('plannerType').appendChild(opt);
+            const name = prompt("Name your new planner:");
+            if(name) {
+                const list = document.getElementById('planner-list');
+                const div = document.createElement('div');
+                div.className = 'planner-nav-item';
+                div.innerText = name;
+                div.onclick = () => switchView(name);
+                list.appendChild(div);
+                switchView(name);
             }
         }
 
+        // Initial Load
         renderTasks();
     </script>
 </body>
