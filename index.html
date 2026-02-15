@@ -44,7 +44,7 @@
             background-color: var(--sidebar-bg);
             border-bottom: 1px solid var(--border);
             padding: 15px;
-            /* Using env(safe-area-inset-top) ensures it fills the screen height but keeps text below the island */
+            /* Top bar bleed fix */
             padding-top: calc(10px + env(safe-area-inset-top)); 
             display: flex;
             align-items: center;
@@ -125,7 +125,7 @@
             outline: none;
         }
 
-        /* DATE PLACEHOLDER LOGIC */
+        /* DATE PLACEHOLDER */
         input[type="date"]::before {
             content: "Date";
             color: var(--text-dim);
@@ -186,7 +186,7 @@
 </div>
 
 <script>
-    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Assignments', 'Game Releases'];
+    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Grades', 'Assignments'];
     let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
     let activePlanner = planners[0];
 
