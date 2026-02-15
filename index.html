@@ -73,6 +73,12 @@
             z-index: 1000;
         }
 
+        /* Forces the date text to be visible on iOS */
+        input[type="date"]::-webkit-date-and-time-value {
+            text-align: left;
+            min-height: 20px;
+        }
+
         /* Also, make sure the help text doesn't have its own margin */
         .help-tip {
             text-align: center; 
@@ -153,7 +159,7 @@
 
     let activePlanner = 'Grades';
     let allEntries = [];
-    let planners = ['Grades', 'Assignments'];
+    let planners = ['Assignments', 'Game Releases'];
 
     function loadData(uid) {
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
