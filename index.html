@@ -21,7 +21,6 @@
             --accent: #333333; --radius: 50px; 
         }
         
-        /* GLOBAL SELECTION KILLER */
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
@@ -118,7 +117,7 @@
             <input type="text" id="itemName" placeholder="Task Name...">
             <div class="date-btn-wrapper">
                 <span class="date-label" id="dateDisplay">DATE</span>
-                <input type="date" id="itemDate" onchange="document.getElementById('dateDisplay').innerText = this.value.split('-').slice(1).join('/')">
+                <input type="date" id="itemDate" onchange="document.getElementById('dateDisplay').innerText = this.value">
             </div>
         </div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
@@ -141,10 +140,19 @@
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    function popLogin() { auth.signInWithPopup(provider); }
+    function popLogin() { 
+        auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message)); 
+    }
+
     auth.onAuthStateChanged((user) => {
-        if (user) { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('app').style.display = 'flex'; loadData(user.uid); }
-        else { document.getElementById('login-overlay').style.display = 'flex'; document.getElementById('app').style.display = 'none'; }
+        if (user) { 
+            document.getElementById('login-overlay').style.display = 'none'; 
+            document.getElementById('app').style.display = 'flex'; 
+            loadData(user.uid); 
+        } else { 
+            document.getElementById('login-overlay').style.display = 'flex'; 
+            document.getElementById('app').style.display = 'none'; 
+        }
     });
 
     let activePlanner = 'Assignments';
@@ -155,7 +163,6 @@
 
     function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
 
-    // EXIT EDIT MODE BY TAPPING BACKGROUND
     document.addEventListener('touchstart', (e) => {
         if (moveMode && !e.target.closest('.nav-tab')) {
             moveMode = null;
@@ -179,20 +186,45 @@
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
             allEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
             render();
+        }, (error) => {
+            alert("Database Error: " + error.message);
         });
     }
 
     function saveTask() {
         haptic();
-        const name = document.getElementById('itemName').value;
-        const date = document.getElementById('itemDate').value;
-        if(!name || !date) return;
-        db.collection("tasks").add({ name, date, uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() });
-        document.getElementById('itemName').value = ''; document.getElementById('itemDate').value = '';
-        document.getElementById('dateDisplay').innerText = 'DATE';
+        const nameInput = document.getElementById('itemName');
+        const dateInput = document.getElementById('itemDate');
+        
+        if(!nameInput.value || !dateInput.value) {
+            alert("Please enter a name and a date.");
+            return;
+        }
+
+        // ADD DATA TO FIREBASE
+        db.collection("tasks").add({ 
+            name: nameInput.value, 
+            date: dateInput.value, 
+            uid: auth.currentUser.uid, 
+            category: activePlanner, 
+            createdAt: Date.now() 
+        })
+        .then(() => {
+            // Clear inputs ONLY after success
+            nameInput.value = ''; 
+            dateInput.value = '';
+            document.getElementById('dateDisplay').innerText = 'DATE';
+        })
+        .catch((error) => {
+            // If this pops up, your Firebase Rules are blocking the save
+            alert("Save Failed: " + error.message);
+        });
     }
 
-    window.deleteTask = function(id) { haptic(); db.collection("tasks").doc(id).delete(); };
+    window.deleteTask = function(id) { 
+        haptic(); 
+        db.collection("tasks").doc(id).delete().catch(e => alert(e.message)); 
+    };
 
     window.handleTap = function(e, p) {
         if (e.target.classList.contains('tab-del-x')) {
@@ -242,7 +274,7 @@
         list.innerHTML = items.length ? items.map(e => `
             <div class="entry-card">
                 <div><b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small></div>
-                <div style="color:#ff453a; font-weight:bold;" onclick="deleteTask('${e.id}')">✕</div>
+                <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
             </div>
         `).join('') : '<p style="text-align:center; color:gray; margin-top:60px;">No entries.</p>';
     }
