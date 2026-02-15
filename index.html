@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Planero</title>
+    <title>DarkPlan Pro</title>
     
     <link rel="icon" type="image/png" href="https://img.icons8.com/pulsar-line/48/ffffff/calendar.png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/pulsar-line/180/ffffff/calendar.png">
@@ -28,80 +28,71 @@
             background-color: var(--bg-dark); color: var(--text-main); height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
         }
+        
+        /* Auth Screen */
         #login-overlay {
-            position: fixed; inset: 0; background: var(--bg-dark); z-index: 2000;
+            position: fixed; inset: 0; background: var(--bg-dark); z-index: 4000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .google-btn {
             background: #ffffff; color: #000; border: none; padding: 18px 36px;
             border-radius: var(--pill); font-weight: 700; font-size: 16px; cursor: pointer;
         }
+
         #app { display: none; flex-direction: column; height: 100%; }
         
+        /* Nav Bar */
         #nav-bar {
             background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border);
             padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
             display: flex; align-items: center; justify-content: space-between;
         }
-        #planner-tabs { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-        .nav-tab { padding: 10px 20px; border-radius: var(--pill); color: var(--text-dim); font-size: 14px; font-weight: 600; cursor: pointer; }
+        #planner-tabs { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+        .nav-tab { padding: 10px 20px; border-radius: var(--pill); color: var(--text-dim); font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .nav-tab.active { background: var(--accent); color: white; border: 1px solid var(--border); }
+        .nav-actions { display: flex; align-items: center; gap: 15px; padding-left: 10px; }
+        .logout-btn { color: #ff453a; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
 
-        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 220px; }
+        /* Content Area */
+        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 240px; }
         #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
-        
         .entry-card {
             background: var(--bg-card); border: 1px solid var(--border); border-radius: 25px;
             padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
         }
 
+        /* Floating Island Footer */
         #footer {
             position: fixed; bottom: 10px; left: 8px; right: 8px;
-            background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
+            background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--border); border-radius: var(--iphone-radius);
-            /* Tightened bottom padding to 6px as requested */
-            padding: 18px 18px 6px 18px; 
-            display: flex; flex-direction: column; gap: 10px; z-index: 1000;
+            padding: 18px 18px 6px 18px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;
         }
         .input-row { display: flex; gap: 10px; width: 100%; }
-        
         input { 
-            background: #000 !important; 
-            border: 1px solid var(--border); 
-            color: #ffffff !important; /* Forces text to be white */
-            padding: 12px 15px; 
-            border-radius: var(--pill); 
-            flex: 1; 
-            font-size: 16px;
-            min-width: 0; 
-            height: 48px;
-            -webkit-appearance: none;
-            display: flex;
-            align-items: center;
+            background: #000 !important; border: 1px solid var(--border); color: #ffffff !important; 
+            padding: 12px 15px; border-radius: var(--pill); flex: 1; font-size: 15px;
+            height: 48px; -webkit-appearance: none; display: flex; align-items: center;
         }
+        #itemDate::-webkit-date-and-time-value { color: white !important; text-align: left; min-height: 20px; }
+        .save-btn { background: #ffffff; color: #000; border: none; padding: 16px; border-radius: var(--pill); font-weight: 900; cursor: pointer; text-transform: uppercase; }
 
-        input[type="date"] {
-            color-scheme: dark !important;
-            display: flex !important;
-            align-items: center !important;
-            color: white !important;
-            background-color: black !important;
+        /* Calendar Overlay */
+        #calendar-view {
+            position: fixed; inset: 0; background: var(--bg-dark); z-index: 3000;
+            display: none; flex-direction: column; padding-top: env(safe-area-inset-top);
         }
-
-        /* The "Nuclear Option" for iOS Date text visibility */
-        input[type="date"]::-webkit-date-and-time-value {
-            color: white !important;
-            background-color: transparent !important;
-            text-align: left;
-            min-height: 20px;
-            margin-top: 2px;
+        .cal-header { display: flex; justify-content: space-between; align-items: center; padding: 25px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; padding: 15px; }
+        .cal-day-label { color: var(--text-dim); font-size: 11px; text-align: center; font-weight: bold; margin-bottom: 5px; }
+        .cal-cell {
+            aspect-ratio: 1; background: var(--bg-card); border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 15px; position: relative; border: 1px solid transparent;
         }
-
-        .save-btn { 
-            background: #ffffff; color: #000; border: none; padding: 16px; 
-            border-radius: var(--pill); font-weight: 900; cursor: pointer; text-transform: uppercase;
-        }
+        .cal-cell.has-event { border-color: #444; }
+        .event-dot { width: 5px; height: 5px; background: #ffffff; border-radius: 50%; position: absolute; bottom: 6px; }
+        .cal-today { background: #ffffff; color: #000; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -114,19 +105,34 @@
 <div id="app">
     <div id="nav-bar">
         <div id="planner-tabs"></div>
-        <div style="color: var(--text-dim); font-size: 28px; cursor: pointer; padding: 0 10px;" onclick="createNewList()">+</div>
+        <div class="nav-actions">
+            <div style="font-size: 20px; cursor: pointer;" onclick="toggleCalendar()">📅</div>
+            <div style="color: var(--text-dim); font-size: 28px; cursor: pointer;" onclick="createNewList()">+</div>
+            <div class="logout-btn" onclick="handleLogout()">Out</div>
+        </div>
     </div>
+    
     <div id="content">
         <span id="list-label">List</span>
         <div id="task-list"></div>
     </div>
+
     <div id="footer">
         <div class="input-row">
             <input type="text" id="itemName" placeholder="Task name...">
-            <input type="date" id="itemDate">
+            <input type="text" id="itemDate" placeholder="Date" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'">
         </div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
-        <div style="text-align:center; font-size: 9px; color: var(--text-dim); margin-top: -5px;">Universal Planner</div>
+        <div style="text-align:center; font-size: 9px; color: var(--text-dim); margin-top: -5px;">TAP ABOVE TO SAVE ENTRY</div>
+    </div>
+
+    <div id="calendar-view">
+        <div class="cal-header">
+            <h2 id="cal-month-year" style="margin:0; letter-spacing: -1px;">Month Year</h2>
+            <div style="color: #ff453a; font-weight: 800; font-size: 14px; cursor: pointer;" onclick="toggleCalendar()">CLOSE</div>
+        </div>
+        <div id="calendar-grid" class="cal-grid"></div>
+        <div style="padding: 20px; color: var(--text-dim); font-size: 12px; text-align: center;">White dots indicate tasks across all lists.</div>
     </div>
 </div>
 
@@ -140,17 +146,14 @@
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
 
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    function popLogin() {
-        auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message));
-    }
+    // AUTH
+    function popLogin() { auth.signInWithPopup(provider).catch(e => alert(e.message)); }
+    function handleLogout() { if(confirm("Sign out?")) auth.signOut(); }
 
     auth.onAuthStateChanged((user) => {
         if (user) {
@@ -171,41 +174,61 @@
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
             allEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
             render();
+            if(document.getElementById('calendar-view').style.display === 'flex') renderCalendar();
         });
     }
 
     function saveTask() {
         const name = document.getElementById('itemName').value;
-        const date = document.getElementById('itemDate').value;
+        const dateInput = document.getElementById('itemDate');
+        const date = dateInput.value;
         if(!name || !date) return;
-        db.collection("tasks").add({
-            name, date, uid: auth.currentUser.uid,
-            category: activePlanner, createdAt: Date.now()
-        });
+        db.collection("tasks").add({ name, date, uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() });
         document.getElementById('itemName').value = '';
-        document.getElementById('itemDate').value = '';
+        dateInput.value = ''; dateInput.type = 'text';
     }
 
-    window.deleteTask = function(id) {
-        db.collection("tasks").doc(id).delete();
-    };
-
-    window.setTab = function(t) {
-        activePlanner = t;
-        render();
-    };
-
-    function createNewList() {
-        const n = prompt("New Category:");
-        if(n) { planners.push(n); activePlanner = n; render(); }
+    // CALENDAR LOGIC
+    function toggleCalendar() {
+        const cal = document.getElementById('calendar-view');
+        const isVisible = cal.style.display === 'flex';
+        cal.style.display = isVisible ? 'none' : 'flex';
+        if (!isVisible) renderCalendar();
     }
+
+    function renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        const label = document.getElementById('cal-month-year');
+        const now = new Date();
+        const month = now.getMonth();
+        const year = now.getFullYear();
+
+        label.innerText = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        grid.innerHTML = ['S','M','T','W','T','F','S'].map(d => `<div class="cal-day-label">${d}</div>`).join('');
+        for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const hasTask = allEntries.some(e => e.date === dateStr);
+            const isToday = d === now.getDate() && month === new Date().getMonth();
+            grid.innerHTML += `
+                <div class="cal-cell ${isToday ? 'cal-today' : ''} ${hasTask ? 'has-event' : ''}">
+                    ${d}
+                    ${hasTask ? '<div class="event-dot"></div>' : ''}
+                </div>`;
+        }
+    }
+
+    window.deleteTask = (id) => db.collection("tasks").doc(id).delete();
+    window.setTab = (t) => { activePlanner = t; render(); };
+    function createNewList() { const n = prompt("New Category:"); if(n) { planners.push(n); activePlanner = n; render(); } }
 
     function render() {
         const tabs = document.getElementById('planner-tabs');
-        tabs.innerHTML = planners.map(p => `
-            <div class="nav-tab ${p === activePlanner ? 'active' : ''}" onclick="setTab('${p}')">${p}</div>
-        `).join('');
-
+        tabs.innerHTML = planners.map(p => `<div class="nav-tab ${p === activePlanner ? 'active' : ''}" onclick="setTab('${p}')">${p}</div>`).join('');
         document.getElementById('list-label').innerText = activePlanner;
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
@@ -213,10 +236,8 @@
             <div class="entry-card">
                 <div><b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small></div>
                 <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
-            </div>
-        `).join('') : '<p style="text-align:center; color:gray; margin-top:60px;">No entries.</p>';
+            </div>`).join('') : '<p style="text-align:center; color:gray; margin-top:60px;">Empty.</p>';
     }
-
     render();
 </script>
 </body>
