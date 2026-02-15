@@ -5,15 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DarkPlan Pro</title>
 
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
-            --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
+            --bg-dark: #121212; --bg-card: #1e1e1e;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
-            --accent: #333333; --iphone-radius: 50px; --pill: 100px; 
+            --pill: 100px; 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
@@ -21,59 +24,78 @@
             background-color: var(--bg-dark); color: var(--text-main); height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
         }
+
+        /* FIXED NAV BAR: Respective of Dynamic Island */
+        #nav-bar {
+            background-color: var(--bg-dark);
+            /* This 'env' variable adds space only if a notch/island exists */
+            padding: 10px 20px;
+            padding-top: calc(15px + env(safe-area-inset-top)); 
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+        .nav-tab { 
+            padding: 10px 18px; border-radius: var(--pill); color: var(--text-dim); 
+            font-size: 15px; font-weight: 600; cursor: pointer;
+        }
+        .nav-tab.active { background: var(--bg-card); color: white; }
+
+        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 240px; }
+        
+        .entry-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
+            padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* FIXED FOOTER: Respective of Home Indicator (Bottom Bar) */
+        #footer {
+            position: fixed; 
+            bottom: calc(10px + env(safe-area-inset-bottom)); 
+            left: 15px; right: 15px;
+            background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 35px;
+            padding: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 1000;
+        }
+        
+        .input-group { display: flex; flex-direction: column; gap: 10px; }
+        input { 
+            background: #000; border: 1px solid var(--border); color: white; 
+            padding: 15px 20px; border-radius: 20px; font-size: 16px; width: 100%;
+        }
+        input[type="date"] { color-scheme: dark; }
+
+        .save-btn { 
+            background: #ffffff; color: #000; border: none; padding: 16px; 
+            border-radius: var(--pill); font-weight: 800; font-size: 15px; cursor: pointer; 
+        }
+
         #login-overlay {
             position: fixed; inset: 0; background: var(--bg-dark); z-index: 2000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .google-btn {
-            background: #ffffff; color: #000; border: none; padding: 18px 36px;
-            border-radius: var(--pill); font-weight: 700; font-size: 16px; margin-top: 20px; cursor: pointer;
-        }
-        #app { display: none; flex-direction: column; height: 100%; }
-        #nav-bar {
-            background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border);
-            padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        #planner-tabs { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-        .nav-tab { padding: 10px 20px; border-radius: var(--pill); color: var(--text-dim); font-size: 14px; font-weight: 600; cursor: pointer; }
-        .nav-tab.active { background: var(--accent); color: white; border: 1px solid var(--border); }
-        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 220px; }
-        .entry-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 25px;
-            padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
-        }
-        #footer {
-            position: fixed; bottom: 10px; left: 8px; right: 8px;
-            background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px);
-            border: 1px solid var(--border); border-radius: var(--iphone-radius);
-            padding: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;
-        }
-        .input-row { display: flex; gap: 10px; }
-        input { background: #000; border: 1px solid var(--border); color: white; padding: 14px 20px; border-radius: var(--pill); flex: 1; font-size: 16px; }
-        .save-btn { background: #ffffff; color: #000; border: none; padding: 16px; border-radius: var(--pill); font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
-    <h1 style="font-size: 40px; letter-spacing: -2px;">DarkPlan</h1>
-    <p id="login-status" style="color: var(--text-dim);">Authentication Fixed</p>
-    <button class="google-btn" onclick="popLogin()">Sign in with Google</button>
+    <h1 style="font-size: 36px; letter-spacing: -1.5px;">DarkPlan</h1>
+    <button style="background:white; color:black; border:none; padding:18px 36px; border-radius:100px; font-weight:700;" onclick="popLogin()">Sign in with Google</button>
 </div>
 
 <div id="app">
     <div id="nav-bar">
         <div id="planner-tabs"></div>
-        <div style="color: var(--text-dim); font-size: 28px; cursor: pointer; padding: 0 10px;" onclick="createNewList()">+</div>
+        <div style="color: var(--text-dim); font-size: 24px; padding: 0 10px; cursor:pointer;" onclick="createNewList()">+</div>
     </div>
     <div id="content">
-        <span id="active-list-name" style="font-size: 11px; text-transform: uppercase; color: var(--text-dim);">CURRENT LIST</span>
-        <div id="task-list" style="margin-top: 15px;"></div>
+        <div id="task-list"></div>
     </div>
     <div id="footer">
-        <div class="input-row">
-            <input type="text" id="itemName" placeholder="What needs to be done?">
+        <div class="input-group">
+            <input type="text" id="itemName" placeholder="What's next?">
             <input type="date" id="itemDate">
         </div>
         <button class="save-btn" onclick="saveTask()">Add Task</button>
@@ -81,7 +103,6 @@
 </div>
 
 <script>
-    // --- UPDATED CONFIG WITH YOUR VERIFIED KEY ---
     const firebaseConfig = {
         apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -91,21 +112,13 @@
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
 
-    // Safety check for initialization
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
     function popLogin() {
-        document.getElementById('login-status').innerText = "Opening Google window...";
-        auth.signInWithPopup(provider).catch(e => {
-            console.error(e);
-            alert("Auth Error: " + e.message);
-        });
+        auth.signInWithPopup(provider).catch(e => alert(e.message));
     }
 
     auth.onAuthStateChanged((user) => {
@@ -161,15 +174,14 @@
             <div class="nav-tab ${p === activePlanner ? 'active' : ''}" onclick="setTab('${p}')">${p}</div>
         `).join('');
 
-        document.getElementById('active-list-name').innerText = activePlanner;
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
-        list.innerHTML = items.map(e => `
+        list.innerHTML = items.length ? items.map(e => `
             <div class="entry-card">
-                <div><b>${e.name}</b><br><small style="color:gray">${e.date}</small></div>
+                <div><b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small></div>
                 <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
             </div>
-        `).join('') || '<p style="text-align:center; color:gray; margin-top:20px;">No entries.</p>';
+        `).join('') : '<p style="text-align:center; color:gray; margin-top:60px; font-size:14px;">No entries.</p>';
     }
 
     render();
