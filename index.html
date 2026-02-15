@@ -22,8 +22,8 @@
             --text-dim: #888888;
             --accent: #333333;
             --danger: #ff5555;
-            /* Precise iPhone Corner Radius */
-            --iphone-radius: 44px; 
+            /* Extra large radius to flow with the outer bezel */
+            --iphone-radius: 48px; 
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -78,8 +78,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            /* Room for the flush footer */
-            padding-bottom: 220px; 
+            padding-bottom: 250px; 
         }
 
         .entry-card {
@@ -105,21 +104,21 @@
             font-size: 12px;
         }
 
-        /* THE FLUSH ISLAND */
+        /* THE DOCKED ISLAND */
         #footer {
             position: fixed;
-            /* Pulled down to sit directly in the phone's bottom curve */
-            bottom: 6px; 
-            left: 6px;
-            right: 6px;
-            background: rgba(32, 32, 32, 0.98);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--border);
+            /* This moves the box physically closer to the bottom edge */
+            bottom: -5px; 
+            left: 5px;
+            right: 5px;
+            background: rgba(35, 35, 35, 0.98);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1.5px solid var(--border);
             border-radius: var(--iphone-radius);
-            /* Internal spacing: Large bottom padding to keep button clear of swipe bar */
-            padding: 20px 20px calc(10px + env(safe-area-inset-bottom));
-            box-shadow: 0 -4px 30px rgba(0,0,0,0.6);
+            /* Increased bottom padding to keep button text safe while box is low */
+            padding: 24px 24px calc(25px + env(safe-area-inset-bottom));
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.7);
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -128,7 +127,7 @@
 
         .input-row {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             width: 100%;
         }
 
@@ -136,8 +135,8 @@
             background: #000;
             border: 1px solid var(--border);
             color: white;
-            padding: 14px;
-            border-radius: 18px;
+            padding: 15px;
+            border-radius: 20px;
             font-size: 16px;
             flex: 1;
             min-width: 0;
@@ -147,16 +146,16 @@
             background: #ffffff;
             color: #000000;
             border: none;
-            padding: 16px;
+            padding: 18px;
             border-radius: 22px;
-            font-weight: 800;
-            font-size: 15px;
+            font-weight: 900;
+            font-size: 14px;
             width: 100%;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
 
-        .save-btn:active { transform: scale(0.96); background: #f0f0f0; }
+        .save-btn:active { transform: scale(0.95); background: #ddd; }
 
     </style>
 </head>
