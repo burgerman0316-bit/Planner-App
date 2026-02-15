@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DarkPlan Pro Planner</title>
     
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='48' height='48'%3E%3Cpath fill='none' stroke='%23f0f0f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 10h18M7 3v3m10-3v3M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm3 9h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/pulsar-line/48/ffffff/calendar.png">
+    
+    <link rel="apple-touch-icon" href="https://img.icons8.com/pulsar-line/180/ffffff/calendar.png">
+    
+    <meta name="theme-color" content="#1e1e1e">
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
@@ -46,7 +50,7 @@
             border: 1px solid var(--border);
         }
 
-        /* Sidebar */
+        /* Sidebar - List of Planners */
         #sidebar {
             width: 200px;
             padding: 15px;
@@ -84,7 +88,7 @@
         .nav-item:hover { background-color: #383838; color: #fff; }
         .nav-item.active { background-color: var(--accent-btn); color: #fff; font-weight: bold; }
 
-        /* Main Workspace */
+        /* Main Area */
         #main-area {
             flex-grow: 1;
             display: flex;
@@ -107,7 +111,7 @@
             background-color: var(--bg-main);
         }
 
-        /* Entry Cards */
+        /* Task Cards */
         .entry-card {
             background: var(--sidebar-bg);
             border: 1px solid var(--border);
@@ -122,7 +126,7 @@
         .entry-info b { display: block; color: #fff; font-size: 1.1rem; margin-bottom: 4px; }
         .date-display { font-size: 0.85em; color: var(--text-dim); display: block; }
 
-        /* Removal UI */
+        /* Hover Reveal Remove Button */
         .remove-btn {
             opacity: 0;
             background: transparent;
@@ -139,7 +143,7 @@
         .entry-card:hover .remove-btn { opacity: 1; }
         .remove-btn:hover { background: var(--danger); color: #fff; }
 
-        /* Footer Input */
+        /* Footer Input Area */
         #input-footer {
             padding: 20px;
             background-color: var(--sidebar-bg);
@@ -147,6 +151,7 @@
         }
 
         .input-row { display: flex; gap: 12px; }
+        
         input {
             flex: 1;
             background: var(--input-bg);
@@ -167,6 +172,7 @@
             font-weight: bold;
         }
 
+        /* Mobile Viewport Tweak */
         @media (max-width: 600px) {
             #container { flex-direction: column; height: 100vh; width: 100%; border-radius: 0; }
             #sidebar { width: 100%; height: auto; border-right: none; }
@@ -191,21 +197,28 @@
         <div id="task-list"></div>
         <div id="input-footer">
             <div class="input-row">
-                <input type="text" id="itemName" placeholder="Task name...">
+                <input type="text" id="itemName" placeholder="Task or Game name...">
                 <input type="date" id="itemDate">
-                <button class="btn-primary" onclick="saveEntry()">Save</button>
+                <button class="btn-primary" onclick="saveEntry()">Save Entry</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    // 1. Setup Data Storage
     let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Grades', 'Games'];
     let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
     let activePlanner = planners[0];
 
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+    // 2. Initialize EmailJS (Insert your Public Key here)
+    (function() {
+        // emailjs.init("YOUR_PUBLIC_KEY");
+    })();
+
+    // 3. Render the Interface
     function renderApp() {
         const nav = document.getElementById('planner-nav');
         nav.innerHTML = '';
@@ -244,10 +257,11 @@
         });
     }
 
+    // 4. Action Functions
     function saveEntry() {
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
-        if(!name || !date) return alert("Fill everything out!");
+        if(!name || !date) return alert("Fill out both name and date!");
 
         const newEntry = { 
             id: Date.now().toString(),
@@ -258,6 +272,16 @@
 
         entries.push(newEntry);
         localStorage.setItem('myEntries', JSON.stringify(entries));
+        
+        // Optional Email Send (Uncomment and add IDs to use)
+        /*
+        emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+            item_name: name,
+            due_date: date,
+            to_email: "your@email.com"
+        });
+        */
+
         document.getElementById('itemName').value = '';
         document.getElementById('itemDate').value = '';
         renderApp();
@@ -270,7 +294,7 @@
     }
 
     function createNewPlanner() {
-        const name = prompt("New Planner Name:");
+        const name = prompt("Name your new planner:");
         if(name && !planners.includes(name)) {
             planners.push(name);
             localStorage.setItem('myPlanners', JSON.stringify(planners));
