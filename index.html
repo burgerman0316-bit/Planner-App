@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DarkPlan Pro</title>
 
-    <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/512/ffffff/calendar.png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/512/ffffff/calendar.png">
-    
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAABm0lEQVR4nO2WsU4CQRRF786SGBMTo7G2srG0o6Gxs7S0ofAn/AB/xkSNCY0S/8BfMBoTExMTo7GysvIAs7AY7mZ2YUnInmSSTXbeuS87770pSClpS9I9pGfIs8iY67p7yInIB9I9pBy6mXyW/DREtCbpAnIs8m7X3UN+idwYIn0p6RhyYIis9P8VpAnvFfId5NBeV9InSbeQiY7mO8itXU8WkrYgfXfH90S2TfscSFeQ96Y9fSR9T70z9T6vIatI946fInp6vV5H6v0mXU99i5P7vYpsD66vj5x7vS7vA6Y60fF9R6fX6/K9vI87SFeQ96Y9fSR9T70z9T6vIatI946fInp6vV5H6v0mXU99i5P7vYpsD66vj5x7vS7vA/YgXUHem/b0kfQ99c7U+7yGrCLdO36K6On1eh2p95t0PfUtTu73KrI9uL4+cu71urwP2IN0BXlv2tNH0vfUO1Pv8xqyinTv+Cmip9frdaTeb9L11Lc4ud+ryPbg+vrIudfr8j7gL9IsS7N3MEnpAAAAAElFTkSuQmCC">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
@@ -50,7 +49,6 @@
             display: flex; align-items: center; gap: 8px;
         }
         .nav-tab.active { background: var(--accent); color: white; }
-        
         .tab-del-x { display: none; color: #ff453a; font-size: 14px; font-weight: 800; padding: 0 2px; }
         .nav-tab.moving { border: 1px dashed #ffd60a; animation: shake 0.3s infinite; }
         .nav-tab.moving .tab-del-x { display: inline-block; }
@@ -62,13 +60,7 @@
         }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
-        
-        /* Updated SIGN OUT button style */
-        .out-btn { 
-            background: #ffffff; color: #000; padding: 6px 14px; 
-            border-radius: 12px; font-weight: 800; font-size: 10px; 
-            text-transform: uppercase; cursor: pointer; white-space: nowrap;
-        }
+        .out-btn { background: #ffffff; color: #000; padding: 6px 14px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
 
         #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 200px; }
         #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
@@ -96,7 +88,6 @@
         input[type="date"]:focus::before, input[type="date"]:valid::before { display: none; }
         
         .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 50px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; cursor: pointer; }
-        
         .footer-tip { text-align: center; font-size: 8px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 0px; padding-bottom: 5px; }
 
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
