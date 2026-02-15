@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DarkPlan Pro Planner</title>
     
-    <link rel="icon" type="image/png" href="https://img.icons8.com/external-flat-juicy-fish/60/external-calendar-digital-nomad-flat-juicy-fish.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='48' height='48'%3E%3Cpath fill='none' stroke='%23f0f0f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 10h18M7 3v3m10-3v3M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm3 9h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01'/%3E%3C/svg%3E">
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
@@ -81,16 +81,8 @@
             transition: 0.2s;
         }
 
-        .nav-item:hover {
-            background-color: #383838;
-            color: #fff;
-        }
-
-        .nav-item.active {
-            background-color: var(--accent-btn);
-            color: #fff;
-            font-weight: bold;
-        }
+        .nav-item:hover { background-color: #383838; color: #fff; }
+        .nav-item.active { background-color: var(--accent-btn); color: #fff; font-weight: bold; }
 
         /* Main Workspace */
         #main-area {
@@ -125,23 +117,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
         }
 
-        .entry-info b { 
-            display: block; 
-            color: #fff; 
-            font-size: 1.1rem;
-            margin-bottom: 4px;
-        }
+        .entry-info b { display: block; color: #fff; font-size: 1.1rem; margin-bottom: 4px; }
+        .date-display { font-size: 0.85em; color: var(--text-dim); display: block; }
 
-        .date-display {
-            font-size: 0.85em;
-            color: var(--text-dim);
-            display: block;
-        }
-
-        /* Removal UI - Hover Trigger */
+        /* Removal UI */
         .remove-btn {
             opacity: 0;
             background: transparent;
@@ -155,14 +136,8 @@
             font-size: 0.75rem;
         }
 
-        .entry-card:hover .remove-btn {
-            opacity: 1;
-        }
-
-        .remove-btn:hover {
-            background: var(--danger);
-            color: #fff;
-        }
+        .entry-card:hover .remove-btn { opacity: 1; }
+        .remove-btn:hover { background: var(--danger); color: #fff; }
 
         /* Footer Input */
         #input-footer {
@@ -171,11 +146,7 @@
             border-top: 1px solid var(--border);
         }
 
-        .input-row {
-            display: flex;
-            gap: 12px;
-        }
-
+        .input-row { display: flex; gap: 12px; }
         input {
             flex: 1;
             background: var(--input-bg);
@@ -196,7 +167,6 @@
             font-weight: bold;
         }
 
-        /* Mobile View */
         @media (max-width: 600px) {
             #container { flex-direction: column; height: 100vh; width: 100%; border-radius: 0; }
             #sidebar { width: 100%; height: auto; border-right: none; }
@@ -237,7 +207,6 @@
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     function renderApp() {
-        // Sidebar Render
         const nav = document.getElementById('planner-nav');
         nav.innerHTML = '';
         planners.forEach(p => {
@@ -250,7 +219,6 @@
 
         document.getElementById('current-title').innerText = activePlanner;
 
-        // Task List Render
         const list = document.getElementById('task-list');
         list.innerHTML = '';
         
@@ -290,10 +258,8 @@
 
         entries.push(newEntry);
         localStorage.setItem('myEntries', JSON.stringify(entries));
-        
         document.getElementById('itemName').value = '';
         document.getElementById('itemDate').value = '';
-        
         renderApp();
     }
 
