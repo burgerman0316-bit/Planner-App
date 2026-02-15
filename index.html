@@ -93,23 +93,23 @@
             align-items: center;
         }
 
-        /* THE FLUSH ISLAND */
+        /* YOUR CUSTOM BOTTOM POSITION */
         #footer {
             position: fixed;
-            bottom: 10 px; 
+            bottom: 10px; 
             left: 8px;
             right: 8px;
-            background: rgba(28, 28, 28, 0.98);
+            background: rgba(30, 30, 30, 0.98);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--border);
             border-radius: var(--iphone-radius);
-            /* REDUCED PADDING: Shaved the bottom gap way down */
-            padding: 20px 20px 22px 20px; 
+            /* Increased bottom padding slightly for tapping safety */
+            padding: 20px 20px 35px 20px;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             z-index: 1000;
         }
 
