@@ -17,7 +17,7 @@
         :root {
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
-            --accent: #333333; --radius: 15px; 
+            --accent: #333333; --radius: 50px; 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
@@ -34,14 +34,16 @@
             padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
             display: flex; align-items: center; justify-content: space-between;
         }
-        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; padding-right: 10px; }
         
         .nav-tab { 
             padding: 8px 18px; border-radius: 12px; color: var(--text-dim); 
             font-size: 15px; font-weight: 600; white-space: nowrap; 
             user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+            transition: all 0.2s ease;
         }
         .nav-tab.active { background: var(--accent); color: white; }
+        .nav-tab.moving { border: 1px dashed white; opacity: 0.7; transform: scale(0.95); }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
         .out-btn { background: #ffffff; color: #000; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 10px; text-transform: uppercase; cursor: pointer; }
@@ -124,7 +126,7 @@
             <input type="date" id="itemDate" required>
         </div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
-        <div style="text-align:center; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px;">TAP ABOVE TO SAVE ENTRY</div>
+        <div style="text-align:center; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px; margin-top: -4px;">TAP ABOVE TO SAVE ENTRY</div>
     </div>
 </div>
 
@@ -143,9 +145,7 @@
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // Haptic Function
-    function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(10); } }
-
+    function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(12); } }
     function popLogin() { auth.signInWithPopup(provider).catch(e => alert(e.message)); }
 
     auth.onAuthStateChanged((user) => {
@@ -162,6 +162,7 @@
     let activePlanner = 'Assignments';
     let allEntries = [];
     let planners = ['Assignments', 'Game Releases'];
+    let moveMode = null;
 
     function loadData(uid) {
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
@@ -184,25 +185,41 @@
     }
 
     window.deleteTask = function(id) { haptic(); db.collection("tasks").doc(id).delete(); };
-    window.setTab = function(t) { haptic(); activePlanner = t; render(); };
 
-    let pressTimer;
-    function startPress(planner) {
-        pressTimer = window.setTimeout(function() {
+    window.handleTap = function(p) {
+        if (moveMode) {
+            if (moveMode === p) { moveMode = null; render(); return; }
+            const fromIdx = planners.indexOf(moveMode);
+            const toIdx = planners.indexOf(p);
+            planners.splice(fromIdx, 1);
+            planners.splice(toIdx, 0, moveMode);
+            moveMode = null;
             haptic();
-            handleDeletePlanner(planner);
-        }, 800);
-    }
-    function cancelPress() { clearTimeout(pressTimer); }
-
-    function handleDeletePlanner(plannerName) {
-        if (planners.length <= 1) return alert("Must have one list.");
-        if (confirm(`Delete "${plannerName}"?`)) {
-            planners = planners.filter(p => p !== plannerName);
-            if (activePlanner === plannerName) activePlanner = planners[0];
+            render();
+        } else {
+            haptic();
+            activePlanner = p;
             render();
         }
+    };
+
+    let pressTimer;
+    function startPress(p) {
+        pressTimer = window.setTimeout(function() {
+            haptic();
+            const action = confirm(`Delete "${p}"? Cancel for Move Mode.`);
+            if (action) {
+                if (planners.length <= 1) return alert("Need 1 list.");
+                planners = planners.filter(item => item !== p);
+                if (activePlanner === p) activePlanner = planners[0];
+                render();
+            } else {
+                moveMode = p;
+                render();
+            }
+        }, 700);
     }
+    function cancelPress() { clearTimeout(pressTimer); }
 
     function createNewList() {
         haptic();
@@ -214,9 +231,10 @@
         const tabs = document.getElementById('planner-tabs');
         tabs.innerHTML = planners.map(p => {
             const isActive = p === activePlanner;
+            const isMoving = p === moveMode;
             return `
-                <div class="nav-tab ${isActive ? 'active' : ''}" 
-                     onclick="setTab('${p}')"
+                <div class="nav-tab ${isActive ? 'active' : ''} ${isMoving ? 'moving' : ''}" 
+                     onclick="handleTap('${p}')"
                      ontouchstart="startPress('${p}')"
                      ontouchend="cancelPress()"
                      onmousedown="startPress('${p}')"
