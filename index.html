@@ -17,11 +17,11 @@
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
             --accent: #333333; --radius: 50px; --bar-height: 80px;
-            --field-h: 44px; /* FORCED VERTICAL SYMMETRY */
+            --field-h: 44px; /* VERTICAL SYMMETRY LOCK */
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        input { -webkit-user-select: text; user-select: text; font-family: inherit; -webkit-appearance: none; }
+        input { -webkit-user-select: text; user-select: text; font-family: inherit; }
 
         html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; background-color: var(--bg-dark); color: var(--text-main); }
 
@@ -46,15 +46,13 @@
             display: flex; align-items: center; min-height: 80px;
         }
         
-        /* SYMMETRY ENGINE */
         .edit-layout { display: flex; width: 100%; align-items: center; gap: 15px; }
         .field-stack { display: flex; flex-direction: column; gap: 8px; flex: 1; }
         
         .pill-input { 
             background: #000; border: 1px solid var(--border); color: white; 
             border-radius: 20px; padding: 0 15px; font-size: 16px; width: 100%; 
-            height: var(--field-h) !important;
-            line-height: var(--field-h); display: block;
+            height: var(--field-h) !important; line-height: var(--field-h); display: block;
         }
 
         .icon-column { display: flex; flex-direction: column; gap: 10px; width: 35px; align-items: center; justify-content: center; }
@@ -70,7 +68,12 @@
 
         .input-row { display: flex; gap: 8px; height: 50px; }
         .footer-input { background: #000; border: 1px solid var(--border); color: white; padding: 0 25px; border-radius: var(--radius); font-size: 16px; flex: 1; }
+        
+        .date-input-wrap { position: relative; background: #000; border: 1px solid var(--border); border-radius: var(--radius); width: 110px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .date-input-wrap input { position: absolute; opacity: 0; width: 100%; height: 100%; }
+        
         .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 55px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; }
+        .help-text { font-size: 10px; color: var(--text-dim); text-align: center; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
     </style>
 </head>
 <body onclick="closeAllModes()">
@@ -96,9 +99,13 @@
     <div id="footer" onclick="event.stopPropagation()">
         <div class="input-row">
             <input type="text" id="itemName" class="footer-input" placeholder="Task Name...">
-            <input type="date" id="itemDate" class="footer-input" style="width:130px;">
+            <div class="date-input-wrap">
+                <span id="dateDisplay" style="font-size: 10px; font-weight: 800;">DATE</span>
+                <input type="date" id="itemDate" onchange="document.getElementById('dateDisplay').innerText = 'SET'">
+            </div>
         </div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
+        <div class="help-text">Tap text to edit • Hold tabs to move/delete</div>
     </div>
 </div>
 
@@ -148,6 +155,7 @@
         if(!name || !date) return;
         db.collection("tasks").add({ name, date, uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() });
         document.getElementById('itemName').value = '';
+        document.getElementById('dateDisplay').innerText = 'DATE';
     }
 
     function createNewList() {
