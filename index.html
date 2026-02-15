@@ -160,7 +160,7 @@
 
     let activePlanner = 'Grades';
     let allEntries = [];
-    let planners = ['Grades', 'Assignments'];
+    let planners = ['Assignments', 'Game Releases'];
 
     function loadData(uid) {
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
