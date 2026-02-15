@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DarkPlan Pro</title>
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -28,6 +25,7 @@
 
         #app { display: none; flex-direction: column; height: 100vh; }
         
+        /* Fixed Header */
         #nav-bar {
             background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border);
             padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
@@ -39,10 +37,10 @@
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
         
-        /* White Sign Out Button */
+        /* Fixed White OUT Button */
         .out-btn { 
-            background: #ffffff; color: #000; padding: 5px 10px; 
-            border-radius: 6px; font-weight: 800; font-size: 10px; 
+            background: #ffffff; color: #000; padding: 6px 12px; 
+            border-radius: 8px; font-weight: 800; font-size: 10px; 
             text-transform: uppercase; cursor: pointer; 
         }
 
@@ -51,10 +49,10 @@
         
         .entry-card {
             background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
-            padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+            padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* GROUNDED PILL (Full Width) */
+        /* Full Width Grounded Pill */
         #footer {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px);
@@ -63,29 +61,37 @@
             border-radius: 30px 30px 0 0;
             padding: 20px; 
             padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            display: flex; flex-direction: column; gap: 12px; z-index: 1000;
+            display: flex; flex-direction: column; gap: 10px; z-index: 1000;
         }
 
         .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         
         input[type="text"] { 
             background: #000; border: 1px solid var(--border); color: white; 
-            padding: 12px 18px; border-radius: 20px; font-size: 15px; flex: 1;
+            padding: 12px 18px; border-radius: 15px; font-size: 15px; flex: 1;
         }
 
-        /* Compact Styled Date Button */
+        /* Date Input with "SET DATE" text fix */
         input[type="date"] { 
+            position: relative;
             color-scheme: dark; 
-            background: #2a2a2a; border: 1px solid var(--border);
+            background: #000; border: 1px solid var(--border);
             color: white; border-radius: 15px; 
-            padding: 10px; font-size: 12px;
-            width: 110px; /* Small fixed width */
-            text-align: center;
+            padding: 12px; font-size: 12px;
+            width: 125px;
+            text-transform: uppercase;
         }
+        input[type="date"]::before {
+            content: "SET DATE";
+            position: absolute; color: var(--text-dim);
+            left: 12px; top: 13px; background: #000; width: 80px;
+        }
+        input[type="date"]:focus::before,
+        input[type="date"]:valid::before { display: none; }
 
         .save-btn { 
             width: 100%; background: #ffffff; color: #000; border: none; 
-            padding: 16px; border-radius: 20px; font-weight: 900; 
+            padding: 16px; border-radius: 15px; font-weight: 900; 
             text-transform: uppercase; font-size: 14px; cursor: pointer;
         }
 
@@ -98,7 +104,7 @@
 <body>
 
 <div id="login-overlay">
-    <h1 style="color:white; font-size:32px; margin-bottom:20px; letter-spacing:-1px;">DarkPlan</h1>
+    <h1 style="color:white; font-size:32px; margin-bottom:20px;">DarkPlan</h1>
     <button class="save-btn" style="width:auto; padding:15px 40px;" onclick="popLogin()">Sign in with Google</button>
 </div>
 
@@ -118,8 +124,8 @@
 
     <div id="footer">
         <div class="input-row">
-            <input type="text" id="itemName" placeholder="What needs to be done?">
-            <input type="date" id="itemDate">
+            <input type="text" id="itemName" placeholder="Task Name...">
+            <input type="date" id="itemDate" required>
         </div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
         <div style="text-align:center; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px;">TAP ABOVE TO SAVE ENTRY</div>
