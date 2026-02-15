@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DarkPlan Pro Planner</title>
-    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/calendar-external-link.png">
+    
+    <link rel="icon" type="image/png" href="https://img.icons8.com/external-flat-juicy-fish/60/external-calendar-digital-nomad-flat-juicy-fish.png">
+
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
     <style>
         :root {
             --bg-main: #1e1e1e;
@@ -43,7 +46,7 @@
             border: 1px solid var(--border);
         }
 
-        /* Sidebar - Desktop */
+        /* Sidebar */
         #sidebar {
             width: 200px;
             padding: 15px;
@@ -103,9 +106,6 @@
             font-size: 1.1em;
             border-bottom: 1px solid var(--border);
             background-color: var(--header-bg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         #task-list {
@@ -115,7 +115,7 @@
             background-color: var(--bg-main);
         }
 
-        /* Task Cards */
+        /* Entry Cards */
         .entry-card {
             background: var(--sidebar-bg);
             border: 1px solid var(--border);
@@ -125,11 +125,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: border 0.2s;
-        }
-
-        .entry-card:hover {
-            border-color: #666;
+            position: relative;
         }
 
         .entry-info b { 
@@ -143,10 +139,9 @@
             font-size: 0.85em;
             color: var(--text-dim);
             display: block;
-            letter-spacing: 0.5px;
         }
 
-        /* Removal UI */
+        /* Removal UI - Hover Trigger */
         .remove-btn {
             opacity: 0;
             background: transparent;
@@ -191,10 +186,6 @@
             outline: none;
         }
 
-        input:focus {
-            border-color: #777;
-        }
-
         .btn-primary {
             background-color: var(--accent-btn);
             color: white;
@@ -203,22 +194,12 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.2s;
         }
 
-        .btn-primary:hover {
-            background-color: var(--accent-hover);
-        }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1e1e1e; }
-        ::-webkit-scrollbar-thumb { background: #555; border-radius: 10px; }
-
-        /* Responsive Mobile Tweak */
+        /* Mobile View */
         @media (max-width: 600px) {
             #container { flex-direction: column; height: 100vh; width: 100%; border-radius: 0; }
-            #sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+            #sidebar { width: 100%; height: auto; border-right: none; }
             .input-row { flex-direction: column; }
         }
     </style>
@@ -230,7 +211,7 @@
         <h2>Planners</h2>
         <div id="planner-nav" class="nav-list"></div>
         <hr style="border:0; height:1px; background:#444; margin:15px 0;">
-        <button class="btn-primary" onclick="createNewPlanner()" style="width:100%">+ New Planner</button>
+        <button class="btn-primary" onclick="createNewPlanner()" style="width:100%">+ New List</button>
     </div>
 
     <div id="main-area">
@@ -240,7 +221,7 @@
         <div id="task-list"></div>
         <div id="input-footer">
             <div class="input-row">
-                <input type="text" id="itemName" placeholder="What needs doing?">
+                <input type="text" id="itemName" placeholder="Task name...">
                 <input type="date" id="itemDate">
                 <button class="btn-primary" onclick="saveEntry()">Save</button>
             </div>
@@ -249,16 +230,14 @@
 </div>
 
 <script>
-    // Initialize Data
     let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Grades', 'Games'];
     let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
     let activePlanner = planners[0];
 
-    // Days Array for Date Formatting
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     function renderApp() {
-        // 1. Render Sidebar
+        // Sidebar Render
         const nav = document.getElementById('planner-nav');
         nav.innerHTML = '';
         planners.forEach(p => {
@@ -271,16 +250,14 @@
 
         document.getElementById('current-title').innerText = activePlanner;
 
-        // 2. Render Task List
+        // Task List Render
         const list = document.getElementById('task-list');
         list.innerHTML = '';
         
-        // Filter and sort by date (closest first)
         const activeEntries = entries.filter(e => e.type === activePlanner);
         activeEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         activeEntries.forEach((entry) => {
-            // Logic for "Monday, 02/14/2026"
             const dateObj = new Date(entry.date + 'T00:00:00');
             const dayName = daysOfWeek[dateObj.getDay()];
             const [year, month, day] = entry.date.split('-');
@@ -302,11 +279,10 @@
     function saveEntry() {
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
-        
-        if(!name || !date) return alert("Missing info!");
+        if(!name || !date) return alert("Fill everything out!");
 
         const newEntry = { 
-            id: Date.now().toString(), // Unique ID for safe deletion
+            id: Date.now().toString(),
             name, 
             date, 
             type: activePlanner 
@@ -315,7 +291,6 @@
         entries.push(newEntry);
         localStorage.setItem('myEntries', JSON.stringify(entries));
         
-        // Reset Inputs
         document.getElementById('itemName').value = '';
         document.getElementById('itemDate').value = '';
         
@@ -329,7 +304,7 @@
     }
 
     function createNewPlanner() {
-        const name = prompt("Name your new planner:");
+        const name = prompt("New Planner Name:");
         if(name && !planners.includes(name)) {
             planners.push(name);
             localStorage.setItem('myPlanners', JSON.stringify(planners));
@@ -338,7 +313,6 @@
         }
     }
 
-    // Run on startup
     renderApp();
 </script>
 
