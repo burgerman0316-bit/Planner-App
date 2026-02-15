@@ -90,7 +90,6 @@
             align-items: center;
         }
 
-        /* THE UPDATED FOOTER */
         #footer {
             position: fixed;
             bottom: 10px; 
@@ -101,7 +100,6 @@
             -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--border);
             border-radius: var(--iphone-radius);
-            /* Reduced bottom padding from 35px to 14px */
             padding: 20px 20px 14px 20px;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
             display: flex;
@@ -125,6 +123,18 @@
             outline: none;
         }
 
+        /* DATE PLACEHOLDER LOGIC */
+        input[type="date"]::before {
+            content: "Date";
+            color: var(--text-dim);
+            margin-right: 0.5em;
+        }
+        input[type="date"]:focus::before,
+        input[type="date"]:valid::before {
+            content: "" !important;
+            margin-right: 0 !important;
+        }
+
         .save-btn {
             background: #ffffff;
             color: #000000;
@@ -137,10 +147,9 @@
             letter-spacing: 1.5px;
         }
 
-        /* THE TINY TEXT TIP */
         .bottom-tip {
             font-size: 9px;
-            color: #444; /* Very dim so it doesn't distract */
+            color: #444; 
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 2px;
@@ -167,7 +176,7 @@
     <div id="footer">
         <div class="input-row">
             <input type="text" id="itemName" placeholder="Task name...">
-            <input type="date" id="itemDate">
+            <input type="date" id="itemDate" required>
         </div>
         <button class="save-btn" onclick="saveEntry()">Add to List</button>
         <div class="bottom-tip">Tap above to save entry</div>
