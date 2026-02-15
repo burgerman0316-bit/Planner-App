@@ -31,7 +31,7 @@
             padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
             display: flex; align-items: center; justify-content: space-between;
         }
-        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; align-items: center; }
         
         .nav-tab { 
             position: relative;
@@ -39,33 +39,32 @@
             font-size: 15px; font-weight: 600; white-space: nowrap; 
             user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
             transition: all 0.2s ease; border: 1px solid transparent;
+            display: flex; align-items: center; gap: 10px;
         }
         .nav-tab.active { background: var(--accent); color: white; }
         
-        /* The X button inside the tab */
+        /* The Clean X: Center-Right, no background */
         .tab-del-x {
-            display: none;
-            position: absolute;
-            top: -6px; right: -4px;
-            background: #ff453a; color: white;
-            width: 18px; height: 18px;
-            border-radius: 50%;
-            font-size: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: none; /* Hidden by default */
+            color: #ff453a;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 0 4px;
         }
 
         .nav-tab.moving { 
             border: 1px dashed #ffd60a; 
             animation: shake 0.3s infinite;
+            padding-right: 12px; /* Adjust spacing for X */
         }
-        .nav-tab.moving .tab-del-x { display: flex; }
+        
+        /* Only show X when moving */
+        .nav-tab.moving .tab-del-x { display: inline-block; }
 
         @keyframes shake {
-            0% { transform: rotate(-1.5deg); }
-            50% { transform: rotate(1.5deg); }
-            100% { transform: rotate(-1.5deg); }
+            0% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+            100% { transform: rotate(-1deg); }
         }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
@@ -168,6 +167,7 @@
     window.deleteTask = function(id) { haptic(); db.collection("tasks").doc(id).delete(); };
 
     window.handleTap = function(e, p) {
+        // If they click exactly the X
         if (e.target.classList.contains('tab-del-x')) {
             e.stopPropagation();
             if (planners.length <= 1) return alert("Must have 1 list.");
@@ -229,7 +229,7 @@
                      onmouseup="cancelPress()"
                      oncontextmenu="event.preventDefault()">
                      ${p}
-                     <div class="tab-del-x">✕</div>
+                     <span class="tab-del-x">✕</span>
                 </div>
             `;
         }).join('');
