@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DarkPlan Pro Planner</title>
+    <title>ProPlanner</title>
     
     <link rel="icon" type="image/png" href="https://img.icons8.com/pulsar-line/48/ffffff/calendar.png">
     
@@ -12,8 +12,6 @@
     <meta name="theme-color" content="#1e1e1e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <style>
         :root {
@@ -29,50 +27,46 @@
             --danger: #ff5555;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #121212;
             color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Fix for mobile address bars */
-            min-height: 100vh;
-            min-height: 100dvh; 
+            height: 100dvh;
+            overflow: hidden;
         }
 
         #container {
             display: flex;
-            width: 95%;
+            width: 100%;
             max-width: 1000px;
-            height: 90vh;
-            height: 90dvh;
+            height: 100%;
             background: var(--bg-main);
-            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             border: 1px solid var(--border);
         }
 
+        /* Sidebar - Desktop */
         #sidebar {
-            width: 200px;
-            padding: 15px;
+            width: 220px;
+            padding: 20px;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
         }
 
         #sidebar h2 {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-dim);
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 1.2px;
+            letter-spacing: 2px;
         }
 
         .nav-list {
@@ -84,16 +78,18 @@
         }
 
         .nav-item {
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
             color: var(--text-dim);
-            border-radius: 4px;
-            margin-bottom: 4px;
-            font-size: 0.9rem;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            transition: 0.2s;
+            font-size: 0.95rem;
         }
 
-        .nav-item.active { background-color: var(--accent-btn); color: #fff; font-weight: bold; }
+        .nav-item.active { background-color: var(--accent-btn); color: #fff; font-weight: 600; }
 
+        /* Main Workspace */
         #main-area {
             flex-grow: 1;
             display: flex;
@@ -102,90 +98,121 @@
         }
 
         #header-title {
-            padding: 12px 18px;
+            padding: 15px 20px;
             font-weight: bold;
-            border-bottom: 1px solid var(--border);
             background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            font-size: 1rem;
         }
 
         #task-list {
             flex-grow: 1;
             padding: 15px;
             overflow-y: auto;
-            background-color: var(--bg-main);
+            -webkit-overflow-scrolling: touch;
         }
 
+        /* Task Cards */
         .entry-card {
             background: var(--sidebar-bg);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 12px 15px;
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .entry-info b { display: block; color: #fff; font-size: 1rem; }
-        .date-display { font-size: 0.8rem; color: var(--text-dim); }
+        .entry-info { min-width: 0; }
+        .entry-info b { 
+            display: block; 
+            color: #fff; 
+            font-size: 1rem; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .date-display { font-size: 0.8rem; color: var(--text-dim); margin-top: 2px; }
 
+        /* Removal UI */
         .remove-btn {
             background: transparent;
             border: 1px solid var(--danger);
             color: var(--danger);
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.7rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-left: 10px;
         }
 
+        /* Footer */
         #input-footer {
             padding: 15px;
             background-color: var(--sidebar-bg);
             border-top: 1px solid var(--border);
         }
 
-        .input-row { display: flex; gap: 8px; }
+        .input-row { display: flex; gap: 10px; }
         
         input {
-            flex: 1;
             background: var(--input-bg);
             border: 1px solid #555;
             color: #fff;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 16px; /* Prevents iOS zoom-on-focus */
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px; /* Prevents mobile zoom */
+            min-width: 0;
         }
+
+        #itemName { flex: 2; }
+        #itemDate { flex: 1.2; }
 
         .btn-primary {
             background-color: var(--accent-btn);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            padding: 10px 18px;
+            border-radius: 6px;
             font-weight: bold;
+            cursor: pointer;
         }
 
-        /* MOBILE FIXES */
+        /* MOBILE OPTIMIZATIONS */
         @media (max-width: 650px) {
-            #container { 
-                flex-direction: column; 
-                width: 100%; 
-                height: 100dvh; 
-                border-radius: 0; 
-                border: none;
-            }
-            #sidebar { 
-                width: 100%; 
-                height: auto; 
-                border-right: none; 
-                border-bottom: 1px solid var(--border);
+            #container { border: none; border-radius: 0; flex-direction: column; }
+            
+            #sidebar {
+                width: 100%;
+                height: auto;
                 padding: 10px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
             }
-            .nav-list { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; }
-            .nav-item { white-space: nowrap; margin-bottom: 0; padding: 6px 12px; }
-            #sidebar h2, #sidebar hr, #sidebar .btn-primary { display: none; }
-            .remove-btn { opacity: 1 !important; } /* Always show on mobile */
+
+            #sidebar h2, #sidebar hr, #sidebar .btn-sidebar { display: none; }
+
+            .nav-list {
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+
+            .nav-item {
+                margin-bottom: 0;
+                padding: 8px 15px;
+                white-space: nowrap;
+                font-size: 0.85rem;
+            }
+
+            .input-row { flex-wrap: wrap; }
+            #itemName { flex: 1 1 100%; margin-bottom: 5px; }
+            #itemDate { flex: 1; }
+            .btn-save { flex: 0.5; }
         }
     </style>
 </head>
@@ -193,29 +220,30 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Lists</h2>
+        <h2>ProPlanner</h2>
         <div id="planner-nav" class="nav-list"></div>
         <hr style="border:0; height:1px; background:#444; margin:15px 0;">
-        <button class="btn-primary" onclick="createNewPlanner()" style="width:100%">+ New List</button>
+        <button class="btn-primary btn-sidebar" onclick="createNewPlanner()" style="width:100%">+ New List</button>
     </div>
 
     <div id="main-area">
         <div id="header-title">
-            <span id="current-title">Grades</span>
+            <span id="current-title">Assignments</span>
         </div>
         <div id="task-list"></div>
         <div id="input-footer">
             <div class="input-row">
-                <input type="text" id="itemName" placeholder="Task...">
+                <input type="text" id="itemName" placeholder="Task name...">
                 <input type="date" id="itemDate">
-                <button class="btn-primary" onclick="saveEntry()">Add</button>
+                <button class="btn-primary btn-save" onclick="saveEntry()">Add</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Assignments', 'Game Releases'];
+    // 1. Data initialization with Assignments and Game releases
+    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Assignments', 'Game releases'];
     let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
     let activePlanner = planners[0];
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -232,6 +260,7 @@
         });
 
         document.getElementById('current-title').innerText = activePlanner;
+
         const list = document.getElementById('task-list');
         list.innerHTML = '';
         
@@ -258,13 +287,19 @@
     }
 
     function saveEntry() {
-        const name = document.getElementById('itemName').value;
-        const date = document.getElementById('itemDate').value;
-        if(!name || !date) return;
-        const newEntry = { id: Date.now().toString(), name, date, type: activePlanner };
+        const nameInput = document.getElementById('itemName');
+        const dateInput = document.getElementById('itemDate');
+        if(!nameInput.value || !dateInput.value) return;
+
+        const newEntry = { 
+            id: Date.now().toString(), 
+            name: nameInput.value, 
+            date: dateInput.value, 
+            type: activePlanner 
+        };
         entries.push(newEntry);
         localStorage.setItem('myEntries', JSON.stringify(entries));
-        document.getElementById('itemName').value = '';
+        nameInput.value = '';
         renderApp();
     }
 
@@ -275,7 +310,7 @@
     }
 
     function createNewPlanner() {
-        const name = prompt("List Name:");
+        const name = prompt("Name your new list:");
         if(name && !planners.includes(name)) {
             planners.push(name);
             localStorage.setItem('myPlanners', JSON.stringify(planners));
@@ -283,6 +318,7 @@
             renderApp();
         }
     }
+
     renderApp();
 </script>
 </body>
