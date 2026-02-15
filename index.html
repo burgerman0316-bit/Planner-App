@@ -13,64 +13,48 @@
         :root {
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
-            --accent: #333333; --radius: 50px;
-            --field-h: 48px; /* FIXED VERTICAL HEIGHT */
+            --radius: 50px;
+            --field-h: 44px; /* FORCED VERTICAL HEIGHT */
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; background: var(--bg-dark); color: white; overflow: hidden; }
 
         #app { display: none; flex-direction: column; height: 100vh; }
-        
-        #nav-bar { 
-            background: var(--sidebar-bg); border-bottom: 1px solid var(--border); 
-            height: 100px; padding: 40px 20px 0;
-            display: flex; align-items: center; justify-content: space-between; 
-        }
-
+        #nav-bar { background: var(--sidebar-bg); border-bottom: 1px solid var(--border); height: 100px; padding: 40px 20px 0; display: flex; align-items: center; justify-content: space-between; }
         #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 220px; }
         
-        /* THE PILL CARD */
+        /* MINI PILL CARD */
         .entry-card { 
             background: var(--bg-card); border: 1px solid var(--border); 
-            border-radius: 35px; padding: 15px 20px; margin-bottom: 12px; 
-            display: flex; align-items: center; min-height: 110px;
+            border-radius: 35px; padding: 12px 20px; margin-bottom: 12px; 
+            display: flex; align-items: center; min-height: 80px;
         }
 
-        /* SYMMETRY ENGINE */
+        /* EDIT LAYOUT SYMMETRY */
         .edit-layout { display: flex; width: 100%; align-items: center; gap: 15px; }
-        .field-stack { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .field-stack { display: flex; flex-direction: column; gap: 8px; flex: 1; }
         
         .pill-input { 
             background: #000; border: 1px solid var(--border); color: white; 
-            border-radius: 20px; padding: 0 15px; font-size: 16px;
-            width: 100%; 
-            height: var(--field-h) !important; /* FORCED VERTICAL HEIGHT */
-            display: block;
+            border-radius: 20px; padding: 0 15px; font-size: 16px; width: 100%; 
+            height: var(--field-h) !important; /* LOCK */
+            line-height: var(--field-h); display: block;
         }
 
         .icon-column { 
-            display: flex; flex-direction: column; 
-            justify-content: space-between; 
-            height: calc(var(--field-h) * 2 + 10px); /* Matches total stack height */
-            width: 40px; align-items: center; 
+            display: flex; flex-direction: column; gap: 10px; width: 35px; 
+            align-items: center; justify-content: center; 
         }
 
         .action-btn { 
-            height: var(--field-h); 
+            font-size: 24px; /* MATCHED SIZE */
+            font-weight: 900; cursor: pointer; height: 32px; width: 32px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 26px; /* MATCHED ICON SIZE */
-            font-weight: bold; cursor: pointer;
-            width: 100%;
         }
 
-        #footer { 
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            background: rgba(25, 25, 25, 0.98); backdrop-filter: blur(20px); 
-            border-top: 1px solid var(--border); border-radius: 30px 30px 0 0; 
-            padding: 20px; padding-bottom: 40px;
-        }
-
+        /* Footer styling kept the same for consistency */
+        #footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(25,25,25,0.98); backdrop-filter: blur(20px); border-top: 1px solid var(--border); border-radius: 30px 30px 0 0; padding: 20px 20px 40px; }
         .input-row { display: flex; gap: 10px; margin-bottom: 10px; height: 50px; }
         .footer-input { background: #000; border: 1px solid var(--border); color: white; border-radius: 25px; padding: 0 20px; flex: 1; }
         .save-btn { width: 100%; background: #fff; color: #000; border: none; height: 50px; border-radius: 25px; font-weight: 900; }
@@ -87,11 +71,7 @@
         <div id="planner-tabs" style="display:flex; gap:10px;"></div>
         <div onclick="auth.signOut()" style="font-size:12px; font-weight:900; background:#fff; color:#000; padding:5px 10px; border-radius:10px;">OUT</div>
     </div>
-    
-    <div id="content">
-        <div id="task-list"></div>
-    </div>
-
+    <div id="content"><div id="task-list"></div></div>
     <div id="footer" onclick="event.stopPropagation()">
         <div class="input-row">
             <input type="text" id="itemName" class="footer-input" placeholder="Task Name...">
@@ -102,7 +82,6 @@
 </div>
 
 <script>
-    // Config from your app
     const firebaseConfig = {
         apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -121,23 +100,9 @@
     let allEntries = [];
     let editingId = null;
 
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
-            loadData(user.uid);
-        }
-    });
-
-    function loadData(uid) {
-        db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
-            allEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            render();
-        });
-    }
-
+    auth.onAuthStateChanged(user => { if (user) { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('app').style.display = 'flex'; loadData(user.uid); } });
+    function loadData(uid) { db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => { allEntries = snap.docs.map(d => ({id: d.id, ...d.data()})); render(); }); }
     function closeEdit() { editingId = null; render(); }
-
     function saveTask() {
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
