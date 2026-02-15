@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DarkPlan Pro</title>
 
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/lucas0316/planner-icons/main/calendar_og.png">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/lucas0316/planner-icons/main/calendar_og.png">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/512/calendar--v1.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/calendar--v1.png">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -64,7 +64,8 @@
         .header-btns { display: flex; align-items: center; gap: 12px; }
         .out-btn { background: #ffffff; color: #000; padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; cursor: pointer; }
 
-        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 240px; }
+        /* Reduced padding-bottom so list feels tighter to the buttons */
+        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 180px; }
         #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         
         .entry-card {
@@ -78,21 +79,21 @@
             -webkit-backdrop-filter: blur(40px);
             border-top: 1px solid var(--border);
             border-radius: 30px 30px 0 0;
-            padding: 20px; 
-            padding-bottom: 15px; 
-            display: flex; flex-direction: column; gap: 10px; z-index: 1000;
+            padding: 10px 20px 10px 20px; /* Reduced top/bottom padding */
+            display: flex; flex-direction: column; gap: 8px; z-index: 1000;
         }
 
         .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
-        input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 22px; border-radius: var(--radius); font-size: 16px; flex: 1; height: 52px; }
-        input[type="date"] { position: relative; color-scheme: dark; background: #000; border: 1px solid var(--border); color: white; border-radius: var(--radius); padding: 0 14px; font-size: 13px; width: 120px; height: 52px; text-align: center; }
+        input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 22px; border-radius: var(--radius); font-size: 16px; flex: 1; height: 50px; }
+        input[type="date"] { position: relative; color-scheme: dark; background: #000; border: 1px solid var(--border); color: white; border-radius: var(--radius); padding: 0 14px; font-size: 13px; width: 110px; height: 50px; text-align: center; }
         
         input[type="date"]::before { content: "DATE"; position: absolute; color: var(--text-dim); left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; background: #000; pointer-events: none; font-weight: 600; }
         input[type="date"]:focus::before, input[type="date"]:valid::before { display: none; }
         
-        .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 52px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; cursor: pointer; }
+        .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 50px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; cursor: pointer; }
         
-        .footer-tip { text-align: center; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: -5px; }
+        /* Tighter tip text */
+        .footer-tip { text-align: center; font-size: 8px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
@@ -109,7 +110,7 @@
         <div id="planner-tabs"></div>
         <div class="header-btns">
             <span onclick="createNewList()" style="font-size: 24px; color: var(--text-dim); cursor: pointer; padding-left: 10px;">+</span>
-            <div onclick="auth.signOut()" class="out-btn">OUT</div>
+            <div onclick="auth.signOut()" class="out-btn">SIGN OUT</div>
         </div>
     </div>
     <div id="content"><span id="list-label">List</span><div id="task-list"></div></div>
