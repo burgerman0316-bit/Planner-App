@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DarkPlan Pro Planner</title>
     
-    <link rel="icon" type="image/png" href="https://img.icons8.com/pulsar-line/48/ffffff/calendar.png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/pulsar-line/180/ffffff/calendar.png">
-    
-    <meta name="theme-color" content="#121212">
-
     <style>
         :root {
             --bg-dark: #121212;
@@ -19,8 +14,7 @@
             --text-main: #ffffff;
             --text-dim: #888888;
             --accent: #333333;
-            --danger: #ff5555;
-            /* Extra large radius to flow with the hardware curve */
+            /* Extra large radius to follow the phone's physical corner */
             --iphone-radius: 50px; 
         }
 
@@ -63,20 +57,15 @@
             color: var(--text-dim);
             font-size: 14px;
             font-weight: 600;
-            white-space: nowrap;
         }
 
-        .nav-tab.active {
-            background: var(--accent);
-            color: white;
-        }
+        .nav-tab.active { background: var(--accent); color: white; }
 
         #content {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            /* Room for the island */
-            padding-bottom: 240px; 
+            padding-bottom: 220px; 
         }
 
         .entry-card {
@@ -90,20 +79,11 @@
             align-items: center;
         }
 
-        .remove-btn {
-            background: rgba(255, 85, 85, 0.1);
-            color: var(--danger);
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-        }
-
-        /* HARD-CODED OFFSET FOOTER */
+        /* THE ZERO-OFFSET FOOTER */
         #footer {
             position: fixed;
-            /* FIXED POSITION: Ignores safe zones */
-            bottom: 8px; 
+            /* Pushes the curve into the very bottom edge */
+            bottom: -2px; 
             left: 8px;
             right: 8px;
             background: rgba(30, 30, 30, 0.98);
@@ -111,8 +91,8 @@
             -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--border);
             border-radius: var(--iphone-radius);
-            /* FIXED PADDING: This ensures the button is high enough to be tapped */
-            padding: 25px 25px 35px 25px;
+            /* Static padding to keep the UI usable at the very bottom */
+            padding: 20px 20px 30px 20px;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
@@ -120,11 +100,7 @@
             z-index: 1000;
         }
 
-        .input-row {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
+        .input-row { display: flex; gap: 10px; }
 
         input {
             background: #000;
@@ -145,7 +121,6 @@
             border-radius: 25px;
             font-weight: 900;
             font-size: 14px;
-            width: 100%;
             text-transform: uppercase;
             letter-spacing: 1.5px;
         }
@@ -180,7 +155,6 @@
     let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Grades', 'Game Releases'];
     let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
     let activePlanner = planners[0];
-    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     function renderApp() {
         const tabsCont = document.getElementById('planner-tabs');
@@ -198,23 +172,10 @@
         list.innerHTML = '';
         
         const activeEntries = entries.filter(e => e.type === activePlanner);
-        activeEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
-
         activeEntries.forEach((entry) => {
-            const dateObj = new Date(entry.date + 'T00:00:00');
-            const dayName = daysOfWeek[dateObj.getDay()];
-            const [year, month, day] = entry.date.split('-');
-            const formattedDate = `${month}/${day}/${year}`;
-
             const card = document.createElement('div');
             card.className = 'entry-card';
-            card.innerHTML = `
-                <div class="entry-info">
-                    <b>${entry.name}</b>
-                    <span>${dayName}, ${formattedDate}</span>
-                </div>
-                <button class="remove-btn" onclick="removeEntry('${entry.id}')">Remove</button>
-            `;
+            card.innerHTML = `<div><b>${entry.name}</b><br><small>${entry.date}</small></div>`;
             list.appendChild(card);
         });
     }
@@ -223,16 +184,7 @@
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
         if(!name || !date) return;
-        const newEntry = { id: Date.now().toString(), name, date, type: activePlanner };
-        entries.push(newEntry);
-        localStorage.setItem('myEntries', JSON.stringify(entries));
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemDate').value = '';
-        renderApp();
-    }
-
-    function removeEntry(id) {
-        entries = entries.filter(e => e.id !== id);
+        entries.push({ id: Date.now().toString(), name, date, type: activePlanner });
         localStorage.setItem('myEntries', JSON.stringify(entries));
         renderApp();
     }
