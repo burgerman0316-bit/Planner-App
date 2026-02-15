@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DarkPlan Pro</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#121212">
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -62,7 +58,7 @@
 
 <div id="login-overlay">
     <h1 style="font-size: 40px; letter-spacing: -2px;">DarkPlan</h1>
-    <p id="login-status" style="color: var(--text-dim);">Click to choose your Google account</p>
+    <p id="login-status" style="color: var(--text-dim);">Sign in to start planning</p>
     <button class="google-btn" onclick="popLogin()">Sign in with Google</button>
 </div>
 
@@ -77,43 +73,39 @@
     </div>
     <div id="footer">
         <div class="input-row">
-            <input type="text" id="itemName" placeholder="What's next?">
+            <input type="text" id="itemName" placeholder="New Task...">
             <input type="date" id="itemDate">
         </div>
-        <button class="save-btn" onclick="saveTask()">Add to List</button>
+        <button class="save-btn" onclick="saveTask()">Add Task</button>
     </div>
 </div>
 
 <script>
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyCEdkitayty00ZHL-bbU0R1p_oy8E1RHbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
         projectId: "plannerapp-ff221",
-        storageBucket: "plannerapp-ff221.firebasestorage.app",
+        storageBucket: "plannerapp-ff221.appspot.com",
         messagingSenderId: "282165391993",
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // --- POPUP LOGIC ---
+    // --- AUTH ACTIONS ---
     function popLogin() {
-        document.getElementById('login-status').innerText = "Opening Account Selection...";
-        
-        auth.signInWithPopup(provider)
-        .then((result) => {
-            console.log("Logged in:", result.user.displayName);
-        })
-        .catch((error) => {
-            console.error(error);
-            if (error.code === 'auth/popup-blocked') {
-                alert("The popup was blocked! Look at your address bar and click 'Always allow popups' for this site.");
-            } else {
-                document.getElementById('login-status').innerText = "Error: " + error.message;
-            }
+        document.getElementById('login-status').innerText = "Opening selection...";
+        auth.signInWithPopup(provider).catch(e => {
+            alert("Auth Error: " + e.message);
+            document.getElementById('login-status').innerText = "Try again";
         });
     }
 
@@ -128,14 +120,14 @@
         }
     });
 
-    // --- THE REST OF YOUR APP LOGIC ---
+    // --- APP LOGIC ---
     let activePlanner = 'Grades';
     let allEntries = [];
     let planners = ['Grades', 'Assignments'];
 
     function loadData(uid) {
-        db.collection("tasks").where("uid", "==", uid).onSnapshot((snapshot) => {
-            allEntries = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+        db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
+            allEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
             render();
         });
     }
@@ -151,18 +143,18 @@
         document.getElementById('itemName').value = '';
     }
 
-    function deleteTask(id) {
+    window.deleteTask = function(id) {
         db.collection("tasks").doc(id).delete();
-    }
+    };
 
-    function createNewList() {
-        const n = prompt("New Category:");
-        if(n) { planners.push(n); activePlanner = n; render(); }
-    }
-
-    function setTab(t) {
+    window.setTab = function(t) {
         activePlanner = t;
         render();
+    };
+
+    function createNewList() {
+        const n = prompt("Category Name:");
+        if(n) { planners.push(n); activePlanner = n; render(); }
     }
 
     function render() {
@@ -179,7 +171,7 @@
                 <div><b>${e.name}</b><br><small style="color:gray">${e.date}</small></div>
                 <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
             </div>
-        `).join('') || '<p style="color:gray;text-align:center;">Empty.</p>';
+        `).join('') || '<p style="text-align:center; color:gray; margin-top:20px;">No entries.</p>';
     }
 
     render();
