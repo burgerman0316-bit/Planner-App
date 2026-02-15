@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DarkPlan Pro</title>
 
-    <link rel="apple-touch-icon" href="https://your-icon-url.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -18,7 +14,7 @@
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
             --accent: #333333; 
-            --radius: 15px; /* Change your roundness here */
+            --radius: 15px;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
@@ -38,6 +34,7 @@
         #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; }
         
         .nav-tab { 
+            position: relative;
             padding: 8px 18px; border-radius: 12px; color: var(--text-dim); 
             font-size: 15px; font-weight: 600; white-space: nowrap; 
             user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
@@ -45,26 +42,33 @@
         }
         .nav-tab.active { background: var(--accent); color: white; }
         
-        /* Moving State: Yellow border to signify "Edit Mode" */
-        .nav-tab.moving { 
-            border: 1px dashed #ffd60a; 
-            color: #ffd60a;
-            animation: shake 0.3s infinite;
+        /* The X button inside the tab */
+        .tab-del-x {
+            display: none;
+            position: absolute;
+            top: -6px; right: -4px;
+            background: #ff453a; color: white;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
+        .nav-tab.moving { 
+            border: 1px dashed #ffd60a; 
+            animation: shake 0.3s infinite;
+        }
+        .nav-tab.moving .tab-del-x { display: flex; }
+
         @keyframes shake {
-            0% { transform: rotate(-1deg); }
-            50% { transform: rotate(1deg); }
-            100% { transform: rotate(-1deg); }
+            0% { transform: rotate(-1.5deg); }
+            50% { transform: rotate(1.5deg); }
+            100% { transform: rotate(-1.5deg); }
         }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
-        #del-list-btn { 
-            display: none; background: #ff453a; color: white; 
-            padding: 6px 10px; border-radius: 8px; font-weight: 800; 
-            font-size: 10px; text-transform: uppercase; cursor: pointer;
-        }
-
         .out-btn { background: #ffffff; color: #000; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 10px; text-transform: uppercase; cursor: pointer; }
 
         #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 240px; }
@@ -87,34 +91,11 @@
         }
 
         .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
-        
-        input[type="text"] { 
-            background: #000; border: 1px solid var(--border); color: white; 
-            padding: 0 18px; border-radius: var(--radius); 
-            font-size: 15px; flex: 1; height: 48px; 
-        }
-
-        input[type="date"] { 
-            position: relative; color-scheme: dark; background: #000; 
-            border: 1px solid var(--border); color: white; 
-            border-radius: var(--radius); 
-            padding: 0 14px; font-size: 13px; width: 140px; height: 48px; 
-            text-align: center; display: flex; align-items: center; justify-content: center;
-        }
-
-        input[type="date"]::before {
-            content: "SET DATE"; position: absolute; color: var(--text-dim);
-            left: 0; right: 0; top: 50%; transform: translateY(-50%); 
-            text-align: center; background: #000; pointer-events: none; font-weight: 600;
-        }
+        input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 18px; border-radius: var(--radius); font-size: 15px; flex: 1; height: 48px; }
+        input[type="date"] { position: relative; color-scheme: dark; background: #000; border: 1px solid var(--border); color: white; border-radius: var(--radius); padding: 0 14px; font-size: 13px; width: 140px; height: 48px; text-align: center; }
+        input[type="date"]::before { content: "SET DATE"; position: absolute; color: var(--text-dim); left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; background: #000; pointer-events: none; font-weight: 600; }
         input[type="date"]:focus::before, input[type="date"]:valid::before { display: none; }
-
-        .save-btn { 
-            width: 100%; background: #ffffff; color: #000; border: none; 
-            height: 50px; border-radius: var(--radius); font-weight: 900; 
-            text-transform: uppercase; font-size: 14px; cursor: pointer;
-        }
-
+        .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 50px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; cursor: pointer; }
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -129,29 +110,18 @@
     <div id="nav-bar">
         <div id="planner-tabs"></div>
         <div class="header-btns">
-            <div id="del-list-btn" onclick="deleteCurrentMoving()">DELETE</div>
             <span onclick="createNewList()" style="font-size: 24px; color: var(--text-dim); cursor: pointer; padding-left: 10px;">+</span>
             <div onclick="auth.signOut()" class="out-btn">OUT</div>
         </div>
     </div>
-    
-    <div id="content">
-        <span id="list-label">List</span>
-        <div id="task-list"></div>
-    </div>
-
+    <div id="content"><span id="list-label">List</span><div id="task-list"></div></div>
     <div id="footer">
-        <div class="input-row">
-            <input type="text" id="itemName" placeholder="Task Name...">
-            <input type="date" id="itemDate" required>
-        </div>
+        <div class="input-row"><input type="text" id="itemName" placeholder="Task Name..."><input type="date" id="itemDate" required></div>
         <button class="save-btn" onclick="saveTask()">Add to List</button>
-        <div style="text-align:center; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px; margin-top: -4px;">TAP ABOVE TO SAVE ENTRY</div>
     </div>
 </div>
 
 <script>
-    // --- 1. CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -161,29 +131,17 @@
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
 
-    // --- 2. INITIALIZE ---
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // --- 3. AUTH LOGIC ---
-    function popLogin() { 
-        auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message)); 
-    }
-
+    function popLogin() { auth.signInWithPopup(provider).catch(e => alert(e.message)); }
     auth.onAuthStateChanged((user) => {
-        if (user) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
-            loadData(user.uid);
-        } else {
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.getElementById('app').style.display = 'none';
-        }
+        if (user) { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('app').style.display = 'flex'; loadData(user.uid); }
+        else { document.getElementById('login-overlay').style.display = 'flex'; document.getElementById('app').style.display = 'none'; }
     });
 
-    // --- 4. APP STATE ---
     let activePlanner = 'Assignments';
     let allEntries = [];
     let planners = ['Assignments', 'Game Releases'];
@@ -203,21 +161,29 @@
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
         if(!name || !date) return;
-        db.collection("tasks").add({
-            name, date, uid: auth.currentUser.uid,
-            category: activePlanner, createdAt: Date.now()
-        });
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemDate').value = '';
+        db.collection("tasks").add({ name, date, uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() });
+        document.getElementById('itemName').value = ''; document.getElementById('itemDate').value = '';
     }
 
     window.deleteTask = function(id) { haptic(); db.collection("tasks").doc(id).delete(); };
 
-    window.handleTap = function(p) {
+    window.handleTap = function(e, p) {
+        if (e.target.classList.contains('tab-del-x')) {
+            e.stopPropagation();
+            if (planners.length <= 1) return alert("Must have 1 list.");
+            if (confirm(`Delete "${p}"?`)) {
+                planners = planners.filter(item => item !== p);
+                if (activePlanner === p) activePlanner = planners[0];
+                moveMode = null;
+                haptic();
+                render();
+            }
+            return;
+        }
+
         if (moveMode) {
-            if (moveMode === p) { 
-                moveMode = null; 
-            } else {
+            if (moveMode === p) { moveMode = null; } 
+            else {
                 const fromIdx = planners.indexOf(moveMode);
                 const toIdx = planners.indexOf(p);
                 planners.splice(fromIdx, 1);
@@ -237,32 +203,16 @@
     function startPress(p) {
         pressTimer = window.setTimeout(function() {
             haptic();
-            moveMode = p; 
+            moveMode = p;
             render();
         }, 650);
     }
     function cancelPress() { clearTimeout(pressTimer); }
 
-    function deleteCurrentMoving() {
-        if (!moveMode) return;
-        if (planners.length <= 1) return alert("Must keep at least one list.");
-        if (confirm(`Delete the "${moveMode}" list?`)) {
-            planners = planners.filter(p => p !== moveMode);
-            if (activePlanner === moveMode) activePlanner = planners[0];
-            moveMode = null;
-            haptic();
-            render();
-        }
-    }
-
     function createNewList() {
         haptic();
-        const n = prompt("Name your new list:");
-        if(n && !planners.includes(n)) { 
-            planners.push(n); 
-            activePlanner = n; 
-            render(); 
-        }
+        const n = prompt("New list name:");
+        if(n && !planners.includes(n)) { planners.push(n); activePlanner = n; render(); }
     }
 
     function render() {
@@ -272,18 +222,18 @@
             const isMoving = p === moveMode;
             return `
                 <div class="nav-tab ${isActive ? 'active' : ''} ${isMoving ? 'moving' : ''}" 
-                     onclick="handleTap('${p}')"
+                     onclick="handleTap(event, '${p}')"
                      ontouchstart="startPress('${p}')"
                      ontouchend="cancelPress()"
                      onmousedown="startPress('${p}')"
                      onmouseup="cancelPress()"
                      oncontextmenu="event.preventDefault()">
                      ${p}
+                     <div class="tab-del-x">✕</div>
                 </div>
             `;
         }).join('');
 
-        document.getElementById('del-list-btn').style.display = moveMode ? 'block' : 'none';
         document.getElementById('list-label').innerText = activePlanner;
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
