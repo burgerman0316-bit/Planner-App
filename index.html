@@ -64,14 +64,14 @@
 
 <div id="login-overlay">
     <h1 style="font-size: 32px; letter-spacing: -1.5px;">DarkPlan Pro</h1>
-    <p style="color: var(--text-dim);">Cloud-sync your schedule</p>
-    <button class="google-btn" onclick="login()">Sign in with Google</button>
+    <p id="login-status" style="color: var(--text-dim);">Cloud-sync your schedule</p>
+    <button id="login-button" class="google-btn">Sign in with Google</button>
 </div>
 
 <div id="app">
     <div id="nav-bar">
         <div id="planner-tabs"></div>
-        <div style="color: var(--text-dim); font-size: 28px; cursor: pointer;" onclick="createNewPlanner()">+</div>
+        <div id="add-planner-btn" style="color: var(--text-dim); font-size: 28px; cursor: pointer;">+</div>
     </div>
     <div id="content">
         <span id="list-name-label" style="font-size: 10px; color: var(--text-dim);">List</span>
@@ -82,7 +82,7 @@
             <input type="text" id="itemName" placeholder="Task name...">
             <input type="date" id="itemDate">
         </div>
-        <button class="save-btn" onclick="saveEntry()">Add to List</button>
+        <button id="save-entry-btn" class="save-btn">Add to List</button>
     </div>
 </div>
 
@@ -106,13 +106,42 @@
     const provider = new GoogleAuthProvider();
     emailjs.init("RsAYqiwym2mViUR8u");
 
-    window.activePlanner = 'Grades';
-    window.allEntries = [];
+    let activePlanner = 'Grades';
+    let allEntries = [];
     let planners = ['Grades', 'Assignments'];
 
-    // Handle the result of the redirect when the page loads
-    getRedirectResult(auth).catch((error) => {
-        console.error("Redirect Error:", error.message);
+    // --- BUTTON HOOKS (Ensures buttons work in Module mode) ---
+    document.getElementById('login-button').onclick = () => {
+        document.getElementById('login-status').innerText = "Connecting to Google...";
+        signInWithRedirect(auth, provider);
+    };
+
+    document.getElementById('save-entry-btn').onclick = async () => {
+        const name = document.getElementById('itemName').value;
+        const date = document.getElementById('itemDate').value;
+        if(!name || !date || !auth.currentUser) return;
+        await addDoc(collection(db, "tasks"), {
+            name, date, uid: auth.currentUser.uid,
+            category: activePlanner, reminderSent: false, createdAt: Date.now()
+        });
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemDate').value = '';
+    };
+
+    document.getElementById('add-planner-btn').onclick = () => {
+        const name = prompt("New List Name:");
+        if(name && !planners.includes(name)) {
+            planners.push(name);
+            activePlanner = name;
+            renderApp();
+        }
+    };
+
+    // --- AUTH LOGIC ---
+    getRedirectResult(auth).then(() => {
+        console.log("Redirect result handled.");
+    }).catch((error) => {
+        document.getElementById('login-status').innerText = "Error: " + error.message;
     });
 
     onAuthStateChanged(auth, (user) => {
@@ -127,42 +156,37 @@
         }
     });
 
-    // NEW LOGIN LOGIC: Redirect instead of Popup
-    window.login = () => signInWithRedirect(auth, provider);
-
     function loadTasks(uid) {
         const q = query(collection(db, "tasks"), where("uid", "==", uid));
         onSnapshot(q, (snapshot) => {
-            window.allEntries = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            allEntries = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
             renderApp();
         });
     }
 
-    window.saveEntry = async () => {
-        const name = document.getElementById('itemName').value;
-        const date = document.getElementById('itemDate').value;
-        if(!name || !date || !auth.currentUser) return;
-        await addDoc(collection(db, "tasks"), {
-            name, date, uid: auth.currentUser.uid,
-            category: window.activePlanner, reminderSent: false, createdAt: Date.now()
-        });
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemDate').value = '';
-    };
-
+    // Attached to window so the generated HTML can see it
     window.deleteItem = async (id) => {
         if(confirm("Delete task?")) await deleteDoc(doc(db, "tasks", id));
     };
 
-    window.renderApp = () => {
+    window.switchTab = (name) => {
+        activePlanner = name;
+        renderApp();
+    };
+
+    function renderApp() {
+        // Tabs
         const tabsCont = document.getElementById('planner-tabs');
         tabsCont.innerHTML = planners.map(p => `
-            <div class="nav-tab ${p === window.activePlanner ? 'active' : ''}" onclick="window.activePlanner='${p}'; renderApp();">${p}</div>
+            <div class="nav-tab ${p === activePlanner ? 'active' : ''}" onclick="switchTab('${p}')">${p}</div>
         `).join('');
-        document.getElementById('list-name-label').innerText = window.activePlanner;
+
+        document.getElementById('list-name-label').innerText = activePlanner;
+        
+        // List
         const list = document.getElementById('task-list');
-        list.innerHTML = window.allEntries
-            .filter(e => e.category === window.activePlanner)
+        list.innerHTML = allEntries
+            .filter(e => e.category === activePlanner)
             .sort((a,b) => new Date(a.date) - new Date(b.date))
             .map(e => `
                 <div class="entry-card">
@@ -170,16 +194,7 @@
                     <div class="delete-btn" onclick="deleteItem('${e.id}')">Done</div>
                 </div>
             `).join('');
-    };
-
-    window.createNewPlanner = () => {
-        const name = prompt("New List Name:");
-        if(name && !planners.includes(name)) {
-            planners.push(name);
-            window.activePlanner = name;
-            renderApp();
-        }
-    };
+    }
 
     async function runDailyCheck(user) {
         const target = new Date().toISOString().split('T')[0];
@@ -188,11 +203,15 @@
         snap.forEach(taskDoc => {
             const data = taskDoc.data();
             if (!data.reminderSent) {
-                emailjs.send("service_ow9m3kg", "template_vvxqygc", { to_email: user.email, task_name: data.name, due_date: data.date })
-                .then(() => updateDoc(doc(db, "tasks", taskDoc.id), { reminderSent: true }));
+                emailjs.send("service_ow9m3kg", "template_vvxqygc", { 
+                    to_email: user.email, 
+                    task_name: data.name, 
+                    due_date: data.date 
+                }).then(() => updateDoc(doc(db, "tasks", taskDoc.id), { reminderSent: true }));
             }
         });
     }
+
     renderApp();
 </script>
 </body>
