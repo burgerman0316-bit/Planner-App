@@ -5,11 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DarkPlan Pro</title>
 
+    <link rel="apple-touch-icon" href="https://your-icon-url.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
-            --accent: #333333; --radius: 15px;
+            --accent: #333333; 
+            --radius: 50px; /* Control all roundness here */
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
@@ -50,8 +59,6 @@
         }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
-        
-        /* New Delete Button that only shows during Move Mode */
         #del-list-btn { 
             display: none; background: #ff453a; color: white; 
             padding: 6px 10px; border-radius: 8px; font-weight: 800; 
@@ -144,7 +151,6 @@
 </div>
 
 <script>
-    // --- FIREBASE CONFIG (SAME AS BEFORE) ---
     const firebaseConfig = {
         apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -159,7 +165,7 @@
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
+    // RESTORED LOGIN FUNCTIONS
     function popLogin() { auth.signInWithPopup(provider).catch(e => alert(e.message)); }
 
     auth.onAuthStateChanged((user) => {
@@ -177,6 +183,8 @@
     let allEntries = [];
     let planners = ['Assignments', 'Game Releases'];
     let moveMode = null;
+
+    function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
 
     function loadData(uid) {
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
@@ -202,9 +210,8 @@
 
     window.handleTap = function(p) {
         if (moveMode) {
-            if (moveMode === p) { 
-                moveMode = null; 
-            } else {
+            if (moveMode === p) { moveMode = null; } 
+            else {
                 const fromIdx = planners.indexOf(moveMode);
                 const toIdx = planners.indexOf(p);
                 planners.splice(fromIdx, 1);
@@ -224,7 +231,7 @@
     function startPress(p) {
         pressTimer = window.setTimeout(function() {
             haptic();
-            moveMode = p; // Long press ONLY triggers move mode
+            moveMode = p;
             render();
         }, 600);
     }
@@ -232,8 +239,8 @@
 
     function deleteCurrentMoving() {
         if (!moveMode) return;
-        if (planners.length <= 1) return alert("You need at least one list.");
-        if (confirm(`Delete entire "${moveMode}" list?`)) {
+        if (planners.length <= 1) return alert("Must have 1 list.");
+        if (confirm(`Delete "${moveMode}"?`)) {
             planners = planners.filter(p => p !== moveMode);
             if (activePlanner === moveMode) activePlanner = planners[0];
             moveMode = null;
@@ -266,9 +273,7 @@
             `;
         }).join('');
 
-        // Show/Hide delete button based on moveMode
         document.getElementById('del-list-btn').style.display = moveMode ? 'block' : 'none';
-
         document.getElementById('list-label').innerText = activePlanner;
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
