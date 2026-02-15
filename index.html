@@ -53,13 +53,33 @@
             padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Reverted Floating Footer Style */
         #footer {
-            position: fixed; bottom: 10px; left: 8px; right: 8px;
-            background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px);
+            position: fixed; 
+            bottom: 10px; /* Keeps it floating */
+            left: 8px; 
+            right: 8px;
+            background: rgba(30, 30, 30, 0.98); 
+            backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid var(--border); border-radius: var(--iphone-radius);
-            padding: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;
+            border: 1px solid var(--border); 
+            border-radius: var(--iphone-radius);
+            
+            /* UPDATED LINE BELOW: Top=20, Left/Right=20, Bottom=8 */
+            padding: 20px 20px 8px 20px; 
+            
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            z-index: 1000;
+        }
+
+        /* Also, make sure the help text doesn't have its own margin */
+        .help-tip {
+            text-align: center; 
+            font-size: 9px; 
+            color: var(--text-dim); 
+            margin: 0; /* Ensures no extra space below the text */
+            padding-bottom: 5px; /* Tiny bit of breathing room */
         }
         .input-row { display: flex; gap: 10px; width: 100%; }
         input { 
