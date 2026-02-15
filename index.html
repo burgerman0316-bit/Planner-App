@@ -42,7 +42,6 @@
             height: 100%;
         }
 
-        /* Top Nav - Clears Dynamic Island */
         #nav-bar {
             background-color: var(--sidebar-bg);
             border-bottom: 1px solid var(--border);
@@ -74,13 +73,11 @@
             border-color: var(--border);
         }
 
-        /* Task Content Area */
         #content {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            /* Extra bottom padding to ensure list items aren't hidden by the footer */
-            padding-bottom: 180px; 
+            padding-bottom: 200px; 
         }
 
         .section-label {
@@ -114,28 +111,37 @@
             font-size: 12px;
         }
 
-        /* CENTERED FOOTER UI */
+        /* FIXED CENTERED FOOTER */
         #footer {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(20, 20, 20, 0.96);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(20, 20, 20, 0.98);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border-top: 1px solid var(--border);
-            padding: 15px;
-            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            padding: 20px; /* More padding for a cleaner look */
+            padding-bottom: max(25px, env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
+        }
+
+        /* Centered Input container with width limits */
+        .input-container {
+            width: 100%;
+            max-width: 400px; 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .input-row {
             display: flex;
-            width: 100%;
             gap: 10px;
+            width: 100%;
         }
 
         input {
@@ -148,24 +154,39 @@
             flex: 1;
         }
 
-        #itemDate { flex: 1; }
+        /* Date input specific fix */
+        input[type="date"] {
+            position: relative;
+            min-height: 45px;
+        }
+
+        /* Adds a "Date" label for mobile date inputs that look empty */
+        input[type="date"]::before {
+            content: "Date";
+            position: absolute;
+            color: var(--text-dim);
+            left: 12px;
+        }
+
+        input[type="date"]:focus::before,
+        input[type="date"]:valid::before {
+            content: "";
+        }
 
         .save-btn {
             background: #ffffff;
             color: #000000;
             border: none;
             padding: 14px;
-            width: 80%; /* Centered and prominent */
-            max-width: 300px;
+            width: 100%; 
             border-radius: 12px;
             font-weight: bold;
             font-size: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
 
         .save-btn:active {
-            transform: scale(0.98);
-            background: #e0e0e0;
+            transform: scale(0.96);
         }
     </style>
 </head>
@@ -183,11 +204,13 @@
     </div>
 
     <div id="footer">
-        <div class="input-row">
-            <input type="text" id="itemName" placeholder="Task name...">
-            <input type="date" id="itemDate">
+        <div class="input-container">
+            <div class="input-row">
+                <input type="text" id="itemName" placeholder="Task name...">
+                <input type="date" id="itemDate" required>
+            </div>
+            <button class="save-btn" onclick="saveEntry()">Add Entry</button>
         </div>
-        <button class="save-btn" onclick="saveEntry()">Add Entry</button>
     </div>
 </div>
 
@@ -209,7 +232,6 @@
         });
 
         document.getElementById('list-name-label').innerText = activePlanner;
-
         const list = document.getElementById('task-list');
         list.innerHTML = '';
         
@@ -238,11 +260,12 @@
     function saveEntry() {
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
-        if(!name || !date) return alert("Fill out both fields!");
+        if(!name || !date) return;
         const newEntry = { id: Date.now().toString(), name, date, type: activePlanner };
         entries.push(newEntry);
         localStorage.setItem('myEntries', JSON.stringify(entries));
         document.getElementById('itemName').value = '';
+        document.getElementById('itemDate').value = '';
         renderApp();
     }
 
