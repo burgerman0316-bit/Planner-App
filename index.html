@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DarkPlan Pro</title>
 
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -15,7 +19,7 @@
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
             --accent: #333333; --iphone-radius: 50px; --pill: 100px; 
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body {
             margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-dark); color: var(--text-main); height: 100vh;
@@ -27,9 +31,11 @@
         }
         .google-btn {
             background: #ffffff; color: #000; border: none; padding: 18px 36px;
-            border-radius: var(--pill); font-weight: 700; font-size: 16px; margin-top: 20px; cursor: pointer;
+            border-radius: var(--pill); font-weight: 700; font-size: 16px; cursor: pointer;
         }
         #app { display: none; flex-direction: column; height: 100%; }
+        
+        /* Original Header Style */
         #nav-bar {
             background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border);
             padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
@@ -38,27 +44,41 @@
         #planner-tabs { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
         .nav-tab { padding: 10px 20px; border-radius: var(--pill); color: var(--text-dim); font-size: 14px; font-weight: 600; cursor: pointer; }
         .nav-tab.active { background: var(--accent); color: white; border: 1px solid var(--border); }
+
         #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 220px; }
+        #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
+        
         .entry-card {
             background: var(--bg-card); border: 1px solid var(--border); border-radius: 25px;
             padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
         }
+
+        /* Reverted Floating Footer Style */
         #footer {
             position: fixed; bottom: 10px; left: 8px; right: 8px;
             background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--border); border-radius: var(--iphone-radius);
             padding: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;
         }
-        .input-row { display: flex; gap: 10px; }
-        input { background: #000; border: 1px solid var(--border); color: white; padding: 14px 20px; border-radius: var(--pill); flex: 1; font-size: 16px; }
-        .save-btn { background: #ffffff; color: #000; border: none; padding: 16px; border-radius: var(--pill); font-weight: 900; cursor: pointer; }
+        .input-row { display: flex; gap: 10px; width: 100%; }
+        input { 
+            background: #000; border: 1px solid var(--border); color: white; 
+            padding: 14px 20px; border-radius: var(--pill); flex: 1; font-size: 14px;
+            min-width: 0; /* Prevents input from pushing out of flex box */
+        }
+        input[type="date"] { color-scheme: dark; }
+
+        .save-btn { 
+            background: #ffffff; color: #000; border: none; padding: 16px; 
+            border-radius: var(--pill); font-weight: 900; cursor: pointer; text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
-    <h1 style="font-size: 40px; letter-spacing: -2px;">DarkPlan</h1>
-    <p id="login-status" style="color: var(--text-dim);">Sign in to start planning</p>
+    <h1 style="font-size: 32px; letter-spacing: -1.5px;">DarkPlan Pro</h1>
     <button class="google-btn" onclick="popLogin()">Sign in with Google</button>
 </div>
 
@@ -68,22 +88,22 @@
         <div style="color: var(--text-dim); font-size: 28px; cursor: pointer; padding: 0 10px;" onclick="createNewList()">+</div>
     </div>
     <div id="content">
-        <span id="active-list-name" style="font-size: 11px; text-transform: uppercase; color: var(--text-dim);">LIST</span>
-        <div id="task-list" style="margin-top: 15px;"></div>
+        <span id="list-label">List</span>
+        <div id="task-list"></div>
     </div>
     <div id="footer">
         <div class="input-row">
-            <input type="text" id="itemName" placeholder="New Task...">
+            <input type="text" id="itemName" placeholder="Task name...">
             <input type="date" id="itemDate">
         </div>
-        <button class="save-btn" onclick="saveTask()">Add Task</button>
+        <button class="save-btn" onclick="saveTask()">Add to List</button>
+        <div style="text-align:center; font-size: 9px; color: var(--text-dim); margin-top: -5px;">TAP ABOVE TO SAVE ENTRY</div>
     </div>
 </div>
 
 <script>
-    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
-        apiKey: "AIzaSyCEdkitayty00ZHL-bbU0R1p_oy8E1RHbY",
+        apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
         projectId: "plannerapp-ff221",
         storageBucket: "plannerapp-ff221.appspot.com",
@@ -91,22 +111,13 @@
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
 
-    // Initialize Firebase
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // --- AUTH ACTIONS ---
     function popLogin() {
-        document.getElementById('login-status').innerText = "Opening selection...";
-        auth.signInWithPopup(provider).catch(e => {
-            alert("Auth Error: " + e.message);
-            document.getElementById('login-status').innerText = "Try again";
-        });
+        auth.signInWithPopup(provider).catch(e => alert(e.message));
     }
 
     auth.onAuthStateChanged((user) => {
@@ -120,7 +131,6 @@
         }
     });
 
-    // --- APP LOGIC ---
     let activePlanner = 'Grades';
     let allEntries = [];
     let planners = ['Grades', 'Assignments'];
@@ -141,6 +151,7 @@
             category: activePlanner, createdAt: Date.now()
         });
         document.getElementById('itemName').value = '';
+        document.getElementById('itemDate').value = '';
     }
 
     window.deleteTask = function(id) {
@@ -153,7 +164,7 @@
     };
 
     function createNewList() {
-        const n = prompt("Category Name:");
+        const n = prompt("New Category:");
         if(n) { planners.push(n); activePlanner = n; render(); }
     }
 
@@ -163,15 +174,15 @@
             <div class="nav-tab ${p === activePlanner ? 'active' : ''}" onclick="setTab('${p}')">${p}</div>
         `).join('');
 
-        document.getElementById('active-list-name').innerText = activePlanner;
+        document.getElementById('list-label').innerText = activePlanner;
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
-        list.innerHTML = items.map(e => `
+        list.innerHTML = items.length ? items.map(e => `
             <div class="entry-card">
-                <div><b>${e.name}</b><br><small style="color:gray">${e.date}</small></div>
+                <div><b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small></div>
                 <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
             </div>
-        `).join('') || '<p style="text-align:center; color:gray; margin-top:20px;">No entries.</p>';
+        `).join('') : '<p style="text-align:center; color:gray; margin-top:60px;">No entries.</p>';
     }
 
     render();
