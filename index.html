@@ -33,7 +33,6 @@
         .google-btn {
             background: #ffffff; color: #000; border: none; padding: 18px 36px;
             border-radius: var(--pill); font-weight: 700; font-size: 16px; margin-top: 20px; cursor: pointer;
-            box-shadow: 0 10px 30px rgba(255,255,255,0.05);
         }
         #app { display: none; flex-direction: column; height: 100%; }
         #nav-bar {
@@ -64,7 +63,7 @@
 
 <div id="login-overlay">
     <h1 style="font-size: 40px; letter-spacing: -2px; margin-bottom: 5px;">DarkPlan</h1>
-    <p id="login-status" style="color: var(--text-dim);">Sign in to sync your schedule</p>
+    <p id="login-status" style="color: var(--text-dim);">Syncing with Google...</p>
     <button id="login-btn" class="google-btn">Sign in with Google</button>
 </div>
 
@@ -88,7 +87,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -110,21 +109,17 @@
     let allEntries = [];
     let planners = ['Grades', 'Assignments'];
 
-    // --- 1. THE LOGIN FIX ---
-    document.getElementById('login-btn').addEventListener('click', async () => {
-        const status = document.getElementById('login-status');
-        status.innerText = "Opening Secure Login...";
-        
-        try {
-            await signInWithPopup(auth, provider);
-        } catch (error) {
-            console.error(error);
-            status.innerText = "Error: " + error.message;
-            alert("If nothing happened, please allow popups for this site in your browser settings.");
-        }
+    // --- REDIRECT HANDLER (Crucial for bypassing popups) ---
+    getRedirectResult(auth).then(() => {
+        console.log("Logged in via redirect");
+    }).catch(e => {
+        document.getElementById('login-status').innerText = e.message;
     });
 
-    // --- 2. AUTH STATE ---
+    document.getElementById('login-btn').onclick = () => {
+        signInWithRedirect(auth, provider);
+    };
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('login-overlay').style.display = 'none';
@@ -137,7 +132,7 @@
         }
     });
 
-    // --- 3. DATA LOGIC ---
+    // --- DATA LOGIC ---
     function loadData(uid) {
         const q = query(collection(db, "tasks"), where("uid", "==", uid));
         onSnapshot(q, (snapshot) => {
@@ -150,7 +145,6 @@
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
         if(!name || !date || !auth.currentUser) return;
-        
         await addDoc(collection(db, "tasks"), {
             name, date, uid: auth.currentUser.uid,
             category: activePlanner, reminderSent: false
@@ -172,7 +166,6 @@
         if(n) { planners.push(n); activePlanner = n; render(); }
     };
 
-    // --- 4. RENDER ---
     function render() {
         const tabs = document.getElementById('planner-tabs');
         tabs.innerHTML = planners.map(p => `
@@ -180,7 +173,6 @@
         `).join('');
 
         document.getElementById('active-list-name').innerText = activePlanner;
-
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
         list.innerHTML = items.length ? items.map(e => `
@@ -188,7 +180,7 @@
                 <div><b>${e.name}</b><br><small style="color:gray">${e.date}</small></div>
                 <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
             </div>
-        `).join('') : '<p style="text-align:center; color:gray; margin-top:40px;">No tasks yet.</p>';
+        `).join('') : '<p style="text-align:center; color:gray; margin-top:40px;">Empty list.</p>';
     }
 
     async function runAutomation(user) {
@@ -203,7 +195,6 @@
             }
         });
     }
-
     render();
 </script>
 </body>
