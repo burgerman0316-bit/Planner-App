@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DarkPlanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DarkPlan Pro Planner</title>
     
     <link rel="icon" type="image/png" href="https://img.icons8.com/pulsar-line/48/ffffff/calendar.png">
     
     <link rel="apple-touch-icon" href="https://img.icons8.com/pulsar-line/180/ffffff/calendar.png">
     
     <meta name="theme-color" content="#1e1e1e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
@@ -27,6 +29,8 @@
             --danger: #ff5555;
         }
 
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -35,7 +39,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            /* Fix for mobile address bars */
             min-height: 100vh;
+            min-height: 100dvh; 
         }
 
         #container {
@@ -43,6 +49,7 @@
             width: 95%;
             max-width: 1000px;
             height: 90vh;
+            height: 90dvh;
             background: var(--bg-main);
             border-radius: 8px;
             overflow: hidden;
@@ -50,7 +57,6 @@
             border: 1px solid var(--border);
         }
 
-        /* Sidebar - List of Planners */
         #sidebar {
             width: 200px;
             padding: 15px;
@@ -62,11 +68,11 @@
         }
 
         #sidebar h2 {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-dim);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
         }
 
         .nav-list {
@@ -74,21 +80,20 @@
             padding: 0;
             margin: 0;
             flex-grow: 1;
+            overflow-y: auto;
         }
 
         .nav-item {
-            padding: 10px 12px;
+            padding: 10px;
             cursor: pointer;
             color: var(--text-dim);
             border-radius: 4px;
             margin-bottom: 4px;
-            transition: 0.2s;
+            font-size: 0.9rem;
         }
 
-        .nav-item:hover { background-color: #383838; color: #fff; }
         .nav-item.active { background-color: var(--accent-btn); color: #fff; font-weight: bold; }
 
-        /* Main Area */
         #main-area {
             flex-grow: 1;
             display: flex;
@@ -97,86 +102,90 @@
         }
 
         #header-title {
-            padding: 15px 20px;
+            padding: 12px 18px;
             font-weight: bold;
-            font-size: 1.1em;
             border-bottom: 1px solid var(--border);
             background-color: var(--header-bg);
         }
 
         #task-list {
             flex-grow: 1;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             background-color: var(--bg-main);
         }
 
-        /* Task Cards */
         .entry-card {
             background: var(--sidebar-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 12px 18px;
-            margin-bottom: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .entry-info b { display: block; color: #fff; font-size: 1.1rem; margin-bottom: 4px; }
-        .date-display { font-size: 0.85em; color: var(--text-dim); display: block; }
+        .entry-info b { display: block; color: #fff; font-size: 1rem; }
+        .date-display { font-size: 0.8rem; color: var(--text-dim); }
 
-        /* Hover Reveal Remove Button */
         .remove-btn {
-            opacity: 0;
             background: transparent;
             border: 1px solid var(--danger);
             color: var(--danger);
-            padding: 5px 12px;
+            padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
-            transition: 0.2s;
-            font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
 
-        .entry-card:hover .remove-btn { opacity: 1; }
-        .remove-btn:hover { background: var(--danger); color: #fff; }
-
-        /* Footer Input Area */
         #input-footer {
-            padding: 20px;
+            padding: 15px;
             background-color: var(--sidebar-bg);
             border-top: 1px solid var(--border);
         }
 
-        .input-row { display: flex; gap: 12px; }
+        .input-row { display: flex; gap: 8px; }
         
         input {
             flex: 1;
             background: var(--input-bg);
             border: 1px solid #555;
             color: #fff;
-            padding: 12px;
+            padding: 10px;
             border-radius: 4px;
-            outline: none;
+            font-size: 16px; /* Prevents iOS zoom-on-focus */
         }
 
         .btn-primary {
             background-color: var(--accent-btn);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-radius: 4px;
-            cursor: pointer;
             font-weight: bold;
         }
 
-        /* Mobile Viewport Tweak */
-        @media (max-width: 600px) {
-            #container { flex-direction: column; height: 100vh; width: 100%; border-radius: 0; }
-            #sidebar { width: 100%; height: auto; border-right: none; }
-            .input-row { flex-direction: column; }
+        /* MOBILE FIXES */
+        @media (max-width: 650px) {
+            #container { 
+                flex-direction: column; 
+                width: 100%; 
+                height: 100dvh; 
+                border-radius: 0; 
+                border: none;
+            }
+            #sidebar { 
+                width: 100%; 
+                height: auto; 
+                border-right: none; 
+                border-bottom: 1px solid var(--border);
+                padding: 10px;
+            }
+            .nav-list { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; }
+            .nav-item { white-space: nowrap; margin-bottom: 0; padding: 6px 12px; }
+            #sidebar h2, #sidebar hr, #sidebar .btn-primary { display: none; }
+            .remove-btn { opacity: 1 !important; } /* Always show on mobile */
         }
     </style>
 </head>
@@ -184,7 +193,7 @@
 
 <div id="container">
     <div id="sidebar">
-        <h2>Planners</h2>
+        <h2>Lists</h2>
         <div id="planner-nav" class="nav-list"></div>
         <hr style="border:0; height:1px; background:#444; margin:15px 0;">
         <button class="btn-primary" onclick="createNewPlanner()" style="width:100%">+ New List</button>
@@ -192,33 +201,25 @@
 
     <div id="main-area">
         <div id="header-title">
-            <span>Planner: <span id="current-title" style="color: #fff;">Grades</span></span>
+            <span id="current-title">Grades</span>
         </div>
         <div id="task-list"></div>
         <div id="input-footer">
             <div class="input-row">
-                <input type="text" id="itemName" placeholder="Task or Game name...">
+                <input type="text" id="itemName" placeholder="Task...">
                 <input type="date" id="itemDate">
-                <button class="btn-primary" onclick="saveEntry()">Save Entry</button>
+                <button class="btn-primary" onclick="saveEntry()">Add</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // 1. Setup Data Storage
-    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Grades', 'Game Realeses'];
+    let planners = JSON.parse(localStorage.getItem('myPlanners')) || ['Assignments', 'Game Releases'];
     let entries = JSON.parse(localStorage.getItem('myEntries')) || [];
     let activePlanner = planners[0];
-
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    // 2. Initialize EmailJS (Insert your Public Key here)
-    (function() {
-        // emailjs.init("YOUR_PUBLIC_KEY");
-    })();
-
-    // 3. Render the Interface
     function renderApp() {
         const nav = document.getElementById('planner-nav');
         nav.innerHTML = '';
@@ -231,7 +232,6 @@
         });
 
         document.getElementById('current-title').innerText = activePlanner;
-
         const list = document.getElementById('task-list');
         list.innerHTML = '';
         
@@ -257,33 +257,14 @@
         });
     }
 
-    // 4. Action Functions
     function saveEntry() {
         const name = document.getElementById('itemName').value;
         const date = document.getElementById('itemDate').value;
-        if(!name || !date) return alert("Fill out both name and date!");
-
-        const newEntry = { 
-            id: Date.now().toString(),
-            name, 
-            date, 
-            type: activePlanner 
-        };
-
+        if(!name || !date) return;
+        const newEntry = { id: Date.now().toString(), name, date, type: activePlanner };
         entries.push(newEntry);
         localStorage.setItem('myEntries', JSON.stringify(entries));
-        
-        // Optional Email Send (Uncomment and add IDs to use)
-        /*
-        emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
-            item_name: name,
-            due_date: date,
-            to_email: "your@email.com"
-        });
-        */
-
         document.getElementById('itemName').value = '';
-        document.getElementById('itemDate').value = '';
         renderApp();
     }
 
@@ -294,7 +275,7 @@
     }
 
     function createNewPlanner() {
-        const name = prompt("Name your new planner:");
+        const name = prompt("List Name:");
         if(name && !planners.includes(name)) {
             planners.push(name);
             localStorage.setItem('myPlanners', JSON.stringify(planners));
@@ -302,9 +283,7 @@
             renderApp();
         }
     }
-
     renderApp();
 </script>
-
 </body>
 </html>
