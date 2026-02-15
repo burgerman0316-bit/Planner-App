@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DarkPlan Pro</title>
 
-    <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/512/ffffff/calendar.png">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23121212'/%3E%3Crect x='20' y='25' width='60' height='55' rx='5' stroke='white' stroke-width='6' fill='none'/%3E%3Cpath d='M20 40h60M35 20v10M65 20v10' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,21 +18,19 @@
         :root {
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
-            --accent: #333333; 
-            --radius: 50px; 
+            --accent: #333333; --radius: 50px; 
         }
         
-        /* SELECTION KILLER: Prevents the blue pins globally */
+        /* GLOBAL SELECTION KILLER */
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
             outline: none;
-            -webkit-user-select: none; /* Disable selection */
+            -webkit-user-select: none; 
             user-select: none;
-            -webkit-touch-callout: none; /* Disable long-press menu */
+            -webkit-touch-callout: none;
         }
 
-        /* Allow typing in inputs only */
         input { -webkit-user-select: text; user-select: text; }
 
         html, body {
@@ -52,8 +50,7 @@
         #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; align-items: center; }
         
         .nav-tab { 
-            position: relative;
-            padding: 8px 18px; border-radius: 20px; color: var(--text-dim); 
+            position: relative; padding: 8px 18px; border-radius: 20px; color: var(--text-dim); 
             font-size: 15px; font-weight: 600; white-space: nowrap; 
             transition: all 0.2s ease; border: 1px solid transparent;
             display: flex; align-items: center; gap: 8px;
@@ -62,14 +59,12 @@
         .tab-del-x { color: #ff453a; font-size: 14px; font-weight: 800; padding: 0 2px; }
 
         .nav-tab.moving { border: 1px dashed #ffd60a; animation: shake 0.3s infinite; }
-        @keyframes shake {
-            0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); }
-        }
+        @keyframes shake { 0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); } }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
-        .out-btn { background: #ffffff; color: #000; padding: 6px 14px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; cursor: pointer; }
+        .out-btn { background: #ffffff; color: #000; padding: 6px 14px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; }
 
-        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 180px; }
+        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 200px; }
         #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         
         .entry-card {
@@ -81,32 +76,30 @@
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
             border-top: 1px solid var(--border); border-radius: 30px 30px 0 0;
-            padding: 15px 20px 0px 20px; 
-            display: flex; flex-direction: column; gap: 8px; z-index: 1000;
+            padding: 15px 20px 0px 20px; display: flex; flex-direction: column; gap: 8px; z-index: 1000;
         }
 
         .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 22px; border-radius: var(--radius); font-size: 16px; flex: 1; height: 50px; }
         
-        /* Fixed "Set Date" Button style from your screenshot */
-        .date-btn-wrapper { position: relative; background: #000; border: 1px solid var(--border); border-radius: var(--radius); width: 110px; height: 50px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .date-btn-wrapper { position: relative; background: #000; border: 1px solid var(--border); border-radius: var(--radius); width: 110px; height: 50px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .date-btn-wrapper input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
         .date-label { color: var(--text-main); font-size: 11px; font-weight: 800; pointer-events: none; }
 
         .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 50px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; }
         
-        /* FOOTER PADDING FIX: Lowering the help text */
         .footer-tip { 
             text-align: center; font-size: 8px; color: var(--text-dim); 
-            text-transform: uppercase; letter-spacing: 1px; 
-            margin-top: 2px;
-            padding-bottom: calc(5px + env(safe-area-inset-bottom)); 
+            text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom)); 
         }
 
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div id="login-overlay">
+<body oncontextmenu="return false;">
+
+<div id="login-overlay">
     <h1 style="color:white; font-size:32px; margin-bottom:20px;">DarkPlan</h1>
     <button class="save-btn" style="width:auto; padding:0 40px;" onclick="popLogin()">Sign in with Google</button>
 </div>
@@ -134,7 +127,6 @@
 </div>
 
 <script>
-    // [Firebase Config - Remains Same]
     const firebaseConfig = {
         apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
         authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -143,6 +135,7 @@
         messagingSenderId: "282165391993",
         appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -162,13 +155,21 @@
 
     function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
 
+    // EXIT EDIT MODE BY TAPPING BACKGROUND
+    document.addEventListener('touchstart', (e) => {
+        if (moveMode && !e.target.closest('.nav-tab')) {
+            moveMode = null;
+            haptic();
+            render();
+        }
+    }, { passive: true });
+
     function startPress(p) {
-        // Force deselect everything immediately
         window.getSelection().removeAllRanges();
         pressTimer = window.setTimeout(function() {
             haptic();
             moveMode = p;
-            window.getSelection().removeAllRanges(); // Kill selection again
+            window.getSelection().removeAllRanges();
             render();
         }, 600);
     }
