@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.3.8</title>
+    <title>Agenda Pro | V3.3.9</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -43,7 +43,8 @@
 
         .error-msg { color: var(--error); font-size: 13px; font-weight: 600; min-height: 20px; }
 
-        #app-shell { display: none; flex-direction: column; height: 100vh; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        #app-shell { display: none; flex-direction: column; height: 100vh; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; }
+        #app-shell.ready { display: flex; opacity: 1; }
         #app-shell.modal-active { transform: scale(0.94); filter: blur(20px); pointer-events: none; }
 
         header { padding-top: calc(var(--safe-top) + 20px); padding-bottom: 10px; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; flex-shrink: 0; }
@@ -118,7 +119,7 @@
 
         <div class="auth-container" id="auth-verify">
             <h2>Verify Email</h2>
-            <p style="color:var(--dim); font-size:14px;">We sent a 6-digit code to your email.</p>
+            <p style="color:var(--dim); font-size:14px;">Verification code sent to email.</p>
             <input type="text" id="v-code" placeholder="000000" maxlength="6" style="text-align:center; font-size:32px; letter-spacing:8px;">
             <div class="error-msg" id="v-error"></div>
             <button class="btn-prime btn-save" onclick="validateCode()">Verify Account</button>
@@ -210,12 +211,11 @@
     </div>
 
     <script>
-        // --- UPDATED EMAILJS CREDENTIALS ---
+        // CONFIG
         const EMAILJS_SERVICE_ID = "service_ow9m3kg";
         const EMAILJS_TEMPLATE_ID = "template_7xhxmoi";
         const EMAILJS_PUBLIC_KEY = "RsAYqiwym2mViUR8u";
 
-        // --- FIREBASE SETUP ---
         const firebaseConfig = {
             apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
             authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -224,6 +224,7 @@
             messagingSenderId: "282165391993",
             appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
         };
+
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -240,18 +241,64 @@
 
         const trashSvg = `<svg class="trash-icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>`;
 
+        // UI HELPERS
         function showAuth(id) {
             document.querySelectorAll('.auth-container').forEach(c => c.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        async function sendVerificationEmail(targetEmail, code) {
-            const templateParams = {
-                to_email: targetEmail,
-                verification_code: code,
-                user_name: signupTemp.name
-            };
-            return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        function setTheme(t) { 
+            document.body.className = t || 'theme-midnight'; 
+        }
+
+        // AUTH CORE
+        auth.onAuthStateChanged(async user => {
+            const landing = document.getElementById('screen-landing');
+            const intro = document.getElementById('screen-intro');
+            const shell = document.getElementById('app-shell');
+
+            if (user) {
+                // User is signed in
+                const doc = await db.collection('users').doc(user.uid).get();
+                
+                if(!doc.exists) {
+                    // New user -> Show onboarding
+                    landing.style.display = 'none';
+                    shell.style.display = 'none';
+                    shell.classList.remove('ready');
+                    intro.style.display = 'flex';
+                    document.getElementById('intro-welcome').innerText = `Hi, ${user.displayName ? user.displayName.split(' ')[0] : 'there'}!`;
+                } else {
+                    // Existing user -> Show App
+                    landing.style.display = 'none';
+                    intro.style.display = 'none';
+                    shell.style.display = 'flex';
+                    setTimeout(() => shell.classList.add('ready'), 50); // Small delay to ensure display:flex is registered
+                    initApp(user, doc.data());
+                }
+            } else {
+                // No user -> Show Landing
+                shell.classList.remove('ready');
+                shell.style.display = 'none';
+                intro.style.display = 'none';
+                landing.style.display = 'flex';
+            }
+        });
+
+        async function handleGoogleLogin() {
+            try { 
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider); 
+            } catch(e) { console.error("Google Login Error", e); }
+        }
+
+        async function handleEmailLogin() {
+            const e = document.getElementById('li-email').value.trim();
+            const p = document.getElementById('li-pass').value;
+            if(!e || !p) return;
+            auth.signInWithEmailAndPassword(e, p).catch(err => { 
+                document.getElementById('li-error').innerText = err.message; 
+            });
         }
 
         async function handleSignUpProcess() {
@@ -265,21 +312,23 @@
 
             if(!f || !l || !e || !p) return err.innerText = "All fields required";
             if(p !== rp) return err.innerText = "Passwords don't match";
-            if(lockoutEnd && Date.now() < lockoutEnd) return err.innerText = "Locked out. Try later.";
-
+            
             signupTemp = { email: e, pass: p, name: `${f} ${l}` };
             vCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-            btn.innerText = "Sending Code...";
+            btn.innerText = "Sending...";
             btn.disabled = true;
 
             try {
-                await sendVerificationEmail(e, vCode);
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_email: e,
+                    verification_code: vCode,
+                    user_name: signupTemp.name
+                });
                 vAttempts = 0;
                 showAuth('auth-verify');
             } catch (error) {
-                err.innerText = "Check Browser Console for Error Detail.";
-                console.error("EmailJS Error:", error);
+                err.innerText = "Email Error. Check configuration.";
             } finally {
                 btn.innerText = "Sign Up";
                 btn.disabled = false;
@@ -288,68 +337,36 @@
 
         async function validateCode() {
             const input = document.getElementById('v-code').value;
-            const err = document.getElementById('v-error');
-            
             if(input === vCode) {
                 try {
                     const res = await auth.createUserWithEmailAndPassword(signupTemp.email, signupTemp.pass);
                     await res.user.updateProfile({ displayName: signupTemp.name });
-                } catch(e) { err.innerText = e.message; }
+                } catch(e) { document.getElementById('v-error').innerText = e.message; }
             } else {
                 vAttempts++;
-                document.getElementById('v-attempts-ui').innerText = `Attempts: ${vAttempts}/5`;
-                if(vAttempts >= 5) {
-                    lockoutEnd = Date.now() + 300000;
-                    err.innerText = "5 failed attempts. Wait 5 minutes.";
-                    setTimeout(() => showAuth('auth-main'), 2000);
-                } else {
-                    err.innerText = "Incorrect code.";
-                }
+                document.getElementById('v-error').innerText = `Incorrect code. Attempt ${vAttempts}/5`;
+                if(vAttempts >= 5) location.reload();
             }
         }
 
-        async function handleDeleteAccount() {
-            const user = auth.currentUser;
-            if(!user) return;
-            try {
-                const taskSnap = await db.collection('tasks').where('uid', '==', user.uid).get();
-                const batch = db.batch();
-                taskSnap.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-                await db.collection('users').doc(user.uid).delete();
-                await user.delete();
-                closeAllModals();
-            } catch (e) {
-                alert("Please log out and back in to verify identity before deleting.");
-                closeAllModals();
+        // APP CORE
+        function initApp(user, data) {
+            document.getElementById('user-photo').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`;
+            document.getElementById('user-name').innerText = user.displayName || "User";
+            document.getElementById('user-email').innerText = user.email;
+            agendas = data.agendas || [];
+            if (agendas.length > 0 && !agendas.find(a => a.id === activeTab)) {
+                activeTab = agendas[0].id;
             }
+            setTheme(data.theme);
+            syncTasks(user.uid);
         }
 
-        auth.onAuthStateChanged(async user => {
-            if (user) {
-                document.getElementById('screen-landing').style.display = 'none';
-                const doc = await db.collection('users').doc(user.uid).get();
-                if(!doc.exists) {
-                    document.getElementById('screen-intro').style.display = 'flex';
-                    document.getElementById('intro-welcome').innerText = `Hi, ${user.displayName.split(' ')[0]}!`;
-                } else {
-                    initApp(user, doc.data());
-                }
-            } else {
-                document.getElementById('screen-landing').style.display = 'flex';
-                document.getElementById('app-shell').style.display = 'none';
-                document.getElementById('screen-intro').style.display = 'none';
-            }
-        });
-
-        async function handleEmailLogin() {
-            const e = document.getElementById('li-email').value;
-            const p = document.getElementById('li-pass').value;
-            auth.signInWithEmailAndPassword(e, p).catch(err => { document.getElementById('li-error').innerText = err.message; });
-        }
-
-        async function handleGoogleLogin() {
-            try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } catch(e) {}
+        function syncTasks(uid) {
+            db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
+                allTasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                render();
+            });
         }
 
         async function completeOnboarding() {
@@ -357,28 +374,10 @@
             const user = auth.currentUser;
             const data = { theme: document.body.className, agendas: [{id: name, type: 'Standard'}] };
             await db.collection('users').doc(user.uid).set(data);
-            initApp(user, data);
+            // Observer handles the screen switch automatically
         }
 
-        function initApp(user, data) {
-            document.getElementById('screen-intro').style.display = 'none';
-            document.getElementById('app-shell').style.display = 'flex';
-            document.getElementById('user-photo').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`;
-            document.getElementById('user-name').innerText = user.displayName;
-            document.getElementById('user-email').innerText = user.email;
-            agendas = data.agendas || [];
-            activeTab = agendas[0]?.id || 'General';
-            setTheme(data.theme);
-            sync(user.uid);
-        }
-
-        function sync(uid) {
-            db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
-                allTasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                render();
-            });
-        }
-
+        // CRUD & UI
         window.openModal = (id) => {
             const m = document.getElementById(id);
             m.style.display = 'flex';
@@ -390,20 +389,6 @@
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
             document.getElementById('app-shell').classList.remove('modal-active');
             setTimeout(() => document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'), 400);
-        };
-
-        window.setTheme = (t) => { document.body.className = t; };
-
-        window.createNewAgenda = async () => {
-            const n = document.getElementById('n-list-name').value.trim();
-            const t = document.getElementById('n-list-type').value;
-            if(!n) return;
-            agendas.push({id: n, type: t});
-            activeTab = n;
-            await db.collection('users').doc(auth.currentUser.uid).update({agendas});
-            document.getElementById('n-list-name').value = '';
-            closeAllModals();
-            render();
         };
 
         window.handleTaskSubmit = () => {
@@ -433,25 +418,53 @@
             document.getElementById('cancel-edit').style.display = "none";
         };
 
-        function renderSettingsList() {
-            const setList = document.getElementById('settings-agendas-list');
-            setList.innerHTML = agendas.map(a => `<div class="settings-item" style="display:flex; justify-content:space-between; padding:15px; background:var(--bg); margin-bottom:5px; border-radius:12px;">
-                <span>${a.id}</span><div onclick="deleteAgenda('${a.id}')">${trashSvg}</div></div>`).join('');
-        }
+        window.createNewAgenda = async () => {
+            const n = document.getElementById('n-list-name').value.trim();
+            const t = document.getElementById('n-list-type').value;
+            if(!n) return;
+            agendas.push({id: n, type: t});
+            activeTab = n;
+            await db.collection('users').doc(auth.currentUser.uid).update({agendas});
+            document.getElementById('n-list-name').value = '';
+            closeAllModals();
+            render();
+        };
 
         window.deleteAgenda = async (id) => {
-            if(!confirm('Delete Agenda?')) return;
+            if(agendas.length <= 1) return alert("You must have at least one agenda.");
+            if(!confirm('Delete this entire agenda?')) return;
             agendas = agendas.filter(x => x.id !== id);
+            activeTab = agendas[0].id;
             await db.collection('users').doc(auth.currentUser.uid).update({agendas});
             render(); renderSettingsList();
         };
 
+        async function handleDeleteAccount() {
+            const user = auth.currentUser;
+            if(!user) return;
+            try {
+                const taskSnap = await db.collection('tasks').where('uid', '==', user.uid).get();
+                const batch = db.batch();
+                taskSnap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                await db.collection('users').doc(user.uid).delete();
+                await user.delete();
+            } catch (e) { alert("Please re-login to verify identity before deleting account."); }
+        }
+
+        function renderSettingsList() {
+            const setList = document.getElementById('settings-agendas-list');
+            setList.innerHTML = agendas.map(a => `<div style="display:flex; justify-content:space-between; padding:15px; background:var(--bg); margin-bottom:5px; border-radius:12px;">
+                <span>${a.id}</span><div onclick="deleteAgenda('${a.id}')">${trashSvg}</div></div>`).join('');
+        }
+
         function render() {
-            document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
+            const tabBar = document.getElementById('tab-bar');
+            tabBar.innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
+            
             const main = document.getElementById('main-content');
             main.innerHTML = '';
-            const cur = agendas.find(a => a.id === activeTab) || agendas[0];
-            if(!cur) return;
+            const curType = agendas.find(a => a.id === activeTab)?.type || 'Standard';
             
             let filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
             const groups = {};
@@ -473,8 +486,8 @@
                     const diff = Math.ceil((target - new Date()) / 86400000);
                     let badge = '', displayTitle = task.name;
 
-                    if (cur.type === 'Countdown') badge = `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PAST' : diff + 'd'}</div>`;
-                    else if (cur.type === 'Finance') displayTitle = `$${task.name}`;
+                    if (curType === 'Countdown') badge = `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PAST' : diff + 'd'}</div>`;
+                    else if (curType === 'Finance') displayTitle = `$${task.name}`;
 
                     const card = document.createElement('div');
                     card.className = 'card';
