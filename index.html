@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | OS</title>
+    <title>Agenda Pro | Full Build</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -11,317 +11,650 @@
 
     <style>
         :root {
-            --bg: #000; --card: #1c1c1e; --border: #2c2c2e;
-            --text: #ffffff; --dim: #8e8e93; --accent: #ffd60a;
+            /* Default Dark Theme Variables */
+            --bg: #000000;
+            --card: #1c1c1e;
+            --border: #2c2c2e;
+            --text: #ffffff;
+            --dim: #8e8e93;
+            --accent: #ffd60a;
+            --error: #ff375f;
             --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* Full Theme Library */
-        body.theme-midnight { --bg: #000000; --card: #111; --accent: #5856d6; }
-        body.theme-emerald { --bg: #040d06; --card: #0d1a10; --accent: #34c759; }
-        body.theme-sunset { --bg: #0d0404; --card: #1a0d0d; --accent: #ff375f; }
-        body.theme-ocean { --bg: #040b0d; --card: #0d161a; --accent: #0a84ff; }
+        /* Color Theme Library */
+        body.theme-midnight { --bg: #000000; --card: #111111; --accent: #5856d6; --border: #1a1a1a; }
+        body.theme-emerald { --bg: #040d06; --card: #0d1a10; --accent: #34c759; --border: #152a1a; }
+        body.theme-sunset { --bg: #0d0404; --card: #1a0d0d; --accent: #ff375f; --border: #2a1515; }
+        body.theme-ocean { --bg: #040b0d; --card: #0d161a; --accent: #0a84ff; --border: #15232a; }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            margin: 0; background: var(--bg); color: var(--text); 
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow: hidden; height: 100vh;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden; /* We handle scrolling in <main> */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Layout Structure */
-        #app-shell { display: none; flex-direction: column; height: 100vh; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s; }
-        #app-shell.modal-open { transform: scale(0.95); filter: blur(15px); pointer-events: none; }
+        #app-shell {
+            display: none; /* Shown after auth */
+            flex-direction: column;
+            height: 100vh;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s;
+        }
 
-        header { padding: calc(var(--safe-top) + 15px) 20px 10px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
-        .nav-scroller { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        /* The "Shrink Back" effect when settings are open */
+        #app-shell.modal-active {
+            transform: scale(0.92);
+            filter: blur(10px);
+            pointer-events: none;
+            border-radius: 40px;
+        }
+
+        header {
+            padding: calc(var(--safe-top) + 20px) 20px 15px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-top h1 { margin: 0; font-size: 28px; font-weight: 800; }
+
+        /* Navigation Scroller */
+        .nav-scroller {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 5px;
+        }
         .nav-scroller::-webkit-scrollbar { display: none; }
 
-        .tab { 
-            padding: 8px 20px; border-radius: 40px; background: var(--card); color: var(--dim); 
-            font-size: 14px; font-weight: 600; white-space: nowrap; border: 1px solid var(--border);
-            transition: 0.2s;
+        .tab-pill {
+            padding: 10px 22px;
+            border-radius: 50px;
+            background: var(--card);
+            color: var(--dim);
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
-        .tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
-
-        /* Content Area */
-        main { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 250px; }
-        .month-section { margin-bottom: 25px; }
-        .month-title { 
-            font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; 
-            color: var(--accent); margin-bottom: 12px; padding-left: 5px; font-weight: 800;
+        .tab-pill.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            transform: scale(1.05);
         }
 
-        .card { 
-            background: var(--card); border-radius: 20px; padding: 18px; 
-            margin-bottom: 12px; border: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            animation: slideUp 0.4s ease forwards;
+        /* Main Content Grouping */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 280px; /* Space for the floating footer */
         }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card-info b { display: block; font-size: 17px; margin-bottom: 4px; }
-        .card-info span { color: var(--dim); font-size: 13px; }
-        .badge { background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+        .month-section {
+            margin-bottom: 35px;
+        }
+
+        .month-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            font-weight: 900;
+            margin-bottom: 15px;
+            padding-left: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .month-label::after {
+            content: "";
+            height: 1px;
+            background: var(--border);
+            flex: 1;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: cardAppear 0.5s ease backwards;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-body b { display: block; font-size: 17px; margin-bottom: 4px; color: var(--text); }
+        .card-body span { font-size: 13px; color: var(--dim); font-weight: 500; }
+
+        .countdown-badge {
+            background: rgba(255,255,255,0.08);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        /* Footer Input System */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            padding-bottom: calc(var(--safe-bottom) + 20px);
+            background: linear-gradient(to top, var(--bg) 60%, transparent);
+            z-index: 50;
+        }
+
+        .input-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .input-fields {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"], input[type="date"], select {
+            background: #000;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 20px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 18px;
+            border-radius: 22px;
+            border: none;
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-action:active { transform: scale(0.98); }
+        .btn-add { background: #fff; color: #000; }
+        .btn-save { background: var(--accent); color: #000; }
 
         /* Custom Modal System */
-        .modal-layer { 
-            position: fixed; inset: 0; z-index: 1000; visibility: hidden; opacity: 0;
-            display: flex; align-items: flex-end; transition: 0.3s;
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s;
         }
-        .modal-layer.active { visibility: visible; opacity: 1; }
-        .modal-sheet { 
-            background: var(--card); width: 100%; border-radius: 30px 30px 0 0; 
-            padding: 30px; transform: translateY(100%); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        .modal-overlay.active { display: flex; opacity: 1; }
+
+        .modal-sheet {
+            background: #1c1c1e;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 35px 35px 0 0;
+            padding: 30px;
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             border-top: 1px solid var(--border);
+            max-height: 90vh;
+            overflow-y: auto;
         }
-        .modal-layer.active .modal-sheet { transform: translateY(0); }
+        .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
-        /* Form Elements */
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 10px; color: var(--dim); text-transform: uppercase; margin-bottom: 8px; }
-        input, select { 
-            width: 100%; background: #000; border: 1px solid var(--border); 
-            color: #fff; padding: 15px; border-radius: 15px; font-size: 16px;
+        /* Settings UI Components */
+        .settings-section { margin-bottom: 25px; }
+        .settings-section label {
+            display: block;
+            font-size: 10px;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            font-weight: 800;
         }
 
-        .btn-prime { 
-            width: 100%; padding: 18px; border-radius: 18px; border: none; 
-            font-weight: 800; font-size: 15px; text-transform: uppercase;
-            background: #fff; color: #000; 
+        .settings-card {
+            background: #2c2c2e;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 10px;
         }
 
-        /* Footer Fixed */
-        footer { 
-            position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; 
-            background: linear-gradient(transparent, var(--bg) 40%);
+        .settings-item {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3a3a3c;
+            font-size: 15px;
         }
+        .settings-item:last-child { border-bottom: none; }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* Login Screen */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+        }
+
+        .auth-card {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .auth-card h1 { font-size: 42px; margin-bottom: 10px; }
+        .auth-card p { color: var(--dim); margin-bottom: 40px; }
+
     </style>
 </head>
 <body>
 
-<div id="modal-settings" class="modal-layer" onclick="closeAllModals()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-        <h2 style="margin-top:0">Settings</h2>
-        <div class="input-group">
-            <label>Color Appearance</label>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-                <button class="tab" onclick="setTheme('theme-midnight')">Midnight</button>
-                <button class="tab" onclick="setTheme('theme-emerald')">Emerald</button>
-                <button class="tab" onclick="setTheme('theme-sunset')">Sunset</button>
-                <button class="tab" onclick="setTheme('theme-ocean')">Ocean</button>
-            </div>
+    <div id="login-screen">
+        <div class="auth-card">
+            <h1>Agenda.</h1>
+            <p>Your life, organized by month.</p>
+            <button class="btn-action btn-add" style="width:auto; padding: 18px 50px;" onclick="handleLogin()">
+                Sign In with Google
+            </button>
         </div>
-        <button class="btn-prime" onclick="auth.signOut()">Sign Out</button>
     </div>
-</div>
 
-<div id="modal-add-list" class="modal-layer" onclick="closeAllModals()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-        <h2>New Agenda</h2>
-        <div class="input-group">
-            <label>Name</label>
-            <input type="text" id="listNameInput" placeholder="Work, Fitness, Releases...">
+    <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                <h2 style="margin:0; font-size:24px;">Settings</h2>
+                <span style="font-weight:800; color:var(--accent); cursor:pointer;" onclick="closeAllModals()">Done</span>
+            </div>
+
+            <div class="settings-section">
+                <label>Theme & Appearance</label>
+                <div class="theme-grid">
+                    <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
+                    <button class="tab-pill" onclick="setTheme('theme-emerald')">Emerald</button>
+                    <button class="tab-pill" onclick="setTheme('theme-sunset')">Sunset</button>
+                    <button class="tab-pill" onclick="setTheme('theme-ocean')">Ocean</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <label>Manage Agendas</label>
+                <div class="settings-card" id="settings-agendas-list">
+                    </div>
+            </div>
+
+            <div class="settings-section">
+                <label>User</label>
+                <div class="settings-card">
+                    <div class="settings-item">
+                        <span id="user-display-name">Loading...</span>
+                        <span style="color:var(--error); font-weight:700;" onclick="auth.signOut()">Sign Out</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="input-group">
-            <label>Agenda Type</label>
-            <select id="listTypeInput">
-                <option value="Standard">Standard List</option>
-                <option value="Countdown">Countdown (Days Left)</option>
-                <option value="Journal">Journal (Log)</option>
-            </select>
-        </div>
-        <button class="btn-prime" style="background:var(--accent)" onclick="createNewList()">Create Agenda</button>
     </div>
-</div>
 
-<div id="app-shell">
-    <header>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h1 style="margin:0; font-size:24px;">Agenda</h1>
-            <div style="display:flex; gap:15px">
-                <span onclick="openModal('modal-add-list')" style="font-size:24px; cursor:pointer">+</span>
-                <span onclick="openModal('modal-settings')" style="font-size:22px; cursor:pointer">⚙️</span>
+    <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+            <h2 style="margin-bottom:25px;">Create Agenda</h2>
+            
+            <div class="settings-section">
+                <label>Name</label>
+                <input type="text" id="new-list-name" placeholder="e.g. Work, GTA 6 Release, Gym">
             </div>
-        </div>
-        <div class="nav-scroller" id="tab-bar"></div>
-    </header>
 
-    <main id="main-content"></main>
-
-    <footer>
-        <div style="background:var(--card); padding:15px; border-radius:25px; border:1px solid var(--border)">
-            <div style="display:flex; gap:10px; margin-bottom:10px">
-                <input type="text" id="taskName" placeholder="Event Name...">
-                <input type="date" id="taskDate" style="width:140px">
+            <div class="settings-section">
+                <label>Agenda Style</label>
+                <select id="new-list-type">
+                    <option value="Standard">Standard (Checklist)</option>
+                    <option value="Countdown">Countdown (Days Remaining)</option>
+                </select>
             </div>
-            <button class="btn-prime" id="actionBtn" onclick="saveTask()">Add to List</button>
+
+            <button class="btn-action btn-save" onclick="createNewAgenda()">Create Agenda</button>
         </div>
-    </footer>
-</div>
+    </div>
 
-<div id="login-screen" style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#000">
-    <h1 style="font-size:40px; margin-bottom:30px">Agenda.</h1>
-    <button class="btn-prime" style="width:auto; padding:15px 40px" onclick="auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())">Sign In with Google</button>
-</div>
+    <div id="app-shell">
+        <header>
+            <div class="header-top">
+                <h1>Agenda</h1>
+                <div style="display:flex; gap:20px;">
+                    <span style="font-size:26px; font-weight:300; cursor:pointer;" onclick="openModal('modal-new-list')">+</span>
+                    <span style="font-size:20px; cursor:pointer;" onclick="openModal('modal-settings')">⚙️</span>
+                </div>
+            </div>
+            <div class="nav-scroller" id="tab-bar">
+                </div>
+        </header>
 
-<script>
-    // 1. Firebase Logic
-    const config = {
-        apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
-        authDomain: "plannerapp-ff221.firebaseapp.com",
-        projectId: "plannerapp-ff221",
-        storageBucket: "plannerapp-ff221.appspot.com",
-        messagingSenderId: "282165391993",
-        appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
-    };
-    firebase.initializeApp(config);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+        <main id="main-content">
+            </main>
 
-    let state = {
-        activeTab: 'Assignments',
-        planners: [
-            {id: 'Assignments', type: 'Standard'},
-            {id: 'Game Releases', type: 'Countdown'}
-        ],
-        tasks: [],
-        editId: null
-    };
+        <footer>
+            <div class="input-box">
+                <div class="input-fields">
+                    <input type="text" id="task-name-input" placeholder="What's happening?">
+                    <input type="date" id="task-date-input" style="width:140px;">
+                </div>
+                <button class="btn-action btn-add" id="submit-btn" onclick="handleTaskSubmit()">Add to List</button>
+                <button class="btn-action btn-save" id="cancel-edit-btn" style="display:none; margin-top:10px; background:#2c2c2e; color:#fff" onclick="clearInputs()">Cancel Edit</button>
+            </div>
+        </footer>
+    </div>
 
-    // 2. Auth State
-    auth.onAuthStateChanged(user => {
-        if(user) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-shell').style.display = 'flex';
-            initData(user.uid);
-        } else {
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('app-shell').style.display = 'none';
-        }
-    });
-
-    // 3. UI Helpers
-    function openModal(id) {
-        document.getElementById(id).classList.add('active');
-        document.getElementById('app-shell').classList.add('modal-open');
-    }
-    function closeAllModals() {
-        document.querySelectorAll('.modal-layer').forEach(m => m.classList.remove('active'));
-        document.getElementById('app-shell').classList.remove('modal-open');
-    }
-    function setTheme(t) {
-        document.body.className = t;
-        localStorage.setItem('pref-theme', t);
-    }
-    if(localStorage.getItem('pref-theme')) setTheme(localStorage.getItem('pref-theme'));
-
-    // 4. Data Logic
-    function initData(uid) {
-        db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
-            state.tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            render();
-        });
-    }
-
-    function createNewList() {
-        const name = document.getElementById('listNameInput').value;
-        const type = document.getElementById('listTypeInput').value;
-        if(!name) return;
-        state.planners.push({id: name, type: type});
-        state.activeTab = name;
-        closeAllModals();
-        render();
-    }
-
-    function saveTask() {
-        const name = document.getElementById('taskName').value;
-        const date = document.getElementById('taskDate').value;
-        if(!name || !date) return;
-
-        const payload = {
-            name, date, uid: auth.currentUser.uid, category: state.activeTab, created: Date.now()
+    <script>
+        // ---------------------------------------------------------
+        // 1. FIREBASE INITIALIZATION
+        // ---------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
+            authDomain: "plannerapp-ff221.firebaseapp.com",
+            projectId: "plannerapp-ff221",
+            storageBucket: "plannerapp-ff221.appspot.com",
+            messagingSenderId: "282165391993",
+            appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
         };
 
-        if(state.editId) {
-            db.collection("tasks").doc(state.editId).update(payload);
-            state.editId = null;
-            document.getElementById('actionBtn').innerText = "Add to List";
-        } else {
-            db.collection("tasks").add(payload);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        // ---------------------------------------------------------
+        // 2. STATE MANAGEMENT
+        // ---------------------------------------------------------
+        let activeTabName = 'General';
+        let allTasks = [];
+        let agendas = [
+            { id: 'General', type: 'Standard' },
+            { id: 'Releases', type: 'Countdown' }
+        ];
+        let editingTaskId = null;
+
+        // Load persisted tab state if available
+        const savedAgendas = localStorage.getItem('user_agendas');
+        if (savedAgendas) agendas = JSON.parse(savedAgendas);
+
+        // ---------------------------------------------------------
+        // 3. AUTHENTICATION LOGIC
+        // ---------------------------------------------------------
+        function handleLogin() {
+            auth.signInWithPopup(googleProvider).catch(err => alert(err.message));
         }
-        
-        document.getElementById('taskName').value = '';
-        document.getElementById('taskDate').value = '';
-    }
 
-    // 5. Core Rendering (The Month & Countdown Logic)
-    function render() {
-        const tabBar = document.getElementById('tab-bar');
-        tabBar.innerHTML = state.planners.map(p => `
-            <div class="tab ${p.id === state.activeTab ? 'active' : ''}" onclick="state.activeTab='${p.id}'; render();">
-                ${p.id}
-            </div>
-        `).join('');
-
-        const main = document.getElementById('main-content');
-        main.innerHTML = '';
-
-        const currentType = state.planners.find(p => p.id === state.activeTab)?.type || 'Standard';
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        
-        const filtered = state.tasks.filter(t => t.category === state.activeTab)
-                         .sort((a,b) => new Date(a.date) - new Date(b.date));
-
-        // Grouping logic
-        const grouped = {};
-        filtered.forEach(t => {
-            const d = new Date(t.date);
-            const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
-            if(!grouped[key]) grouped[key] = [];
-            grouped[key].push(t);
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-shell').style.display = 'flex';
+                document.getElementById('user-display-name').innerText = user.displayName || user.email;
+                syncTasks(user.uid);
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('app-shell').style.display = 'none';
+            }
         });
 
-        for(let monthKey in grouped) {
-            const section = document.createElement('div');
-            section.className = 'month-section';
-            section.innerHTML = `<div class="month-title">${monthKey}</div>`;
-            
-            grouped[monthKey].forEach(task => {
-                let extra = '';
-                if(currentType === 'Countdown') {
-                    const diff = Math.ceil((new Date(task.date) - new Date()) / (1000*60*60*24));
-                    extra = `<div class="badge" style="color:${diff < 0 ? '#ff375f' : 'var(--accent)'}">
-                        ${diff < 0 ? 'Lapsed' : diff + ' Days Left'}
-                    </div>`;
-                }
-
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-info" onclick="startEdit('${task.id}')">
-                        <b>${task.name}</b>
-                        <span>${task.date}</span>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:15px">
-                        ${extra}
-                        <span onclick="db.collection('tasks').doc('${task.id}').delete()" style="color:#ff375f; font-weight:bold">✕</span>
-                    </div>
-                `;
-                section.appendChild(card);
-            });
-            main.appendChild(section);
+        // ---------------------------------------------------------
+        // 4. DATA SYNCHRONIZATION
+        // ---------------------------------------------------------
+        function syncTasks(uid) {
+            db.collection("tasks")
+                .where("uid", "==", uid)
+                .onSnapshot(snapshot => {
+                    allTasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderApp();
+                });
         }
-    }
 
-    window.startEdit = (id) => {
-        const t = state.tasks.find(x => x.id === id);
-        document.getElementById('taskName').value = t.name;
-        document.getElementById('taskDate').value = t.date;
-        state.editId = id;
-        document.getElementById('actionBtn').innerText = "Update Entry";
-    };
+        // ---------------------------------------------------------
+        // 5. EVENT HANDLERS
+        // ---------------------------------------------------------
+        function handleTaskSubmit() {
+            const name = document.getElementById('task-name-input').value;
+            const date = document.getElementById('task-date-input').value;
 
-</script>
+            if (!name || !date) return alert("Please fill in both fields.");
+
+            const taskData = {
+                name: name,
+                date: date,
+                category: activeTabName,
+                uid: auth.currentUser.uid,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if (editingTaskId) {
+                db.collection("tasks").doc(editingTaskId).update(taskData);
+            } else {
+                db.collection("tasks").add({
+                    ...taskData,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            clearInputs();
+        }
+
+        function clearInputs() {
+            editingTaskId = null;
+            document.getElementById('task-name-input').value = '';
+            document.getElementById('task-date-input').value = '';
+            document.getElementById('submit-btn').innerText = "Add to List";
+            document.getElementById('submit-btn').className = "btn-action btn-add";
+            document.getElementById('cancel-edit-btn').style.display = "none";
+        }
+
+        window.triggerEditTask = (id) => {
+            const task = allTasks.find(t => t.id === id);
+            if (!task) return;
+
+            editingTaskId = id;
+            document.getElementById('task-name-input').value = task.name;
+            document.getElementById('task-date-input').value = task.date;
+            document.getElementById('submit-btn').innerText = "Update Event";
+            document.getElementById('submit-btn').className = "btn-action btn-save";
+            document.getElementById('cancel-edit-btn').style.display = "block";
+            
+            // Scroll to bottom to show input
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        };
+
+        function createNewAgenda() {
+            const name = document.getElementById('new-list-name').value.trim();
+            const type = document.getElementById('new-list-type').value;
+
+            if (!name) return alert("Agenda needs a name.");
+            if (agendas.some(a => a.id === name)) return alert("Name already exists.");
+
+            agendas.push({ id: name, type: type });
+            activeTabName = name;
+            localStorage.setItem('user_agendas', JSON.stringify(agendas));
+            
+            document.getElementById('new-list-name').value = '';
+            closeAllModals();
+            renderApp();
+        }
+
+        window.deleteAgenda = (id) => {
+            if (agendas.length <= 1) return alert("You must have at least one agenda.");
+            if (!confirm(`Delete "${id}" and all items inside it?`)) return;
+
+            agendas = agendas.filter(a => a.id !== id);
+            if (activeTabName === id) activeTabName = agendas[0].id;
+            
+            localStorage.setItem('user_agendas', JSON.stringify(agendas));
+            
+            // Cleanup: In production, you'd delete all tasks with this category from Firestore here.
+            renderApp();
+        };
+
+        // ---------------------------------------------------------
+        // 6. UI MODAL CONTROLS
+        // ---------------------------------------------------------
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById(id).classList.add('active');
+                document.getElementById('app-shell').classList.add('modal-active');
+            }, 10);
+        }
+
+        function closeAllModals() {
+            const modals = document.querySelectorAll('.modal-overlay');
+            modals.forEach(m => m.classList.remove('active'));
+            document.getElementById('app-shell').classList.remove('modal-active');
+            setTimeout(() => {
+                modals.forEach(m => m.style.display = 'none');
+            }, 400);
+        }
+
+        function setTheme(themeName) {
+            document.body.className = themeName;
+            localStorage.setItem('app_theme', themeName);
+        }
+        // Load theme
+        if (localStorage.getItem('app_theme')) setTheme(localStorage.getItem('app_theme'));
+
+        // ---------------------------------------------------------
+        // 7. RENDERING ENGINE
+        // ---------------------------------------------------------
+        function renderApp() {
+            // Render Tabs
+            const tabBar = document.getElementById('tab-bar');
+            tabBar.innerHTML = agendas.map(a => `
+                <div class="tab-pill ${a.id === activeTabName ? 'active' : ''}" 
+                     onclick="activeTabName='${a.id}'; renderApp();">
+                    ${a.id}
+                </div>
+            `).join('');
+
+            // Render Agendas List in Settings
+            const settingsAgendas = document.getElementById('settings-agendas-list');
+            settingsAgendas.innerHTML = agendas.map(a => `
+                <div class="settings-item">
+                    <span>${a.id} <small style="color:var(--dim)">(${a.type})</small></span>
+                    <span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="deleteAgenda('${a.id}')">Remove</span>
+                </div>
+            `).join('');
+
+            // Main Content Logic
+            const main = document.getElementById('main-content');
+            main.innerHTML = '';
+
+            const currentAgenda = agendas.find(a => a.id === activeTabName);
+            const tasks = allTasks.filter(t => t.category === activeTabName)
+                                  .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+            if (tasks.length === 0) {
+                main.innerHTML = `<div style="text-align:center; padding:100px 20px; color:var(--dim);">No events in this list.</div>`;
+                return;
+            }
+
+            // Group by Month and Year
+            const grouped = {};
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+            tasks.forEach(t => {
+                const dateObj = new Date(t.date + "T00:00:00");
+                const monthName = months[dateObj.getMonth()];
+                const year = dateObj.getFullYear();
+                const key = `${monthName} ${year}`;
+                
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(t);
+            });
+
+            for (const monthYear in grouped) {
+                const section = document.createElement('div');
+                section.className = 'month-section';
+                section.innerHTML = `<div class="month-label">${monthYear}</div>`;
+
+                grouped[monthYear].forEach(task => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    
+                    let badgeHTML = '';
+                    if (currentAgenda.type === 'Countdown') {
+                        const daysLeft = Math.ceil((new Date(task.date + "T00:00:00") - new Date()) / (1000 * 60 * 60 * 24));
+                        const badgeColor = daysLeft < 0 ? 'var(--error)' : 'var(--accent)';
+                        badgeHTML = `<div class="countdown-badge" style="color:${badgeColor}">${daysLeft < 0 ? 'Lapsed' : daysLeft + ' Days'}</div>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="card-body" onclick="triggerEditTask('${task.id}')">
+                            <b>${task.name}</b>
+                            <span>${task.date}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            ${badgeHTML}
+                            <span style="font-size:18px; color:var(--error); font-weight:800; padding:10px; cursor:pointer;" 
+                                  onclick="event.stopPropagation(); if(confirm('Delete?')) db.collection('tasks').doc('${task.id}').delete()">✕</span>
+                        </div>
+                    `;
+                    section.appendChild(card);
+                });
+                main.appendChild(section);
+            }
+        }
+
+    </script>
 </body>
 </html>
