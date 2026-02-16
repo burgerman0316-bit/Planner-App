@@ -58,7 +58,7 @@
         .nav-tab.active { background: var(--accent); color: white; }
         .tab-del-x { color: #ff453a; font-size: 14px; font-weight: 800; padding: 0 2px; }
 
-        .nav-tab.moving { border: 1px dashed var(--edit-glow); animation: shake 0.3s infinite; }
+        .nav-tab.moving { border: 1px solid var(--edit-glow); animation: shake 0.3s infinite; }
         @keyframes shake { 0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); } }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
@@ -70,7 +70,6 @@
         .entry-card {
             background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
             padding: 18px 25px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
-            transition: border 0.3s ease;
         }
         .entry-card.editing-active { border-color: var(--edit-glow); }
 
@@ -117,8 +116,8 @@
             <div onclick="auth.signOut()" class="out-btn">SIGN OUT</div>
         </div>
     </div>
-    <div id="content"><span id="list-label">List</span><div id="task-list"></div></div>
-    <div id="footer">
+    <div id="content" onclick="globalClickExitMove(event)"><span id="list-label">List</span><div id="task-list"></div></div>
+    <div id="footer" onclick="globalClickExitMove(event)">
         <div class="input-row">
             <input type="text" id="itemName" placeholder="Task Name...">
             <div class="date-btn-wrapper">
@@ -134,7 +133,7 @@
             <button class="save-btn update-btn" onclick="updateTask()">Save Changes</button>
         </div>
 
-        <div class="footer-tip">Tap a task to edit • Tap ✕ to delete</div>
+        <div class="footer-tip">Press/Hold tabs to move • Tap events to edit</div>
     </div>
 </div>
 
@@ -158,7 +157,7 @@
     let planners = ['Assignments', 'Game Releases'];
     let moveMode = null;
     let pressTimer;
-    let editingId = null; // Track which item is being edited
+    let editingId = null;
 
     function popLogin() { 
         auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message)); 
@@ -177,26 +176,27 @@
 
     function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
 
+    // --- NEW: GLOBAL CLICK TO EXIT MOVE MODE ---
+    function globalClickExitMove(e) {
+        if (moveMode) {
+            moveMode = null;
+            haptic();
+            render();
+        }
+    }
+
     function loadData(uid) {
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
             allEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
             render();
-        }, (error) => {
-            alert("Database Error: " + error.message);
         });
     }
-
-    // --- TASK ACTIONS ---
 
     function saveTask() {
         haptic();
         const nameInput = document.getElementById('itemName');
         const dateInput = document.getElementById('itemDate');
-        
-        if(!nameInput.value || !dateInput.value) {
-            alert("Please enter a name and a date.");
-            return;
-        }
+        if(!nameInput.value || !dateInput.value) return alert("Fill name and date");
 
         db.collection("tasks").add({ 
             name: nameInput.value, 
@@ -208,31 +208,24 @@
     }
 
     window.startEdit = function(id) {
+        if (moveMode) return; // Don't edit while moving tabs
         haptic();
         const task = allEntries.find(t => t.id === id);
-        if(!task) return;
-
         editingId = id;
         document.getElementById('itemName').value = task.name;
         document.getElementById('itemDate').value = task.date;
         document.getElementById('dateDisplay').innerText = task.date;
-        
-        // UI toggle
         document.getElementById('addBtn').style.display = 'none';
         document.getElementById('editControls').style.display = 'flex';
-        render(); // Re-render to show active glow
+        render();
     };
 
     window.updateTask = function() {
         if(!editingId) return;
         haptic();
-
-        const name = document.getElementById('itemName').value;
-        const date = document.getElementById('itemDate').value;
-
         db.collection("tasks").doc(editingId).update({
-            name: name,
-            date: date
+            name: document.getElementById('itemName').value,
+            date: document.getElementById('itemDate').value
         }).then(() => cancelEdit());
     };
 
@@ -251,17 +244,13 @@
     }
 
     window.deleteTask = function(e, id) { 
-        e.stopPropagation(); // Don't trigger edit mode
+        e.stopPropagation();
         haptic(); 
-        if(confirm("Delete this task?")) {
-            db.collection("tasks").doc(id).delete().catch(e => alert(e.message)); 
-        }
+        if(confirm("Delete task?")) db.collection("tasks").doc(id).delete(); 
     };
 
-    // --- TAB LOGIC ---
-
+    // --- UPDATED TAB LOGIC ---
     function startPress(p) {
-        window.getSelection().removeAllRanges();
         pressTimer = window.setTimeout(function() {
             haptic();
             moveMode = p;
@@ -271,8 +260,9 @@
     function cancelPress() { clearTimeout(pressTimer); }
 
     window.handleTap = function(e, p) {
+        e.stopPropagation(); // Stop global click from firing
+        
         if (e.target.classList.contains('tab-del-x')) {
-            e.stopPropagation();
             if (planners.length <= 1) return;
             if (confirm(`Delete "${p}"?`)) {
                 planners = planners.filter(item => item !== p);
@@ -281,16 +271,27 @@
             }
             return;
         }
+
         if (moveMode) {
             if (moveMode !== p) {
+                // Swap places
                 const fromIdx = planners.indexOf(moveMode);
                 const toIdx = planners.indexOf(p);
                 planners.splice(fromIdx, 1);
                 planners.splice(toIdx, 0, moveMode);
+                haptic();
+                render();
+            } else {
+                // Tapped the same tab being moved -> Exit mode
+                moveMode = null;
+                haptic();
+                render();
             }
-            moveMode = null; haptic(); render();
         } else {
-            haptic(); activePlanner = p; cancelEdit(); render();
+            haptic(); 
+            activePlanner = p; 
+            cancelEdit(); 
+            render();
         }
     };
 
@@ -298,8 +299,6 @@
         const n = prompt("New list name:");
         if(n && !planners.includes(n)) { planners.push(n); activePlanner = n; render(); }
     }
-
-    // --- RENDER ---
 
     function render() {
         const tabs = document.getElementById('planner-tabs');
