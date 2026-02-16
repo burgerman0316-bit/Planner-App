@@ -19,6 +19,7 @@
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
             --accent: #333333; --radius: 50px; 
+            --edit-glow: #ffd60a;
         }
         
         * { 
@@ -57,19 +58,21 @@
         .nav-tab.active { background: var(--accent); color: white; }
         .tab-del-x { color: #ff453a; font-size: 14px; font-weight: 800; padding: 0 2px; }
 
-        .nav-tab.moving { border: 1px dashed #ffd60a; animation: shake 0.3s infinite; }
+        .nav-tab.moving { border: 1px dashed var(--edit-glow); animation: shake 0.3s infinite; }
         @keyframes shake { 0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); } }
 
         .header-btns { display: flex; align-items: center; gap: 12px; }
         .out-btn { background: #ffffff; color: #000; padding: 6px 14px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; }
 
-        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 200px; }
+        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 220px; }
         #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         
         .entry-card {
             background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
             padding: 18px 25px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+            transition: border 0.3s ease;
         }
+        .entry-card.editing-active { border-color: var(--edit-glow); }
 
         #footer {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -86,6 +89,9 @@
         .date-label { color: var(--text-main); font-size: 11px; font-weight: 800; pointer-events: none; }
 
         .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 50px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; }
+        .edit-mode-btns { display: none; gap: 8px; }
+        .cancel-btn { background: #333; color: white; flex: 1; }
+        .update-btn { background: var(--edit-glow); color: black; flex: 2; }
         
         .footer-tip { 
             text-align: center; font-size: 8px; color: var(--text-dim); 
@@ -120,8 +126,15 @@
                 <input type="date" id="itemDate" onchange="document.getElementById('dateDisplay').innerText = this.value">
             </div>
         </div>
-        <button class="save-btn" onclick="saveTask()">Add to List</button>
-        <div class="footer-tip">Press and hold on tabs at the top to edit or delete them!</div>
+        
+        <button id="addBtn" class="save-btn" onclick="saveTask()">Add to List</button>
+        
+        <div id="editControls" class="edit-mode-btns">
+            <button class="save-btn cancel-btn" onclick="cancelEdit()">Cancel</button>
+            <button class="save-btn update-btn" onclick="updateTask()">Save Changes</button>
+        </div>
+
+        <div class="footer-tip">Tap a task to edit • Tap ✕ to delete</div>
     </div>
 </div>
 
@@ -140,6 +153,13 @@
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
+    let activePlanner = 'Assignments';
+    let allEntries = [];
+    let planners = ['Assignments', 'Game Releases'];
+    let moveMode = null;
+    let pressTimer;
+    let editingId = null; // Track which item is being edited
+
     function popLogin() { 
         auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message)); 
     }
@@ -155,32 +175,7 @@
         }
     });
 
-    let activePlanner = 'Assignments';
-    let allEntries = [];
-    let planners = ['Assignments', 'Game Releases'];
-    let moveMode = null;
-    let pressTimer;
-
     function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
-
-    document.addEventListener('touchstart', (e) => {
-        if (moveMode && !e.target.closest('.nav-tab')) {
-            moveMode = null;
-            haptic();
-            render();
-        }
-    }, { passive: true });
-
-    function startPress(p) {
-        window.getSelection().removeAllRanges();
-        pressTimer = window.setTimeout(function() {
-            haptic();
-            moveMode = p;
-            window.getSelection().removeAllRanges();
-            render();
-        }, 600);
-    }
-    function cancelPress() { clearTimeout(pressTimer); }
 
     function loadData(uid) {
         db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
@@ -190,6 +185,8 @@
             alert("Database Error: " + error.message);
         });
     }
+
+    // --- TASK ACTIONS ---
 
     function saveTask() {
         haptic();
@@ -201,30 +198,77 @@
             return;
         }
 
-        // ADD DATA TO FIREBASE
         db.collection("tasks").add({ 
             name: nameInput.value, 
             date: dateInput.value, 
             uid: auth.currentUser.uid, 
             category: activePlanner, 
             createdAt: Date.now() 
-        })
-        .then(() => {
-            // Clear inputs ONLY after success
-            nameInput.value = ''; 
-            dateInput.value = '';
-            document.getElementById('dateDisplay').innerText = 'DATE';
-        })
-        .catch((error) => {
-            // If this pops up, your Firebase Rules are blocking the save
-            alert("Save Failed: " + error.message);
-        });
+        }).then(() => resetForm());
     }
 
-    window.deleteTask = function(id) { 
-        haptic(); 
-        db.collection("tasks").doc(id).delete().catch(e => alert(e.message)); 
+    window.startEdit = function(id) {
+        haptic();
+        const task = allEntries.find(t => t.id === id);
+        if(!task) return;
+
+        editingId = id;
+        document.getElementById('itemName').value = task.name;
+        document.getElementById('itemDate').value = task.date;
+        document.getElementById('dateDisplay').innerText = task.date;
+        
+        // UI toggle
+        document.getElementById('addBtn').style.display = 'none';
+        document.getElementById('editControls').style.display = 'flex';
+        render(); // Re-render to show active glow
     };
+
+    window.updateTask = function() {
+        if(!editingId) return;
+        haptic();
+
+        const name = document.getElementById('itemName').value;
+        const date = document.getElementById('itemDate').value;
+
+        db.collection("tasks").doc(editingId).update({
+            name: name,
+            date: date
+        }).then(() => cancelEdit());
+    };
+
+    window.cancelEdit = function() {
+        editingId = null;
+        resetForm();
+        document.getElementById('addBtn').style.display = 'block';
+        document.getElementById('editControls').style.display = 'none';
+        render();
+    };
+
+    function resetForm() {
+        document.getElementById('itemName').value = ''; 
+        document.getElementById('itemDate').value = '';
+        document.getElementById('dateDisplay').innerText = 'DATE';
+    }
+
+    window.deleteTask = function(e, id) { 
+        e.stopPropagation(); // Don't trigger edit mode
+        haptic(); 
+        if(confirm("Delete this task?")) {
+            db.collection("tasks").doc(id).delete().catch(e => alert(e.message)); 
+        }
+    };
+
+    // --- TAB LOGIC ---
+
+    function startPress(p) {
+        window.getSelection().removeAllRanges();
+        pressTimer = window.setTimeout(function() {
+            haptic();
+            moveMode = p;
+            render();
+        }, 600);
+    }
+    function cancelPress() { clearTimeout(pressTimer); }
 
     window.handleTap = function(e, p) {
         if (e.target.classList.contains('tab-del-x')) {
@@ -246,7 +290,7 @@
             }
             moveMode = null; haptic(); render();
         } else {
-            haptic(); activePlanner = p; render();
+            haptic(); activePlanner = p; cancelEdit(); render();
         }
     };
 
@@ -254,6 +298,8 @@
         const n = prompt("New list name:");
         if(n && !planners.includes(n)) { planners.push(n); activePlanner = n; render(); }
     }
+
+    // --- RENDER ---
 
     function render() {
         const tabs = document.getElementById('planner-tabs');
@@ -271,10 +317,11 @@
         document.getElementById('list-label').innerText = activePlanner;
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
+        
         list.innerHTML = items.length ? items.map(e => `
-            <div class="entry-card">
+            <div class="entry-card ${editingId === e.id ? 'editing-active' : ''}" onclick="startEdit('${e.id}')">
                 <div><b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small></div>
-                <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
+                <div style="color:#ff453a; font-weight:bold; cursor:pointer; padding: 10px;" onclick="deleteTask(event, '${e.id}')">✕</div>
             </div>
         `).join('') : '<p style="text-align:center; color:gray; margin-top:60px;">No entries.</p>';
     }
