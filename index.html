@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.5.0</title>
+    <title>Agenda Pro | V3.5.1</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -75,6 +75,9 @@
         
         .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .theme-dot { height: 40px; border-radius: 12px; border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        
+        /* Admin specific UI */
+        #admin-panel { display: none; margin-top: 30px; padding-top: 20px; border-top: 2px dashed var(--error); }
     </style>
 </head>
 <body class="theme-midnight">
@@ -89,7 +92,6 @@
             <div style="margin: 15px 0; color: var(--dim); font-size: 10px; font-weight: 800;">OR</div>
             <button class="btn-prime" style="background: #fff; color: #000;" onclick="handleGoogleLogin()">Continue with Google</button>
         </div>
-
         <div class="auth-container" id="auth-signup">
             <h2>New Account</h2>
             <input type="text" id="su-first" placeholder="Name">
@@ -98,7 +100,6 @@
             <button class="btn-prime btn-save" id="signup-btn" onclick="handleSignUpProcess()">Send Code</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-main')">Back</button>
         </div>
-
         <div class="auth-container" id="auth-login">
             <h2>Welcome Back</h2>
             <input type="email" id="li-email" placeholder="Email">
@@ -107,7 +108,6 @@
             <button class="btn-prime btn-save" onclick="handleEmailLogin()">Sign In</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-main')">Back</button>
         </div>
-
         <div class="auth-container" id="auth-verify">
             <h2>Check Email</h2>
             <p id="v-info" style="font-size:12px; color:var(--dim);"></p>
@@ -156,11 +156,18 @@
             <div>
                 <b id="u-name" style="font-size:18px;">---</b><br>
                 <span id="u-email" style="font-size:12px; color:var(--dim);">---</span>
-                <div id="admin-badge" style="display:none; font-size:10px; color:var(--accent); font-weight:900; margin-top:4px;">SUPER ADMIN</div>
+                <div id="admin-badge" style="display:none; font-size:10px; color:var(--accent); font-weight:900; margin-top:4px;">MASTER ADMIN ENABLED</div>
             </div>
         </div>
+
+        <div id="admin-panel">
+            <h3 style="color:var(--error); margin-bottom:5px;">System Override</h3>
+            <p style="font-size:11px; color:var(--dim); margin-bottom:15px;">Enter an email to wipe it from the program entirely.</p>
+            <input type="email" id="admin-target-email" placeholder="Target User Email" style="border-color:var(--error);">
+            <button class="btn-prime btn-danger" onclick="masterWipeUser()" style="margin-top:10px; background:var(--error); color:#fff;">GLOBAL WIPE USER</button>
+        </div>
         
-        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Personalization</p>
+        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase; margin-top:25px;">Personalization</p>
         <div class="theme-grid">
             <div class="theme-dot" style="background:#000; color:#ffd60a;" onclick="updateTheme('theme-midnight')">Dark</div>
             <div class="theme-dot" style="background:#05010d; color:#ff00ff;" onclick="updateTheme('theme-cyber')">Cyber</div>
@@ -172,12 +179,12 @@
             <div class="theme-dot" style="background:#120000; color:#ff3b3b;" onclick="updateTheme('theme-ruby')">Ruby</div>
         </div>
 
-        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase; margin-top:25px;">Agendas</p>
+        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase; margin-top:25px;">My Agendas</p>
         <div id="agendas-list"></div>
         
         <button class="btn-prime btn-ghost" onclick="handleSwitchAccount()" style="margin-top:20px;">Switch User</button>
         <button class="btn-prime" onclick="auth.signOut()" style="margin-top:10px;">Sign Out</button>
-        <button id="del-btn" class="btn-prime btn-danger" onclick="handleDeleteAccount()" style="margin-top:10px;">Wipe Account</button>
+        <button class="btn-prime btn-danger" onclick="handleDeleteAccount()" style="margin-top:10px;">Delete My Account</button>
     </div></div>
 
     <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()"><div class="modal-sheet" onclick="event.stopPropagation()">
@@ -195,7 +202,7 @@
         const auth = firebase.auth(), db = firebase.firestore();
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        const ADMIN_EMAIL = "burgerman0316@gmail.com";
+        const SUPER_ADMIN = "burgerman0316@gmail.com";
         let activeTab = '', allTasks = [], agendas = [], editId = null, vCode = "", signupTemp = null;
 
         function setVisibility(s) {
@@ -225,12 +232,10 @@
             document.getElementById('u-email').innerText = user.email;
             document.getElementById('u-avatar').innerText = (user.displayName || "U")[0].toUpperCase();
             
-            if(user.email === ADMIN_EMAIL) {
+            // Check for Super Admin
+            if(user.email === SUPER_ADMIN) {
                 document.getElementById('admin-badge').style.display = 'block';
-                document.getElementById('del-btn').innerText = "ADMIN WIPE";
-            } else {
-                document.getElementById('admin-badge').style.display = 'none';
-                document.getElementById('del-btn').innerText = "Wipe Account";
+                document.getElementById('admin-panel').style.display = 'block';
             }
 
             agendas = data.agendas || [];
@@ -243,6 +248,44 @@
             setVisibility('app');
         }
 
+        // --- MASTER ADMIN OVERRIDE ---
+        async function masterWipeUser() {
+            if (auth.currentUser.email !== SUPER_ADMIN) return;
+            
+            const target = document.getElementById('admin-target-email').value;
+            if(!target) return alert("Enter a target email.");
+            
+            if(!confirm(`SYSTEM OVERRIDE: Delete all data for ${target}?`)) return;
+
+            setVisibility('loading');
+            try {
+                // Find the user document by email in Firestore
+                const userQuery = await db.collection('users').where('email', '==', target).get();
+                if(userQuery.empty) {
+                    // Try to search by tasks if user doc hasn't been created yet
+                    const taskQuery = await db.collection('tasks').where('uid_email', '==', target).get();
+                    if(taskQuery.empty) throw new Error("User not found in database.");
+                }
+
+                // Delete all tasks associated with that email
+                // Note: Standard tasks use uid. For global admin to work, we search by a task field or delete all.
+                // In this simplified admin, we wipe based on the target's found UID
+                const targetUid = userQuery.docs[0].id;
+                const tasks = await db.collection('tasks').where('uid', '==', targetUid).get();
+                const batch = db.batch();
+                tasks.forEach(t => batch.delete(t.ref));
+                batch.delete(db.collection('users').doc(targetUid));
+                
+                await batch.commit();
+                alert(`SUCCESS: All data for ${target} has been purged.`);
+                document.getElementById('admin-target-email').value = '';
+            } catch(e) {
+                alert("Error: " + e.message);
+            }
+            setVisibility('app');
+        }
+
+        // --- STANDARD APP LOGIC (Restored fully) ---
         async function handleGoogleLogin() {
             setVisibility('loading');
             try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
@@ -276,6 +319,8 @@
                 try {
                     const res = await auth.createUserWithEmailAndPassword(signupTemp.email, signupTemp.pass);
                     await res.user.updateProfile({displayName: signupTemp.name});
+                    // Save email in doc for admin lookup
+                    await db.collection('users').doc(res.user.uid).set({email: signupTemp.email, agendas:[], theme:'theme-midnight'});
                 } catch(e) { alert(e.message); setVisibility('landing'); }
             }
         }
@@ -287,20 +332,14 @@
 
         async function handleDeleteAccount() {
             const u = auth.currentUser;
-            const isAdmin = u.email === ADMIN_EMAIL;
-            
-            if(!confirm(isAdmin ? "ADMIN: This will permanently purge this account data." : "Delete your account and all tasks?")) return;
-            
+            if(!confirm("Delete your account and all tasks?")) return;
             setVisibility('loading');
             try {
-                // Delete user data first
                 const tasks = await db.collection('tasks').where('uid', '==', u.uid).get();
                 const batch = db.batch();
                 tasks.forEach(t => batch.delete(t.ref));
                 await batch.commit();
                 await db.collection('users').doc(u.uid).delete();
-                
-                // Finally delete auth profile
                 await u.delete();
                 location.reload();
             } catch(e) {
@@ -311,7 +350,7 @@
 
         async function completeOnboarding() {
             const n = document.getElementById('intro-name').value || "Agenda";
-            const data = { theme: 'theme-midnight', agendas: [{id: n, type: 'Standard'}] };
+            const data = { email: auth.currentUser.email, theme: 'theme-midnight', agendas: [{id: n, type: 'Standard'}] };
             await db.collection('users').doc(auth.currentUser.uid).set(data);
             initApp(auth.currentUser, data);
         }
