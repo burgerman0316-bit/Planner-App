@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.4.2</title>
+    <title>Agenda Pro | V3.4.3</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -19,7 +19,7 @@
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        /* Full Theme Engine */
+        /* Themes */
         body.theme-midnight { --bg: #000; --card: #1c1c1e; --accent: #ffd60a; --icon-color: #ffd60a; }
         body.theme-solar { --bg: #1a1a1a; --card: #242424; --accent: #ffb300; --icon-color: #ffb300; }
         body.theme-cyber { --bg: #05010d; --card: #12042b; --accent: #ff00ff; --icon-color: #ff00ff; }
@@ -35,12 +35,10 @@
         .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Auth UI */
-        .full-screen { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; overflow-y: auto; text-align: center; }
+        /* Landing */
+        .full-screen { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
         .auth-container { width: 100%; max-width: 400px; display: none; flex-direction: column; gap: 12px; }
         .auth-container.active { display: flex; }
-        .auth-container h1 { font-size: 54px; letter-spacing: -4px; margin-bottom: 20px; }
-        .subtitle { font-size: 11px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 30px; font-weight: 700; }
         
         .btn-prime { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-prime:active { transform: scale(0.98); }
@@ -49,12 +47,10 @@
         .btn-ghost { background: transparent; color: var(--dim); border: 1px solid var(--border); margin-top: 10px; }
         .btn-danger { background: rgba(255, 55, 95, 0.1); color: var(--error); border: 1px solid var(--error); }
 
-        .error-msg { color: var(--error); font-size: 13px; font-weight: 600; min-height: 20px; }
-
         /* App Shell */
-        #app-shell { display: none; flex-direction: column; height: 100vh; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; }
+        #app-shell { display: none; flex-direction: column; height: 100vh; opacity: 0; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         #app-shell.ready { opacity: 1; }
-        #app-shell.modal-active { transform: scale(0.94); filter: blur(20px); pointer-events: none; }
+        #app-shell.modal-active { transform: scale(0.94); filter: blur(15px); pointer-events: none; }
 
         header { padding-top: calc(var(--safe-top) + 20px); padding-bottom: 10px; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; flex-shrink: 0; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 25px; }
@@ -65,89 +61,74 @@
 
         .nav-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 5px 25px 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .nav-scroller::-webkit-scrollbar { display: none; }
-
-        .tab-pill { flex-shrink: 0; padding: 10px 22px; border-radius: 50px; background: var(--card); color: var(--dim); font-size: 13px; font-weight: 800; border: 1px solid var(--border); transition: 0.2s ease; cursor: pointer; }
-        .tab-pill.active { background: var(--accent); color: #000; border-color: var(--accent); transform: scale(1.02); }
+        .tab-pill { flex-shrink: 0; padding: 10px 22px; border-radius: 50px; background: var(--card); color: var(--dim); font-size: 13px; font-weight: 800; border: 1px solid var(--border); cursor: pointer; }
+        .tab-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
         main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 300px; }
         .month-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
         .month-label::after { content: ""; height: 1px; background: var(--border); flex: 1; }
 
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .card-body b { display: block; font-size: 17px; margin-bottom: 4px; }
         .card-body span { font-size: 13px; color: var(--dim); }
-        .trash-icon { width: 20px; height: 20px; fill: none; stroke: var(--error); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; cursor: pointer; }
+        .trash-icon { width: 20px; height: 20px; fill: none; stroke: var(--error); stroke-width: 2.5; }
 
-        /* Modals */
-        .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: 0.4s; backdrop-filter: blur(8px); }
+        /* CUSTOM MODAL SYSTEM */
+        .modal-overlay { position: fixed; inset: 0; z-index: 6000; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: 0.3s; backdrop-filter: blur(10px); }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 30px; padding-bottom: calc(var(--safe-bottom) + 10px); transform: translateY(100%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); max-height: 95vh; display: flex; flex-direction: column; overflow-y: auto; }
+        .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 30px; padding-bottom: calc(var(--safe-bottom) + 20px); transform: translateY(100%); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); }
         .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
         footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 15px); background: linear-gradient(to top, var(--bg) 90%, transparent); z-index: 50; }
         .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 12px; }
-        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
         input, select { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 18px; font-size: 15px; width: 100%; outline: none; }
+        .error-msg { color: var(--error); font-size: 12px; margin-top: 5px; min-height: 15px; font-weight: 700; }
     </style>
 </head>
 <body class="theme-midnight">
 
-    <div id="global-loader">
-        <div class="spinner"></div>
-    </div>
+    <div id="global-loader"><div class="spinner"></div></div>
 
     <div id="screen-landing" class="full-screen">
-        <h1 style="font-size: 64px; letter-spacing: -4px; margin-bottom: 5px;">Agenda.</h1>
-        <div class="subtitle">Private Workspace</div>
-
+        <h1 style="font-size: 64px; letter-spacing: -4px;">Agenda.</h1>
+        <div style="font-size: 11px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 40px; font-weight: 700;">Private Workspace</div>
         <div class="auth-container active" id="auth-main">
             <button class="btn-prime btn-save" onclick="showAuth('auth-login')">Sign In</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-signup')">Create Account</button>
-            <div style="margin: 20px 0; color: var(--dim); font-size: 12px; font-weight:800;">OR</div>
+            <div style="margin: 20px 0; color: var(--dim); font-size: 10px; font-weight:800;">OR</div>
             <button class="btn-prime" style="background:#fff; color:#000;" onclick="handleGoogleLogin()">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="width:18px;">
                 Continue with Google
             </button>
         </div>
-
         <div class="auth-container" id="auth-signup">
-            <h2>New Account</h2>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="su-first" placeholder="First">
-                <input type="text" id="su-last" placeholder="Last">
-            </div>
-            <input type="email" id="su-email" placeholder="Email Address">
-            <input type="password" id="su-pass" placeholder="Password">
-            <input type="password" id="su-repass" placeholder="Confirm Password">
+            <h2>Join Agenda</h2>
+            <div style="display:flex; gap:10px;"><input type="text" id="su-first" placeholder="First"><input type="text" id="su-last" placeholder="Last"></div>
+            <input type="email" id="su-email" placeholder="Email"><input type="password" id="su-pass" placeholder="Password">
             <div class="error-msg" id="su-error"></div>
             <button class="btn-prime btn-save" id="signup-btn" onclick="handleSignUpProcess()">Sign Up</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-main')">Back</button>
         </div>
-
         <div class="auth-container" id="auth-login">
             <h2>Welcome Back</h2>
-            <input type="email" id="li-email" placeholder="Email">
-            <input type="password" id="li-pass" placeholder="Password">
+            <input type="email" id="li-email" placeholder="Email"><input type="password" id="li-pass" placeholder="Password">
             <div class="error-msg" id="li-error"></div>
             <button class="btn-prime btn-save" onclick="handleEmailLogin()">Sign In</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-main')">Back</button>
         </div>
-
         <div class="auth-container" id="auth-verify">
-            <h2>Verify Email</h2>
-            <p style="color:var(--dim); font-size:14px;">Verification code sent to email.</p>
+            <h2>Enter Code</h2>
             <input type="text" id="v-code" placeholder="000000" maxlength="6" style="text-align:center; font-size:32px; letter-spacing:8px;">
             <div class="error-msg" id="v-error"></div>
-            <button class="btn-prime btn-save" onclick="validateCode()">Verify Account</button>
+            <button class="btn-prime btn-save" onclick="validateCode()">Verify</button>
         </div>
     </div>
 
     <div id="screen-intro" class="full-screen">
         <div class="auth-container active">
             <h2 id="intro-welcome">Welcome!</h2>
-            <p style="color:var(--dim); margin-bottom:20px;">Let's set up your first agenda.</p>
-            <input type="text" id="intro-agenda-name" placeholder="e.g. Work, School">
-            <button class="btn-prime btn-save" onclick="completeOnboarding()" style="margin-top:20px;">Complete Setup</button>
+            <input type="text" id="intro-agenda-name" placeholder="First Agenda Name (e.g. Daily)">
+            <button class="btn-prime btn-save" onclick="completeOnboarding()" style="margin-top:20px;">Complete</button>
         </div>
     </div>
 
@@ -165,388 +146,260 @@
         <main id="main-content"></main>
         <footer>
             <div class="input-box">
-                <div class="input-row">
-                    <input type="text" id="t-input" placeholder="Event name...">
-                    <input type="date" id="d-input" style="width:145px;">
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <input type="text" id="t-input" placeholder="Task name...">
+                    <input type="date" id="d-input" style="width:140px;">
                 </div>
-                <button class="btn-prime btn-add" id="s-btn" onclick="handleTaskSubmit()">Add to Agenda</button>
-                <button class="btn-prime" id="cancel-edit" style="display:none; margin-top:8px; background:var(--dim); color:white;" onclick="resetForm()">Cancel</button>
+                <button class="btn-prime btn-add" id="s-btn" onclick="handleTaskSubmit()">Add Item</button>
+                <button id="cancel-edit" style="display:none; width:100%; background:none; border:none; color:var(--dim); margin-top:10px; font-weight:800;" onclick="resetForm()">CANCEL EDIT</button>
             </div>
         </footer>
     </div>
 
-    <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
-        <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2 style="margin-bottom:10px;">Settings</h2>
-            <div id="account-display" style="padding:15px; background:var(--bg); border-radius:20px; margin-bottom:20px; display:flex; align-items:center; gap:15px;">
-                <img id="user-photo" src="" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--accent);">
-                <div><b id="user-name">User</b><br><span id="user-email" style="font-size:12px; color:var(--dim);"></span></div>
-            </div>
-
-            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Accounts</p>
-            <button class="btn-prime" onclick="handleSwitchAccount()" style="background:var(--input-bg); border:1px solid var(--border); color:var(--text); margin-bottom:15px;">
-                Switch Account
-            </button>
-
-            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Theme</p>
-            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:20px;">
-                <button class="tab-pill" onclick="updateTheme('theme-midnight')">Midnight</button>
-                <button class="tab-pill" onclick="updateTheme('theme-solar')">Solar</button>
-                <button class="tab-pill" onclick="updateTheme('theme-cyber')">Cyber</button>
-                <button class="tab-pill" onclick="updateTheme('theme-forest')">Forest</button>
-                <button class="tab-pill" onclick="updateTheme('theme-silver')">Silver</button>
-            </div>
-            
-            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">My Agendas</p>
-            <div id="settings-agendas-list"></div>
-            
-            <button class="btn-prime" onclick="auth.signOut()" style="background:var(--card); border:1px solid var(--border); margin-top:25px; color:var(--text);">Log Out</button>
-            <button class="btn-prime btn-danger" onclick="openModal('modal-confirm-delete')" style="margin-top:10px;">Delete Account</button>
+    <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()"><div class="modal-sheet" onclick="event.stopPropagation()">
+        <h2>Settings</h2>
+        <div style="padding:15px; background:var(--bg); border-radius:20px; margin-bottom:20px; display:flex; align-items:center; gap:15px;">
+            <img id="user-photo" src="" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--accent);">
+            <div><b id="user-name"></b><br><span id="user-email" style="font-size:12px; color:var(--dim);"></span></div>
         </div>
-    </div>
-
-    <div id="modal-confirm-delete" class="modal-overlay" onclick="closeAllModals()">
-        <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2 style="color:var(--error);">Final Warning</h2>
-            <p style="color:var(--dim); font-size:14px; margin-bottom:25px;">This will permanently wipe all your agendas and data. To confirm, please type your email below:</p>
-            <input type="email" id="delete-confirm-email" placeholder="Your Email Address" style="margin-bottom:20px; border-color:var(--error);">
-            <div class="error-msg" id="del-error"></div>
-            <button class="btn-prime btn-save" style="background:var(--error); color:#fff;" onclick="handleDeleteAccount()">Wipe Everything</button>
-            <button class="btn-prime btn-ghost" onclick="closeAllModals()">Cancel</button>
+        <button class="btn-prime" onclick="handleSwitchAccount()" style="background:var(--input-bg); border:1px solid var(--border); color:var(--text); margin-bottom:15px;">Switch Account</button>
+        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Themes</p>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:20px;">
+            <button class="tab-pill" onclick="updateTheme('theme-midnight')">Midnight</button>
+            <button class="tab-pill" onclick="updateTheme('theme-solar')">Solar</button>
+            <button class="tab-pill" onclick="updateTheme('theme-cyber')">Cyber</button>
         </div>
-    </div>
+        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Agendas</p>
+        <div id="settings-agendas-list"></div>
+        <button class="btn-prime" onclick="auth.signOut()" style="margin-top:20px;">Log Out</button>
+        <button class="btn-prime btn-danger" onclick="openModal('modal-confirm-delete')" style="margin-top:10px;">Delete Account</button>
+    </div></div>
 
-    <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()">
-        <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2>New Agenda</h2>
-            <input type="text" id="n-list-name" placeholder="Name (e.g. Travel)">
-            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase; margin-top:15px;">Agenda Type</p>
-            <select id="n-list-type" style="margin-bottom: 20px;">
-                <option value="Standard">Standard List</option>
-                <option value="Countdown">Countdown (Days until)</option>
-                <option value="Finance">Finance ($ Amount)</option>
-            </select>
-            <button class="btn-prime btn-save" onclick="createNewAgenda()">Create</button>
-        </div>
-    </div>
+    <div id="modal-confirm-delete" class="modal-overlay" onclick="closeAllModals()"><div class="modal-sheet" onclick="event.stopPropagation()">
+        <h2 style="color:var(--error);">Wipe Account?</h2>
+        <p style="color:var(--dim); font-size:14px; margin-bottom:20px;">Type your email to confirm deletion:</p>
+        <input type="email" id="delete-confirm-email" placeholder="Email" style="border-color:var(--error);">
+        <div class="error-msg" id="del-error"></div>
+        <button class="btn-prime btn-save" style="background:var(--error); color:#fff; margin-top:15px;" onclick="handleDeleteAccount()">Permanently Delete</button>
+    </div></div>
+
+    <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()"><div class="modal-sheet" onclick="event.stopPropagation()">
+        <h2>New Agenda</h2>
+        <input type="text" id="n-list-name" placeholder="Name">
+        <select id="n-list-type" style="margin:15px 0 20px;"><option value="Standard">Standard</option><option value="Countdown">Countdown</option><option value="Finance">Finance</option></select>
+        <button class="btn-prime btn-save" onclick="createNewAgenda()">Create</button>
+    </div></div>
+
+    <div id="modal-action" class="modal-overlay"><div class="modal-sheet">
+        <h2 id="action-title">Confirm</h2>
+        <p id="action-desc" style="color:var(--dim); font-size:15px; line-height:1.5;"></p>
+        <div id="action-buttons" style="display:flex; flex-direction:column; gap:10px; margin-top:20px;"></div>
+    </div></div>
 
     <script>
-        const EMAILJS_SERVICE_ID = "service_ow9m3kg";
-        const EMAILJS_TEMPLATE_ID = "template_7xhxmoi";
-        const EMAILJS_PUBLIC_KEY = "RsAYqiwym2mViUR8u";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
-            authDomain: "plannerapp-ff221.firebaseapp.com",
-            projectId: "plannerapp-ff221",
-            storageBucket: "plannerapp-ff221.appspot.com",
-            messagingSenderId: "282165391993",
-            appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8"
-        };
+        const EMAILJS_SERVICE_ID="service_ow9m3kg", EMAILJS_TEMPLATE_ID="template_7xhxmoi", EMAILJS_PUBLIC_KEY="RsAYqiwym2mViUR8u";
+        const firebaseConfig = { apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY", authDomain: "plannerapp-ff221.firebaseapp.com", projectId: "plannerapp-ff221", storageBucket: "plannerapp-ff221.appspot.com", messagingSenderId: "282165391993", appId: "1:282165391993:web:cd1b9e50b03a68edfb9aa8" };
 
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const auth = firebase.auth(), db = firebase.firestore();
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        let activeTab = 'General';
-        let allTasks = [];
-        let agendas = [];
-        let editId = null;
-        let vCode = "";
-        let signupTemp = null;
-
+        let activeTab = 'General', allTasks = [], agendas = [], editId = null, vCode = "", signupTemp = null;
         const trashSvg = `<svg class="trash-icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>`;
 
+        // CUSTOM DIALOG ENGINE
+        function showConfirm(title, desc, onConfirm) {
+            document.getElementById('action-title').innerText = title;
+            document.getElementById('action-desc').innerText = desc;
+            const container = document.getElementById('action-buttons');
+            container.innerHTML = `
+                <button class="btn-prime btn-save" id="action-confirm-btn">Confirm</button>
+                <button class="btn-prime btn-ghost" onclick="closeAllModals()">Cancel</button>
+            `;
+            document.getElementById('action-confirm-btn').onclick = () => { onConfirm(); closeAllModals(); };
+            openModal('modal-action');
+        }
+
+        function showAlert(title, desc) {
+            document.getElementById('action-title').innerText = title;
+            document.getElementById('action-desc').innerText = desc;
+            document.getElementById('action-buttons').innerHTML = `<button class="btn-prime btn-save" onclick="closeAllModals()">OK</button>`;
+            openModal('modal-action');
+        }
+
         // UI HELPERS
-        function setVisibility(screen) {
-            const loader = document.getElementById('global-loader');
-            const landing = document.getElementById('screen-landing');
-            const intro = document.getElementById('screen-intro');
-            const shell = document.getElementById('app-shell');
-
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 500);
-
-            landing.style.display = (screen === 'landing') ? 'flex' : 'none';
-            intro.style.display = (screen === 'intro') ? 'flex' : 'none';
-            shell.style.display = (screen === 'app') ? 'flex' : 'none';
-            
-            if(screen === 'app') setTimeout(() => shell.classList.add('ready'), 50);
-            else shell.classList.remove('ready');
+        function setVisibility(s) {
+            document.getElementById('global-loader').style.opacity = '0';
+            setTimeout(()=>document.getElementById('global-loader').style.display='none', 500);
+            document.getElementById('screen-landing').style.display = (s==='landing'?'flex':'none');
+            document.getElementById('screen-intro').style.display = (s==='intro'?'flex':'none');
+            document.getElementById('app-shell').style.display = (s==='app'?'flex':'none');
+            if(s==='app') setTimeout(()=>document.getElementById('app-shell').classList.add('ready'), 50);
         }
 
         function showAuth(id) {
-            document.querySelectorAll('.auth-container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.auth-container').forEach(c=>c.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        // AUTH ENGINE
+        function openModal(id) {
+            const m = document.getElementById(id);
+            m.style.display = 'flex';
+            setTimeout(()=>{m.classList.add('active'); document.getElementById('app-shell').classList.add('modal-active');}, 10);
+            if(id==='modal-settings') renderSettingsList();
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('active'));
+            document.getElementById('app-shell').classList.remove('modal-active');
+            setTimeout(()=>document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'), 400);
+        }
+
+        // AUTH
         auth.onAuthStateChanged(async user => {
             if (user) {
                 const doc = await db.collection('users').doc(user.uid).get();
-                if(!doc.exists) {
-                    setVisibility('intro');
-                    document.getElementById('intro-welcome').innerText = `Hi, ${user.displayName ? user.displayName.split(' ')[0] : 'there'}!`;
-                } else {
-                    initApp(user, doc.data());
-                }
-            } else {
-                setVisibility('landing');
-            }
+                if(!doc.exists) setVisibility('intro');
+                else initApp(user, doc.data());
+            } else setVisibility('landing');
         });
 
+        async function handleGoogleLogin() { try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());}catch(e){} }
         async function handleEmailLogin() {
-            const e = document.getElementById('li-email').value.trim();
-            const p = document.getElementById('li-pass').value;
-            if(!e || !p) return;
-            auth.signInWithEmailAndPassword(e, p).catch(err => { document.getElementById('li-error').innerText = "Incorrect login details."; });
+            const e=document.getElementById('li-email').value, p=document.getElementById('li-pass').value;
+            auth.signInWithEmailAndPassword(e,p).catch(()=>document.getElementById('li-error').innerText="Login failed.");
         }
-
-        async function handleGoogleLogin() {
-            try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } catch(e) {}
-        }
-
-        async function handleSwitchAccount() {
-            await auth.signOut();
-            setVisibility('landing');
-            showAuth('auth-main');
-        }
+        async function handleSwitchAccount() { await auth.signOut(); setVisibility('landing'); showAuth('auth-main'); closeAllModals(); }
 
         async function handleSignUpProcess() {
-            const f = document.getElementById('su-first').value.trim();
-            const l = document.getElementById('su-last').value.trim();
-            const e = document.getElementById('su-email').value.trim();
-            const p = document.getElementById('su-pass').value;
-            const rp = document.getElementById('su-repass').value;
-            const err = document.getElementById('su-error');
-            const btn = document.getElementById('signup-btn');
-
-            if(!f || !e || !p) return err.innerText = "Please fill all fields.";
-            if(p !== rp) return err.innerText = "Passwords do not match.";
-
-            signupTemp = { email: e, pass: p, name: `${f} ${l}` };
-            vCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-            btn.innerText = "Sending Code...";
-            btn.disabled = true;
-
+            const f=document.getElementById('su-first').value, e=document.getElementById('su-email').value, p=document.getElementById('su-pass').value;
+            if(!f || !e || !p) return;
+            signupTemp = { email: e, pass: p, name: f };
+            vCode = Math.floor(100000+Math.random()*900000).toString();
             try {
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                    to_email: e,
-                    verification_code: vCode,
-                    user_name: signupTemp.name
-                });
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {to_email:e, verification_code:vCode, user_name:f});
                 showAuth('auth-verify');
-            } catch (error) {
-                err.innerText = "Verification failed to send.";
-            } finally {
-                btn.innerText = "Sign Up";
-                btn.disabled = false;
-            }
+            } catch(err) { document.getElementById('su-error').innerText="Email error."; }
         }
 
         async function validateCode() {
-            const input = document.getElementById('v-code').value;
-            if(input === vCode) {
+            if(document.getElementById('v-code').value === vCode) {
                 try {
                     const res = await auth.createUserWithEmailAndPassword(signupTemp.email, signupTemp.pass);
-                    await res.user.updateProfile({ displayName: signupTemp.name });
-                } catch(e) { document.getElementById('v-error').innerText = e.message; }
-            } else {
-                document.getElementById('v-error').innerText = "Incorrect verification code.";
-            }
-        }
-
-        // ACCOUNT DELETION (FIXED)
-        async function handleDeleteAccount() {
-            const user = auth.currentUser;
-            const confirmEmail = document.getElementById('delete-confirm-email').value.trim();
-            const err = document.getElementById('del-error');
-
-            if (confirmEmail !== user.email) {
-                err.innerText = "Email does not match current user.";
-                return;
-            }
-
-            if (!confirm("Are you absolutely sure? This cannot be undone.")) return;
-
-            document.getElementById('global-loader').style.display = 'flex';
-            document.getElementById('global-loader').style.opacity = '1';
-
-            try {
-                // 1. Delete Firestore Data
-                const taskSnap = await db.collection('tasks').where('uid', '==', user.uid).get();
-                const batch = db.batch();
-                taskSnap.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-                await db.collection('users').doc(user.uid).delete();
-
-                // 2. Delete Auth User
-                await user.delete();
-                location.reload();
-            } catch (e) {
-                document.getElementById('global-loader').style.display = 'none';
-                if (e.code === 'auth/requires-recent-login') {
-                    err.innerText = "Security error: Please log out and back in, then try again immediately.";
-                } else {
-                    err.innerText = "Error: " + e.message;
-                }
-            }
+                    await res.user.updateProfile({displayName: signupTemp.name});
+                } catch(e){document.getElementById('v-error').innerText=e.message;}
+            } else document.getElementById('v-error').innerText="Wrong code.";
         }
 
         // APP LOGIC
-        async function completeOnboarding() {
-            const name = document.getElementById('intro-agenda-name').value.trim() || "Tasks";
-            const data = { theme: 'theme-midnight', agendas: [{id: name, type: 'Standard'}] };
-            await db.collection('users').doc(auth.currentUser.uid).set(data);
-            initApp(auth.currentUser, data);
-        }
-
-        function initApp(user, data) {
+        async function initApp(user, data) {
             document.getElementById('user-photo').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`;
-            document.getElementById('user-name').innerText = user.displayName || "User";
+            document.getElementById('user-name').innerText = user.displayName;
             document.getElementById('user-email').innerText = user.email;
-            agendas = data.agendas || [];
-            activeTab = agendas[0]?.id || 'General';
+            agendas = data.agendas || []; activeTab = agendas[0]?.id;
             document.body.className = data.theme || 'theme-midnight';
-            
-            db.collection("tasks").where("uid", "==", user.uid).onSnapshot(snap => {
-                allTasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            db.collection("tasks").where("uid","==",user.uid).onSnapshot(snap => {
+                allTasks = snap.docs.map(d => ({id:d.id, ...d.data()}));
                 render();
             });
             setVisibility('app');
         }
 
-        async function updateTheme(t) {
-            document.body.className = t;
-            await db.collection('users').doc(auth.currentUser.uid).update({ theme: t });
+        async function completeOnboarding() {
+            const n = document.getElementById('intro-agenda-name').value || "Daily";
+            const d = { theme:'theme-midnight', agendas:[{id:n, type:'Standard'}] };
+            await db.collection('users').doc(auth.currentUser.uid).set(d);
+            initApp(auth.currentUser, d);
         }
 
-        // MODAL SYSTEM
-        window.openModal = (id) => {
-            const m = document.getElementById(id);
-            m.style.display = 'flex';
-            setTimeout(() => { m.classList.add('active'); document.getElementById('app-shell').classList.add('modal-active'); }, 10);
-            if(id === 'modal-settings') renderSettingsList();
-        };
-
-        window.closeAllModals = () => {
-            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-            document.getElementById('app-shell').classList.remove('modal-active');
-            setTimeout(() => document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'), 400);
-        };
-
-        // CRUD
-        function handleTaskSubmit() {
-            const name = document.getElementById('t-input').value;
-            const date = document.getElementById('d-input').value;
-            if(!name || !date) return;
-            const data = { name, date, category: activeTab, uid: auth.currentUser.uid };
-            
-            if (editId) {
-                db.collection("tasks").doc(editId).update(data);
-                resetForm();
-            } else {
-                db.collection("tasks").add(data);
-                document.getElementById('t-input').value = '';
-            }
-        }
-
-        function startEdit(id) {
-            const t = allTasks.find(x => x.id === id);
-            document.getElementById('t-input').value = t.name;
-            document.getElementById('d-input').value = t.date;
-            editId = id;
-            document.getElementById('s-btn').innerText = "Update";
-            document.getElementById('cancel-edit').style.display = "block";
-        }
-
-        function resetForm() {
-            editId = null;
-            document.getElementById('t-input').value = '';
-            document.getElementById('d-input').value = '';
-            document.getElementById('s-btn').innerText = "Add to Agenda";
-            document.getElementById('cancel-edit').style.display = "none";
-        }
+        async function updateTheme(t) { document.body.className=t; await db.collection('users').doc(auth.currentUser.uid).update({theme:t}); }
 
         async function createNewAgenda() {
-            const n = document.getElementById('n-list-name').value.trim();
-            const t = document.getElementById('n-list-type').value;
+            const n=document.getElementById('n-list-name').value, t=document.getElementById('n-list-type').value;
             if(!n) return;
-            agendas.push({id: n, type: t});
-            activeTab = n;
+            agendas.push({id:n, type:t}); activeTab=n;
             await db.collection('users').doc(auth.currentUser.uid).update({agendas});
-            document.getElementById('n-list-name').value = '';
             closeAllModals();
-            render();
         }
 
-        async function deleteAgenda(id) {
-            if(agendas.length <= 1) return alert("You must keep at least one agenda.");
-            if(!confirm('Delete this entire agenda?')) return;
-            agendas = agendas.filter(x => x.id !== id);
-            activeTab = agendas[0].id;
-            await db.collection('users').doc(auth.currentUser.uid).update({agendas});
-            render(); renderSettingsList();
+        function handleTaskSubmit() {
+            const name=document.getElementById('t-input').value, date=document.getElementById('d-input').value;
+            if(!name || !date) return;
+            const data = {name, date, category:activeTab, uid:auth.currentUser.uid};
+            if(editId) { db.collection("tasks").doc(editId).update(data); resetForm(); }
+            else { db.collection("tasks").add(data); document.getElementById('t-input').value=''; }
+        }
+
+        function resetForm() { editId=null; document.getElementById('t-input').value=''; document.getElementById('s-btn').innerText="Add Item"; document.getElementById('cancel-edit').style.display='none'; }
+
+        async function handleDeleteAccount() {
+            const u=auth.currentUser, e=document.getElementById('delete-confirm-email').value;
+            if(e!==u.email) return document.getElementById('del-error').innerText="Email mismatch.";
+            
+            showConfirm("Final Wipe", "This will erase everything. Proceed?", async () => {
+                const snap = await db.collection('tasks').where('uid','==',u.uid).get();
+                const batch = db.batch(); snap.forEach(d => batch.delete(d.ref));
+                await batch.commit(); await db.collection('users').doc(u.uid).delete();
+                await u.delete(); location.reload();
+            });
         }
 
         function renderSettingsList() {
             document.getElementById('settings-agendas-list').innerHTML = agendas.map(a => `
-                <div style="display:flex; justify-content:space-between; padding:15px; background:var(--bg); margin-bottom:5px; border-radius:12px;">
+                <div style="display:flex; justify-content:space-between; padding:15px; background:var(--bg); border-radius:15px; margin-bottom:8px;">
                     <span>${a.id}</span>
-                    <div onclick="deleteAgenda('${a.id}')">${trashSvg}</div>
+                    <div onclick="confirmAgendaDelete('${a.id}')">${trashSvg}</div>
                 </div>
             `).join('');
         }
 
-        function render() {
-            const tabBar = document.getElementById('tab-bar');
-            tabBar.innerHTML = agendas.map(a => `
-                <div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>
-            `).join('');
-            
-            const curType = agendas.find(a => a.id === activeTab)?.type || 'Standard';
-            const filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
-            const main = document.getElementById('main-content');
-            main.innerHTML = '';
+        function confirmAgendaDelete(id) {
+            if(agendas.length <= 1) return showAlert("Action Blocked", "You need at least one agenda.");
+            showConfirm("Delete Agenda", `Delete "${id}" and all its tasks?`, async () => {
+                agendas = agendas.filter(x => x.id !== id);
+                activeTab = agendas[0].id;
+                await db.collection('users').doc(auth.currentUser.uid).update({agendas});
+                renderSettingsList();
+            });
+        }
 
-            const groups = {};
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        function render() {
+            document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id===activeTab?'active':''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
+            const type = agendas.find(a=>a.id===activeTab)?.type;
+            const filtered = allTasks.filter(t=>t.category===activeTab).sort((a,b)=>new Date(a.date)-new Date(b.date));
+            const main = document.getElementById('main-content'); main.innerHTML = '';
             
+            let currentMonth = "";
             filtered.forEach(t => {
                 const d = new Date(t.date + "T00:00:00");
-                const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(t);
-            });
-
-            for (const key in groups) {
-                const sec = document.createElement('div');
-                sec.style.marginBottom = "30px";
-                sec.innerHTML = `<div class="month-label">${key}</div>`;
+                const mLabel = d.toLocaleString('default', {month:'long', year:'numeric'});
+                if(mLabel !== currentMonth) {
+                    currentMonth = mLabel;
+                    main.innerHTML += `<div class="month-label">${mLabel}</div>`;
+                }
                 
-                groups[key].forEach(task => {
-                    const target = new Date(task.date + "T00:00:00");
-                    const diff = Math.ceil((target - new Date()) / 86400000);
-                    let badge = '', displayTitle = task.name;
+                const diff = Math.ceil((new Date(t.date)-new Date())/86400000);
+                let badge = (type==='Countdown') ? `<div style="color:var(--accent); font-weight:900;">${diff}d</div>` : '';
+                let title = (type==='Finance') ? `$${t.name}` : t.name;
 
-                    if (curType === 'Countdown') badge = `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PAST' : diff + 'd'}</div>`;
-                    else if (curType === 'Finance') displayTitle = `$${task.name}`;
-
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.onclick = () => startEdit(task.id);
-                    card.innerHTML = `
-                        <div class="card-body"><b>${displayTitle}</b><span>${task.date}</span></div>
-                        <div style="display:flex; align-items:center; gap:16px;">
+                main.innerHTML += `
+                    <div class="card" onclick="startEdit('${t.id}')">
+                        <div class="card-body"><b>${title}</b><span>${t.date}</span></div>
+                        <div style="display:flex; align-items:center; gap:15px;">
                             ${badge}
-                            <div style="padding:10px;" onclick="event.stopPropagation(); if(confirm('Delete Task?')) db.collection('tasks').doc('${task.id}').delete();">${trashSvg}</div>
-                        </div>`;
-                    sec.appendChild(card);
-                });
-                main.appendChild(sec);
-            }
+                            <div onclick="event.stopPropagation(); showConfirm('Delete Task', 'Remove this item?', ()=>db.collection('tasks').doc('${t.id}').delete())">${trashSvg}</div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function startEdit(id) {
+            const t = allTasks.find(x=>x.id===id);
+            document.getElementById('t-input').value = t.name;
+            document.getElementById('d-input').value = t.date;
+            editId = id;
+            document.getElementById('s-btn').innerText = "Update Item";
+            document.getElementById('cancel-edit').style.display = 'block';
         }
     </script>
 </body>
