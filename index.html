@@ -3,216 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V4.9</title>
+    <title>Agenda Pro | V4.3</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
-    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
-            --bg: #000; --card: #121212; --border: #282828; --text: #ffffff;
-            --dim: #777; --accent: #ffffff; --error: #ff453a;
+            --bg: #000; --card: #111; --border: #262626; --text: #fff;
+            --dim: #777; --accent: #ffd60a; --error: #ff453a;
             --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Auth Gate Styling */
-        #auth-gate { 
-            position: fixed; inset: 0; background: #000; z-index: 10000; 
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; padding: 30px; overflow-y: auto;
-        }
+        /* Auth Screen */
+        #auth-gate { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        .btn-stack { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
+        .btn-auth { width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .btn-google { background: #fff; color: #000; }
+        .btn-gh { background: #24292e; color: #fff; }
+        .btn-dc { background: #5865F2; color: #fff; }
+        .btn-ph { background: #34c759; color: #fff; }
+        .btn-mail { background: transparent; color: #fff; border: 1px solid var(--border); }
+        .btn-auth:active { transform: scale(0.96); }
+
+        /* App Layout */
+        #app-shell { display: none; flex-direction: column; height: 100vh; }
+        header { padding: calc(var(--safe-top) + 20px) 25px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         
-        .auth-container { width: 100%; max-width: 360px; text-align: center; }
-        .logo { font-size: 52px; font-weight: 900; letter-spacing: -3.5px; margin: 0 0 30px 0; }
-
-        .btn-stack { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-        .btn-auth { 
-            width: 100%; padding: 15px 20px; border-radius: 14px; border: none; 
-            font-weight: 700; cursor: pointer; font-size: 15px; 
-            display: grid; grid-template-columns: 30px 1fr 30px; align-items: center;
-            transition: 0.2s;
-        }
-        
-        .btn-google { background: #ffffff; color: #000; }
-        .btn-github { background: #24292e; color: #fff; }
-        .btn-discord { background: #5865F2; color: #fff; }
-        .btn-phone { background: #1a1a1a; color: #fff; border: 1px solid var(--border); }
-        
-        .icon-box { display: flex; align-items: center; justify-content: center; }
-        .icon-box svg { width: 20px; height: 20px; }
-
-        .btn-auth:active { transform: scale(0.97); }
-
-        .email-form { 
-            background: #0a0a0a; border: 1px solid var(--border); 
-            padding: 24px; border-radius: 22px; text-align: left;
-        }
-        .email-form label { font-size: 10px; color: var(--dim); text-transform: uppercase; font-weight: 800; margin-left: 2px; letter-spacing: 1px; }
-        .email-form input { 
-            width: 100%; background: #151515; border: 1px solid var(--border); 
-            color: #fff; padding: 14px; border-radius: 12px; margin: 6px 0 16px 0; outline: none; font-size: 16px;
-        }
-        .btn-login { width: 100%; background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
-
-        /* Main App Layout Restored */
-        #app-shell { display: none; flex-direction: column; height: 100vh; width: 100%; }
-        
-        header { 
-            padding: calc(var(--safe-top) + 20px) 25px 15px; 
-            border-bottom: 1px solid var(--border); 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: #000;
-        }
-
-        main { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            /* Extra bottom padding to ensure content isn't hidden by the footer */
-            padding-bottom: 300px; 
-        }
-        
-        .task-card { 
-            background: var(--card); border: 1px solid var(--border); 
-            border-radius: 20px; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            animation: slideUp 0.3s ease-out;
-        }
-
+        main { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 260px; }
+        .task-item { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Footer / Input Panel Restored */
-        footer { 
-            position: fixed; 
-            bottom: 0; 
-            width: 100%; 
-            padding: 20px; 
-            padding-bottom: calc(var(--safe-bottom) + 20px);
-            background: linear-gradient(to top, #000 85%, transparent);
-            z-index: 100;
-        }
+        footer { position: fixed; bottom: 0; width: 100%; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 20px); background: linear-gradient(to top, #000 85%, transparent); }
+        .input-pill { background: #080808; border: 1px solid var(--border); border-radius: 28px; padding: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 -15px 40px rgba(0,0,0,0.5); }
+        input { background: transparent; border: none; color: #fff; padding: 10px 15px; font-size: 16px; outline: none; }
+        .btn-add { background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase; }
 
-        .input-panel { 
-            background: #080808; 
-            border: 1px solid var(--border); 
-            border-radius: 28px; 
-            padding: 16px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .input-panel input { 
-            background: transparent; 
-            border: none; 
-            color: #fff; 
-            padding: 8px; 
-            font-size: 16px; 
-            outline: none; 
-            border-bottom: 1px solid #1a1a1a;
-        }
-
-        .input-panel input:focus { border-bottom-color: var(--dim); }
-
-        .btn-submit { 
-            background: var(--accent); 
-            color: #000; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 18px; 
-            font-weight: 900; 
-            cursor: pointer; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
         #recaptcha-container { display: none; }
     </style>
 </head>
 <body>
 
     <div id="auth-gate">
-        <div class="auth-container">
-            <h1 class="logo">Agenda.</h1>
-            
-            <div class="btn-stack">
-                <button class="btn-auth btn-google" onclick="socialAuth('google')">
-                    <div class="icon-box">
-                        <svg viewBox="0 0 24 24" fill="#000">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81.38z"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                    </div>
-                    <span>Continue with Google</span>
-                    <div></div> 
-                </button>
-
-                <button class="btn-auth btn-github" onclick="socialAuth('github')">
-                    <div class="icon-box"><i data-lucide="github"></i></div>
-                    <span>Continue with GitHub</span>
-                    <div></div>
-                </button>
-
-                <button class="btn-auth btn-discord" onclick="socialAuth('discord')">
-                    <div class="icon-box">
-                        <svg viewBox="0 0 24 24" fill="white"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.23 10.23 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.196.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-                    </div>
-                    <span>Continue with Discord</span>
-                    <div></div>
-                </button>
-
-                <button class="btn-auth btn-phone" onclick="phoneAuthFlow()">
-                    <div class="icon-box"><i data-lucide="smartphone"></i></div>
-                    <span>Continue with Phone</span>
-                    <div></div>
-                </button>
-            </div>
-
-            <div class="email-form">
-                <label>Email Address</label>
-                <input type="email" id="email-in" placeholder="name@email.com">
-                <label>Password</label>
-                <input type="password" id="pass-in" placeholder="••••••••">
-                <button class="btn-login" onclick="emailPasswordAuth()">Sign Up / Sign In</button>
-            </div>
+        <h1 style="font-size: 52px; letter-spacing: -3px; margin-bottom: 35px;">Agenda.</h1>
+        <div class="btn-stack">
+            <button class="btn-auth btn-google" onclick="handleAuth('google')">Sign in with Google</button>
+            <button class="btn-auth btn-gh" onclick="handleAuth('github')">Sign in with GitHub</button>
+            <button class="btn-auth btn-dc" onclick="handleAuth('discord')">Sign in with Discord</button>
+            <button class="btn-auth btn-ph" onclick="phoneFlow()">Sign in with Phone</button>
+            <button class="btn-auth btn-mail" onclick="magicLinkFlow()">Sign in with Email</button>
         </div>
         <div id="recaptcha-container"></div>
     </div>
 
     <div id="app-shell">
         <header>
-            <h2 id="display-name" style="margin:0; font-size:28px; letter-spacing:-1.5px;">My Day</h2>
-            <button onclick="auth.signOut()" style="background:none; border:none; color:var(--error); font-weight:800; font-size: 12px; cursor: pointer;">LOGOUT</button>
+            <h2 id="greet" style="margin:0; font-size:28px; letter-spacing:-1px;">My Day</h2>
+            <button onclick="auth.signOut()" style="background:none; border:none; color:var(--error); font-weight:700; font-size:12px; letter-spacing:1px;">LOGOUT</button>
         </header>
 
-        <main id="task-list"></main>
+        <main id="list"></main>
 
         <footer>
-            <div class="input-panel">
-                <input type="text" id="task-title" placeholder="What needs to be done?">
-                <input type="date" id="task-date">
-                <button class="btn-submit" onclick="saveTask()">Add to Cloud</button>
+            <div class="input-pill">
+                <input type="text" id="in-name" placeholder="What's the goal?">
+                <input type="date" id="in-date">
+                <button class="btn-add" onclick="addTask()">Add Task</button>
             </div>
         </footer>
     </div>
 
     <script>
-        lucide.createIcons();
-
         const firebaseConfig = {
             apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
             authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -226,68 +92,74 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        async function socialAuth(type) {
+        // Magic Link Handler
+        if (auth.isSignInWithEmailLink(window.location.href)) {
+            let email = window.localStorage.getItem('emailForSignIn') || window.prompt('Confirm your email:');
+            auth.signInWithEmailLink(email, window.location.href).then(() => {
+                window.localStorage.removeItem('emailForSignIn');
+            });
+        }
+
+        async function handleAuth(type) {
             let provider;
             if (type === 'google') provider = new firebase.auth.GoogleAuthProvider();
             if (type === 'github') provider = new firebase.auth.GithubAuthProvider();
-            if (type === 'discord') provider = new firebase.auth.OAuthProvider('yahoo.com');
+            if (type === 'discord') provider = new firebase.auth.OAuthProvider('yahoo.com'); // Using Yahoo provider slot for Discord
+            
             try { await auth.signInWithPopup(provider); } catch(e) { alert(e.message); }
         }
 
-        async function emailPasswordAuth() {
-            const email = document.getElementById('email-in').value;
-            const pass = document.getElementById('pass-in').value;
-            if(!email || !pass) return alert("Missing fields");
-            try {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } catch (error) {
-                if (error.code === 'auth/user-not-found') {
-                    await auth.createUserWithEmailAndPassword(email, pass);
-                } else { alert(error.message); }
-            }
-        }
-
-        async function phoneAuthFlow() {
-            const num = prompt("Phone Number (+ country code):");
+        async function phoneFlow() {
+            const num = prompt("Phone Number (include + country code):");
             if (!num) return;
             const verifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {size: 'invisible'});
             const confirmation = await auth.signInWithPhoneNumber(num, verifier);
-            const code = prompt("Enter SMS code:");
+            const code = prompt("Enter 6-digit code:");
             await confirmation.confirm(code);
         }
 
+        async function magicLinkFlow() {
+            const email = prompt("Enter your email:");
+            if (!email) return;
+            const settings = { url: window.location.href, handleCodeInApp: true };
+            await auth.sendSignInLinkToEmail(email, settings);
+            window.localStorage.setItem('emailForSignIn', email);
+            alert("Check your email for the magic link!");
+        }
+
         auth.onAuthStateChanged(user => {
-            if (user) {
+            if(user) {
                 document.getElementById('auth-gate').style.display = 'none';
                 document.getElementById('app-shell').style.display = 'flex';
-                document.getElementById('display-name').innerText = user.displayName || user.email?.split('@')[0] || user.phoneNumber;
-                loadTasks(user.uid);
+                document.getElementById('greet').innerText = user.displayName || user.phoneNumber || user.email.split('@')[0];
+                startSync(user.uid);
             } else {
                 document.getElementById('auth-gate').style.display = 'flex';
                 document.getElementById('app-shell').style.display = 'none';
             }
         });
 
-        function saveTask() {
-            const name = document.getElementById('task-title').value;
-            const date = document.getElementById('task-date').value;
+        function addTask() {
+            const name = document.getElementById('in-name').value;
+            const date = document.getElementById('in-date').value;
             if(!name || !date) return;
-            db.collection("tasks").add({ name, date, uid: auth.currentUser.uid, created: Date.now() });
-            document.getElementById('task-title').value = '';
+            if(navigator.vibrate) navigator.vibrate(10);
+            db.collection("tasks").add({ name, date, uid: auth.currentUser.uid, ts: Date.now() });
+            document.getElementById('in-name').value = '';
         }
 
-        function loadTasks(uid) {
-            db.collection("tasks").where("uid", "==", uid).orderBy("created", "desc").onSnapshot(snap => {
-                const list = document.getElementById('task-list');
+        function startSync(uid) {
+            db.collection("tasks").where("uid", "==", uid).orderBy("ts", "desc").onSnapshot(snap => {
+                const list = document.getElementById('list');
                 list.innerHTML = snap.docs.map(doc => {
                     const t = doc.data();
                     return `
-                        <div class="task-card">
+                        <div class="task-item">
                             <div>
                                 <div style="font-weight:700; font-size:18px;">${t.name}</div>
-                                <div style="color:var(--dim); font-size:13px; margin-top:4px;">${t.date}</div>
+                                <div style="color:var(--dim); font-size:12px; margin-top:4px;">${t.date}</div>
                             </div>
-                            <button onclick="db.collection('tasks').doc('${doc.id}').delete()" style="background:none; border:none; color:var(--error); font-size:24px; cursor: pointer;">✕</button>
+                            <button onclick="db.collection('tasks').doc('${doc.id}').delete()" style="background:none; border:none; color:var(--error); font-size:22px;">✕</button>
                         </div>
                     `;
                 }).join('');
