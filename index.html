@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V4.8.1</title>
+    <title>Agenda Pro | V4.8.2</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -61,7 +61,7 @@
             width: 100%; background: #151515; border: 1px solid var(--border); 
             color: #fff; padding: 14px; border-radius: 12px; margin: 6px 0 16px 0; outline: none; font-size: 16px;
         }
-        .btn-login { width: 100%; background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; }
+        .btn-login { width: 100%; background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
 
         /* App Layout */
         #app-shell { display: none; flex-direction: column; height: 100vh; }
@@ -132,7 +132,7 @@
                 <input type="email" id="email-in" placeholder="name@email.com">
                 <label>Password</label>
                 <input type="password" id="pass-in" placeholder="••••••••">
-                <button class="btn-login" onclick="emailPasswordAuth()">Enter Agenda</button>
+                <button class="btn-login" onclick="emailPasswordAuth()">Sign Up / Sign In</button>
             </div>
         </div>
         <div id="recaptcha-container"></div>
