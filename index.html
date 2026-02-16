@@ -19,103 +19,109 @@
             --bg-dark: #121212; --bg-card: #1e1e1e; --sidebar-bg: #181818;
             --border: #2a2a2a; --text-main: #ffffff; --text-dim: #888888;
             --accent: #333333; --radius: 50px; 
-            --field-h: 44px;
         }
         
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; -webkit-user-select: none; user-select: none; }
-        input { -webkit-user-select: text; user-select: text; font-family: inherit; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none;
+            -webkit-user-select: none; 
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
 
-        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; background-color: var(--bg-dark); color: var(--text-main); }
+        input { -webkit-user-select: text; user-select: text; }
+
+        html, body {
+            margin: 0; padding: 0; height: 100%; overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+        }
+
         #app { display: none; flex-direction: column; height: 100vh; }
         
-        /* HEADER - Fixed Plus Placement */
         #nav-bar {
             background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border);
-            padding: 10px 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
+            padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); 
             display: flex; align-items: center; justify-content: space-between;
         }
 
-        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; align-items: center; padding-right: 10px; }
-        #planner-tabs::-webkit-scrollbar { display: none; }
+        #planner-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; align-items: center; }
         
         .nav-tab { 
-            padding: 8px 18px; border-radius: 20px; color: var(--text-dim); 
+            position: relative; padding: 8px 18px; border-radius: 20px; color: var(--text-dim); 
             font-size: 15px; font-weight: 600; white-space: nowrap; 
-            border: 1px solid transparent; display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s ease; border: 1px solid transparent;
+            display: flex; align-items: center; gap: 8px;
         }
         .nav-tab.active { background: var(--accent); color: white; }
-        .plus-tab { font-size: 24px; color: var(--text-dim); padding: 0 10px; cursor: pointer; }
+        .tab-del-x { color: #ff453a; font-size: 14px; font-weight: 800; padding: 0 2px; }
 
-        .out-btn { background: #ffffff; color: #000; padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; }
+        .nav-tab.moving { border: 1px dashed #ffd60a; animation: shake 0.3s infinite; }
+        @keyframes shake { 0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); } }
 
-        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 240px; }
-        #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        .header-btns { display: flex; align-items: center; gap: 12px; }
+        .out-btn { background: #ffffff; color: #000; padding: 6px 14px; border-radius: 12px; font-weight: 800; font-size: 10px; text-transform: uppercase; }
+
+        #content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 200px; }
+        #list-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
         
-        /* TASK CARDS */
         .entry-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 30px;
-            padding: 16px 20px; margin-bottom: 12px; min-height: 90px;
-            display: flex; align-items: center;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 18px 25px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* EDIT MODE ALIGNMENT */
-        .edit-container { display: grid; grid-template-columns: 1fr 40px; gap: 12px; width: 100%; align-items: center; }
-        .input-stack { display: flex; flex-direction: column; gap: 6px; }
-        .edit-input { 
-            background: #000; border: 1px solid var(--border); color: white; 
-            border-radius: 15px; padding: 0 15px; font-size: 15px; 
-            height: var(--field-h); width: 100%;
-        }
-        .btn-stack { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .icon-btn { font-size: 22px; font-weight: bold; cursor: pointer; }
-
-        /* FOOTER */
         #footer {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(25, 25, 25, 0.98); backdrop-filter: blur(40px);
+            background: rgba(30, 30, 30, 0.98); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
             border-top: 1px solid var(--border); border-radius: 30px 30px 0 0;
-            padding: 20px; padding-bottom: calc(15px + env(safe-area-inset-bottom));
-            display: flex; flex-direction: column; gap: 10px; z-index: 1000;
+            padding: 15px 20px 10px 20px; display: flex; flex-direction: column; gap: 8px; z-index: 1000;
         }
 
-        .input-row { display: flex; gap: 8px; }
-        .f-input { background: #000; border: 1px solid var(--border); color: white; padding: 0 20px; border-radius: var(--radius); font-size: 16px; flex: 1; height: 50px; }
-        .f-date { position: relative; background: #000; border: 1px solid var(--border); border-radius: var(--radius); width: 100px; height: 50px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .f-date input { position: absolute; opacity: 0; inset: 0; }
+        .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
+        input[type="text"] { background: #000; border: 1px solid var(--border); color: white; padding: 0 22px; border-radius: var(--radius); font-size: 16px; flex: 1; height: 50px; }
         
-        .add-btn { background: #ffffff; color: #000; border: none; height: 55px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; }
-        .tip { text-align: center; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .date-btn-wrapper { position: relative; background: #000; border: 1px solid var(--border); border-radius: var(--radius); width: 110px; height: 50px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .date-btn-wrapper input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+        .date-label { color: var(--text-main); font-size: 11px; font-weight: 800; pointer-events: none; }
+
+        .save-btn { width: 100%; background: #ffffff; color: #000; border: none; height: 50px; border-radius: var(--radius); font-weight: 900; text-transform: uppercase; font-size: 14px; }
+        
+        .footer-tip { 
+            text-align: center; font-size: 8px; color: var(--text-dim); 
+            text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom)); 
+        }
 
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
-<body onclick="closeEdit()">
+<body oncontextmenu="return false;">
 
 <div id="login-overlay">
-    <button class="add-btn" style="padding:0 40px;" onclick="auth.signInWithPopup(provider)">Sign in with Google</button>
+    <h1 style="color:white; font-size:32px; margin-bottom:20px;">Agenda</h1>
+    <button class="save-btn" style="width:auto; padding:0 40px;" onclick="popLogin()">Sign in with Google</button>
 </div>
 
 <div id="app">
-    <div id="nav-bar" onclick="event.stopPropagation()">
+    <div id="nav-bar">
         <div id="planner-tabs"></div>
-        <div class="out-btn" onclick="auth.signOut()">OUT</div>
+        <div class="header-btns">
+            <span onclick="createNewList()" style="font-size: 24px; color: var(--text-dim); cursor: pointer; padding-left: 10px;">+</span>
+            <div onclick="auth.signOut()" class="out-btn">SIGN OUT</div>
+        </div>
     </div>
-    
-    <div id="content">
-        <span id="list-label">List</span>
-        <div id="task-list"></div>
-    </div>
-
-    <div id="footer" onclick="event.stopPropagation()">
+    <div id="content"><span id="list-label">List</span><div id="task-list"></div></div>
+    <div id="footer">
         <div class="input-row">
-            <input type="text" id="itemName" class="f-input" placeholder="Task Name...">
-            <div class="f-date">
-                <span id="dateDisplay" style="font-size:10px; font-weight:800;">DATE</span>
-                <input type="date" id="itemDate" onchange="document.getElementById('dateDisplay').innerText = 'SET'">
+            <input type="text" id="itemName" placeholder="Task Name...">
+            <div class="date-btn-wrapper">
+                <span class="date-label" id="dateDisplay">DATE</span>
+                <input type="date" id="itemDate" onchange="document.getElementById('dateDisplay').innerText = this.value">
             </div>
         </div>
-        <button class="add-btn" onclick="saveTask()">Add to List</button>
-        <div class="tip">Tap text to edit • Hold tabs to delete/move</div>
+        <button class="save-btn" onclick="saveTask()">Add to List</button>
+        <div class="footer-tip">Press and hold on tabs at the top to edit or delete them!</div>
     </div>
 </div>
 
@@ -134,47 +140,98 @@
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    let activePlanner = 'Assignments';
-    let planners = ['Assignments', 'Game Releases'];
-    let allEntries = [];
-    let editingId = null;
-    let moveMode = null;
-    let pressTimer;
+    function popLogin() { 
+        auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message)); 
+    }
 
-    function haptic() { if (window.navigator.vibrate) window.navigator.vibrate(15); }
-    function closeEdit() { if(editingId) { editingId = null; render(); } }
-
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
-            loadData(user.uid);
-        } else {
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.getElementById('app').style.display = 'none';
+    auth.onAuthStateChanged((user) => {
+        if (user) { 
+            document.getElementById('login-overlay').style.display = 'none'; 
+            document.getElementById('app').style.display = 'flex'; 
+            loadData(user.uid); 
+        } else { 
+            document.getElementById('login-overlay').style.display = 'flex'; 
+            document.getElementById('app').style.display = 'none'; 
         }
     });
 
+    let activePlanner = 'Assignments';
+    let allEntries = [];
+    let planners = ['Assignments', 'Game Releases'];
+    let moveMode = null;
+    let pressTimer;
+
+    function haptic() { if (window.navigator && window.navigator.vibrate) { window.navigator.vibrate(15); } }
+
+    document.addEventListener('touchstart', (e) => {
+        if (moveMode && !e.target.closest('.nav-tab')) {
+            moveMode = null;
+            haptic();
+            render();
+        }
+    }, { passive: true });
+
+    function startPress(p) {
+        window.getSelection().removeAllRanges();
+        pressTimer = window.setTimeout(function() {
+            haptic();
+            moveMode = p;
+            window.getSelection().removeAllRanges();
+            render();
+        }, 600);
+    }
+    function cancelPress() { clearTimeout(pressTimer); }
+
     function loadData(uid) {
-        db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
+        db.collection("tasks").where("uid", "==", uid).onSnapshot((snap) => {
             allEntries = snap.docs.map(d => ({id: d.id, ...d.data()}));
             render();
+        }, (error) => {
+            alert("Database Error: " + error.message);
         });
     }
 
     function saveTask() {
         haptic();
-        const n = document.getElementById('itemName'), d = document.getElementById('itemDate');
-        if(!n.value || !d.value) return;
-        db.collection("tasks").add({ name: n.value, date: d.value, uid: auth.currentUser.uid, category: activePlanner, createdAt: Date.now() });
-        n.value = ''; d.value = ''; document.getElementById('dateDisplay').innerText = 'DATE';
+        const nameInput = document.getElementById('itemName');
+        const dateInput = document.getElementById('itemDate');
+        
+        if(!nameInput.value || !dateInput.value) {
+            alert("Please enter a name and a date.");
+            return;
+        }
+
+        // ADD DATA TO FIREBASE
+        db.collection("tasks").add({ 
+            name: nameInput.value, 
+            date: dateInput.value, 
+            uid: auth.currentUser.uid, 
+            category: activePlanner, 
+            createdAt: Date.now() 
+        })
+        .then(() => {
+            // Clear inputs ONLY after success
+            nameInput.value = ''; 
+            dateInput.value = '';
+            document.getElementById('dateDisplay').innerText = 'DATE';
+        })
+        .catch((error) => {
+            // If this pops up, your Firebase Rules are blocking the save
+            alert("Save Failed: " + error.message);
+        });
     }
 
-    function handleTab(e, p) {
-        if (e.target.innerText === '✕') {
+    window.deleteTask = function(id) { 
+        haptic(); 
+        db.collection("tasks").doc(id).delete().catch(e => alert(e.message)); 
+    };
+
+    window.handleTap = function(e, p) {
+        if (e.target.classList.contains('tab-del-x')) {
             e.stopPropagation();
-            if (planners.length > 1) {
-                planners = planners.filter(i => i !== p);
+            if (planners.length <= 1) return;
+            if (confirm(`Delete "${p}"?`)) {
+                planners = planners.filter(item => item !== p);
                 if (activePlanner === p) activePlanner = planners[0];
                 moveMode = null; render();
             }
@@ -182,51 +239,44 @@
         }
         if (moveMode) {
             if (moveMode !== p) {
-                const f = planners.indexOf(moveMode), t = planners.indexOf(p);
-                planners.splice(f, 1); planners.splice(t, 0, moveMode);
+                const fromIdx = planners.indexOf(moveMode);
+                const toIdx = planners.indexOf(p);
+                planners.splice(fromIdx, 1);
+                planners.splice(toIdx, 0, moveMode);
             }
-            moveMode = null; render();
+            moveMode = null; haptic(); render();
         } else {
-            activePlanner = p; render();
+            haptic(); activePlanner = p; render();
         }
+    };
+
+    function createNewList() {
+        const n = prompt("New list name:");
+        if(n && !planners.includes(n)) { planners.push(n); activePlanner = n; render(); }
     }
 
     function render() {
         const tabs = document.getElementById('planner-tabs');
         tabs.innerHTML = planners.map(p => `
-            <div class="nav-tab ${p === activePlanner ? 'active' : ''}" 
-                 onclick="handleTab(event, '${p}')"
-                 ontouchstart="pressTimer=setTimeout(()=>{haptic();moveMode='${p}';render()},600)"
-                 ontouchend="clearTimeout(pressTimer)">
-                ${p} ${moveMode === p ? '<span style="color:#ff453a;margin-left:5px">✕</span>' : ''}
+            <div class="nav-tab ${p === activePlanner ? 'active' : ''} ${p === moveMode ? 'moving' : ''}" 
+                 onclick="handleTap(event, '${p}')"
+                 ontouchstart="startPress('${p}')"
+                 ontouchend="cancelPress()"
+                 oncontextmenu="return false;">
+                 ${p}
+                 ${p === moveMode ? '<span class="tab-del-x">✕</span>' : ''}
             </div>
-        `).join('') + `<div class="plus-tab" onclick="const n=prompt('Name:');if(n)planners.push(n);render()">+</div>`;
+        `).join('');
 
+        document.getElementById('list-label').innerText = activePlanner;
         const list = document.getElementById('task-list');
         const items = allEntries.filter(e => e.category === activePlanner);
-        list.innerHTML = items.map(e => {
-            if (editingId === e.id) {
-                return `
-                <div class="entry-card" onclick="event.stopPropagation()">
-                    <div class="edit-container">
-                        <div class="input-stack">
-                            <input type="text" class="edit-input" id="edN${e.id}" value="${e.name}">
-                            <input type="date" class="edit-input" id="edD${e.id}" value="${e.date}">
-                        </div>
-                        <div class="btn-stack">
-                            <div class="icon-btn" style="color:#34c759" onclick="db.collection('tasks').doc('${e.id}').update({name:document.getElementById('edN${e.id}').value, date:document.getElementById('edD${e.id}').value});editingId=null">✓</div>
-                            <div class="icon-btn" style="color:#ff453a" onclick="editingId=null;render()">✕</div>
-                        </div>
-                    </div>
-                </div>`;
-            }
-            return `
-            <div class="entry-card" onclick="event.stopPropagation(); editingId='${e.id}'; render();">
-                <div style="flex:1"><b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small></div>
-                <div style="color:#ff453a; font-weight:bold; padding:10px" onclick="event.stopPropagation(); db.collection('tasks').doc('${e.id}').delete()">✕</div>
-            </div>`;
-        }).join('') || '<p style="text-align:center; color:gray; margin-top:40px;">No entries.</p>';
-        document.getElementById('list-label').innerText = activePlanner;
+        list.innerHTML = items.length ? items.map(e => `
+            <div class="entry-card">
+                <div><b>${e.name}</b><br><small style="color:var(--text-dim)">${e.date}</small></div>
+                <div style="color:#ff453a; font-weight:bold; cursor:pointer;" onclick="deleteTask('${e.id}')">✕</div>
+            </div>
+        `).join('') : '<p style="text-align:center; color:gray; margin-top:60px;">No entries.</p>';
     }
     render();
 </script>
