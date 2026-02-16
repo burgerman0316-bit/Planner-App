@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V2.4</title>
+    <title>Agenda Pro | V2.6</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -22,31 +22,30 @@
             --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 20px);
             --input-bg: #1c1c1e;
+            --icon-color: #ffffff;
         }
 
-        /* --- THEME LIBRARY --- */
         body.theme-light {
             --bg: #f2f2f7; --card: #ffffff; --border: #d1d1d6;
             --text: #000000; --dim: #636366; --accent: #007aff;
-            --input-bg: #e5e5ea;
+            --input-bg: #e5e5ea; --icon-color: #000000;
         }
         body.theme-paper {
             --bg: #f9f5eb; --card: #ffffff; --border: #e4dccf;
             --text: #1c2b2d; --dim: #7d9d9c; --accent: #eb6440;
-            --input-bg: #f0ebe3;
-        }
-        body.theme-nord {
-            --bg: #2e3440; --card: #3b4252; --border: #4c566a;
-            --text: #eceff4; --dim: #a3be8c; --accent: #88c0d0;
-            --input-bg: #242933;
-        }
-        body.theme-emerald {
-            --bg: #040d06; --card: #0d1a10; --border: #152a1a;
-            --text: #e8f5e9; --dim: #81c784; --accent: #34c759;
-            --input-bg: #000000;
+            --input-bg: #f0ebe3; --icon-color: #1c2b2d;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, sans-serif; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            font-family: -apple-system, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        input, textarea { user-select: text; -webkit-user-select: text; }
+
         body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; transition: background 0.4s ease; }
 
         #app-shell { display: none; flex-direction: column; height: 100vh; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s; }
@@ -55,6 +54,10 @@
         header { padding-top: calc(var(--safe-top) + 40px); padding-bottom: 20px; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 25px; }
         .header-top h1 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -1.2px; }
+
+        /* SVG Icon Style */
+        .icon-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; color: var(--icon-color); }
+        .icon-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         .nav-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 0 25px 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .nav-scroller::-webkit-scrollbar { display: none; }
@@ -68,30 +71,29 @@
         .month-label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
         .month-label::after { content: ""; height: 1px; background: var(--border); flex: 1; }
 
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 22px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 22px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .card-body b { display: block; font-size: 18px; margin-bottom: 4px; }
         .card-body span { font-size: 14px; color: var(--dim); }
 
-        /* MODALS */
         .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-sheet { background: var(--card); color: var(--text); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 35px; padding-bottom: calc(var(--safe-bottom) + 30px); transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); }
+        .modal-sheet { background: var(--card); color: var(--text); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 35px; padding-bottom: calc(var(--safe-bottom) + 30px); transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); overflow-y: auto; max-height: 90vh; }
         .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
-        /* SETTINGS LIST REORDERING */
-        .sortable-ghost { opacity: 0.3; background: var(--accent) !important; }
-        .settings-item { background: var(--bg); padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); cursor: default; }
-        .drag-handle { cursor: grab; padding: 10px; color: var(--dim); font-size: 20px; }
+        #settings-agendas-list { border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-top: 10px; }
+        .settings-item { background: var(--bg); padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .settings-item:last-child { border-bottom: none; }
+        .drag-handle { cursor: grab; padding: 10px; color: var(--dim); font-size: 20px; margin-right: 5px; }
+        .sortable-ghost { opacity: 0.1; background: var(--accent); }
 
-        /* FOOTER */
         footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 25px; padding-bottom: calc(var(--safe-bottom) + 20px); background: linear-gradient(to top, var(--bg) 80%, transparent); z-index: 50; }
         .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 35px; padding: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
         .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
-        input, select { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); padding: 16px; border-radius: 20px; font-size: 16px; width: 100%; }
+        input, select { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); padding: 16px; border-radius: 20px; font-size: 16px; width: 100%; outline: none; }
 
         .btn-prime { width: 100%; padding: 20px; border-radius: 22px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         .btn-add { background: var(--text); color: var(--bg); }
-        .btn-save { background: var(--accent); color: #fff; }
+        .btn-save { background: var(--accent); color: #000; }
 
         .build-footer { text-align: center; margin-top: 30px; color: var(--dim); font-size: 11px; font-family: monospace; letter-spacing: 1.5px; opacity: 0.6; }
         #login-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
@@ -114,21 +116,21 @@
             <div style="margin-bottom:30px;">
                 <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Themes</p>
                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                    <button class="tab-pill" style="font-size:10px;" onclick="setTheme('theme-midnight')">Dark</button>
-                    <button class="tab-pill" style="font-size:10px;" onclick="setTheme('theme-light')">Light</button>
-                    <button class="tab-pill" style="font-size:10px;" onclick="setTheme('theme-paper')">Paper</button>
+                    <button class="tab-pill" style="font-size:11px;" onclick="setTheme('theme-midnight')">Dark</button>
+                    <button class="tab-pill" style="font-size:11px;" onclick="setTheme('theme-light')">Light</button>
+                    <button class="tab-pill" style="font-size:11px;" onclick="setTheme('theme-paper')">Paper</button>
                 </div>
             </div>
 
             <div style="margin-bottom:30px;">
-                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Reorder / Manage Lists (Drag ≡)</p>
-                <div id="settings-agendas-list" style="border: 1px solid var(--border); border-radius:20px; overflow:hidden;"></div>
+                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:5px;">Agendas (Drag ≡ to reorder)</p>
+                <div id="settings-agendas-list"></div>
             </div>
 
             <button class="btn-prime" onclick="auth.signOut()" style="background:var(--error); color:white; font-size:12px;">Sign Out</button>
 
             <div class="build-footer">
-                VERSION 2.4.0 <br>
+                VERSION 2.6.0 <br>
                 BUILD 2026.02.15_RELEASE
             </div>
         </div>
@@ -151,8 +153,12 @@
             <div class="header-top">
                 <h1>Agenda</h1>
                 <div style="display:flex; gap:20px; align-items:center;">
-                    <span style="font-size:36px; font-weight:200; cursor:pointer;" onclick="openModal('modal-new-list')">+</span>
-                    <span style="font-size:22px; cursor:pointer;" onclick="openModal('modal-settings')">⚙️</span>
+                    <div class="icon-btn" onclick="openModal('modal-new-list')">
+                        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    </div>
+                    <div class="icon-btn" onclick="openModal('modal-settings')">
+                        <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                    </div>
                 </div>
             </div>
             <div class="nav-scroller" id="tab-bar"></div>
@@ -187,8 +193,9 @@
 
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = JSON.parse(localStorage.getItem('agendas_v6')) || [{id:'General', type:'Standard'}, {id:'Releases', type:'Countdown'}];
+        let agendas = JSON.parse(localStorage.getItem('agendas_v8')) || [{id:'General', type:'Standard'}, {id:'Releases', type:'Countdown'}];
         let editId = null;
+        let sortableInstance = null;
 
         function handleLogin() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 
@@ -207,6 +214,7 @@
             db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
                 allTasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 render();
+                if(document.getElementById('modal-settings').classList.contains('active')) renderSettingsList();
             });
         }
 
@@ -216,6 +224,7 @@
                 document.getElementById(id).classList.add('active');
                 document.getElementById('app-shell').classList.add('modal-active');
             }, 10);
+            if(id === 'modal-settings') renderSettingsList();
         };
 
         window.closeAllModals = () => {
@@ -224,8 +233,8 @@
             setTimeout(() => document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'), 400);
         };
 
-        window.setTheme = (t) => { document.body.className = t; localStorage.setItem('theme_v6', t); };
-        if(localStorage.getItem('theme_v6')) setTheme(localStorage.getItem('theme_v6'));
+        window.setTheme = (t) => { document.body.className = t; localStorage.setItem('theme_v8', t); };
+        if(localStorage.getItem('theme_v8')) setTheme(localStorage.getItem('theme_v8'));
 
         window.createNewAgenda = () => {
             const n = document.getElementById('n-list-name').value.trim();
@@ -237,6 +246,22 @@
             document.getElementById('n-list-name').value = '';
             closeAllModals();
             render();
+        };
+
+        window.renameAgenda = (oldId) => {
+            const newName = prompt("Rename agenda:", oldId);
+            if (!newName || newName === oldId) return;
+            const batch = db.batch();
+            allTasks.filter(t => t.category === oldId).forEach(t => {
+                batch.update(db.collection('tasks').doc(t.id), {category: newName});
+            });
+            batch.commit().then(() => {
+                agendas = agendas.map(a => a.id === oldId ? {...a, id: newName} : a);
+                if (activeTab === oldId) activeTab = newName;
+                saveAgendas();
+                render();
+                renderSettingsList();
+            });
         };
 
         window.handleTaskSubmit = () => {
@@ -274,21 +299,30 @@
             document.getElementById('cancel-edit').style.display = "none";
         };
 
-        function saveAgendas() { localStorage.setItem('agendas_v6', JSON.stringify(agendas)); }
+        function saveAgendas() { localStorage.setItem('agendas_v8', JSON.stringify(agendas)); }
 
-        function initSortable() {
-            const el = document.getElementById('settings-agendas-list');
-            Sortable.create(el, {
+        function renderSettingsList() {
+            const setList = document.getElementById('settings-agendas-list');
+            setList.innerHTML = agendas.map(a => `
+                <div class="settings-item" data-id="${a.id}">
+                    <div style="display:flex; align-items:center;">
+                        <span class="drag-handle">≡</span>
+                        <span style="font-weight:700;">${a.id}</span>
+                    </div>
+                    <div style="display:flex; gap:12px;">
+                        <span style="color:var(--accent); font-size:12px; font-weight:900;" onclick="renameAgenda('${a.id}')">RENAME</span>
+                        <span style="color:var(--error); font-size:12px; font-weight:900;" onclick="if(confirm('Delete?')){agendas=agendas.filter(x=>x.id!=='${a.id}');saveAgendas();render();renderSettingsList();}">DELETE</span>
+                    </div>
+                </div>
+            `).join('');
+
+            if (sortableInstance) sortableInstance.destroy();
+            sortableInstance = Sortable.create(setList, {
                 handle: '.drag-handle',
-                animation: 150,
-                onEnd: function () {
-                    const newOrder = [];
-                    el.querySelectorAll('.settings-item').forEach(item => {
-                        const id = item.getAttribute('data-id');
-                        const found = agendas.find(a => a.id === id);
-                        if(found) newOrder.push(found);
-                    });
-                    agendas = newOrder;
+                animation: 200,
+                onEnd: () => {
+                    const newIds = Array.from(setList.querySelectorAll('.settings-item')).map(el => el.getAttribute('data-id'));
+                    agendas = newIds.map(id => agendas.find(a => a.id === id));
                     saveAgendas();
                     render();
                 }
@@ -297,20 +331,6 @@
 
         function render() {
             document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
-            
-            const setList = document.getElementById('settings-agendas-list');
-            setList.innerHTML = agendas.map(a => `
-                <div class="settings-item" data-id="${a.id}">
-                    <div style="display:flex; align-items:center;">
-                        <span class="drag-handle">≡</span>
-                        <span style="margin-left:10px; font-weight:600;">${a.id}</span>
-                    </div>
-                    <span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="agendas=agendas.filter(x=>x.id!=='${a.id}'); saveAgendas(); render();">Delete</span>
-                </div>
-            `).join('');
-            
-            initSortable();
-
             const main = document.getElementById('main-content');
             main.innerHTML = '';
             const current = agendas.find(a => a.id === activeTab) || agendas[0];
@@ -335,7 +355,7 @@
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.onclick = () => startEdit(task.id);
-                    card.innerHTML = `<div class="card-body"><b>${task.name}</b><span>${task.date}</span></div><div style="display:flex; align-items:center; gap:15px;">${badge}<span style="color:var(--error); font-weight:900; cursor:pointer; padding:10px;" onclick="event.stopPropagation(); if(confirm('Delete?')) db.collection('tasks').doc('${task.id}').delete();">✕</span></div>`;
+                    card.innerHTML = `<div class="card-body"><b>${task.name}</b><span>${task.date}</span></div><div style="display:flex; align-items:center; gap:15px;">${badge}<span style="color:var(--error); font-weight:900; padding:10px;" onclick="event.stopPropagation(); if(confirm('Delete?')) db.collection('tasks').doc('${task.id}').delete();">✕</span></div>`;
                     sec.appendChild(card);
                 });
                 main.appendChild(sec);
