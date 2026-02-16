@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V2.6</title>
+    <title>Agenda Pro | V3.0</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -12,139 +12,122 @@
 
     <style>
         :root {
-            --bg: #000000;
-            --card: #1c1c1e;
-            --border: #2c2c2e;
-            --text: #ffffff;
-            --dim: #8e8e93;
-            --accent: #ffd60a;
-            --error: #ff375f;
+            --bg: #000000; --card: #1c1c1e; --border: #2c2c2e; --text: #ffffff;
+            --dim: #8e8e93; --accent: #ffd60a; --error: #ff375f;
+            --input-bg: #1c1c1e; --icon-color: #ffffff;
             --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 20px);
-            --input-bg: #1c1c1e;
-            --icon-color: #ffffff;
         }
 
-        body.theme-light {
-            --bg: #f2f2f7; --card: #ffffff; --border: #d1d1d6;
-            --text: #000000; --dim: #636366; --accent: #007aff;
-            --input-bg: #e5e5ea; --icon-color: #000000;
-        }
-        body.theme-paper {
-            --bg: #f9f5eb; --card: #ffffff; --border: #e4dccf;
-            --text: #1c2b2d; --dim: #7d9d9c; --accent: #eb6440;
-            --input-bg: #f0ebe3; --icon-color: #1c2b2d;
-        }
+        /* --- THEME GALLERY --- */
+        body.theme-midnight { --bg: #000; --card: #1c1c1e; --accent: #ffd60a; }
+        body.theme-solar { --bg: #1a1a1a; --card: #242424; --accent: #ffb300; --icon-color: #ffb300; }
+        body.theme-cyber { --bg: #05010d; --card: #12042b; --accent: #ff00ff; --icon-color: #ff00ff; }
+        body.theme-forest { --bg: #0d140e; --card: #1a241c; --accent: #5efc82; --icon-color: #5efc82; }
+        body.theme-silver { --bg: #f2f2f7; --card: #ffffff; --accent: #007aff; --text: #000; --border: #d1d1d6; --input-bg: #e5e5ea; --icon-color: #007aff; }
+        body.theme-ruby { --bg: #120000; --card: #250000; --accent: #ff3b30; --icon-color: #ff3b30; }
 
         * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            font-family: -apple-system, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
+            box-sizing: border-box; -webkit-tap-highlight-color: transparent; 
+            font-family: -apple-system, system-ui, sans-serif;
+            user-select: none; -webkit-user-select: none;
         }
 
-        input, textarea { user-select: text; -webkit-user-select: text; }
+        input { user-select: text; -webkit-user-select: text; }
 
-        body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; transition: background 0.4s ease; }
+        body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; transition: 0.4s; }
 
         #app-shell { display: none; flex-direction: column; height: 100vh; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s; }
-        #app-shell.modal-active { transform: scale(0.92); filter: blur(15px); pointer-events: none; border-radius: 40px; }
+        #app-shell.modal-active { transform: scale(0.94); filter: blur(20px); pointer-events: none; }
 
         header { padding-top: calc(var(--safe-top) + 40px); padding-bottom: 20px; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 25px; }
-        .header-top h1 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -1.2px; }
+        .header-top h1 { margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -1.5px; }
 
-        /* SVG Icon Style */
-        .icon-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; color: var(--icon-color); }
-        .icon-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; color: var(--icon-color); }
+        .icon-btn svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-        .nav-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 0 25px 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .nav-scroller { display: flex; gap: 10px; overflow-x: auto; padding: 0 25px 5px; scrollbar-width: none; }
         .nav-scroller::-webkit-scrollbar { display: none; }
 
-        .tab-pill { flex-shrink: 0; padding: 12px 24px; border-radius: 50px; background: var(--card); color: var(--dim); font-size: 14px; font-weight: 700; border: 1px solid var(--border); transition: 0.2s ease; cursor: pointer; }
-        .tab-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-        body:not(.theme-light):not(.theme-paper) .tab-pill.active { color: #000; }
+        .tab-pill { flex-shrink: 0; padding: 10px 22px; border-radius: 50px; background: var(--card); color: var(--dim); font-size: 13px; font-weight: 800; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; }
+        .tab-pill.active { background: var(--accent); color: #000; border-color: var(--accent); transform: scale(1.05); }
 
-        main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 320px; }
-        .month-section { margin-bottom: 40px; }
-        .month-label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 300px; }
+        .month-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
         .month-label::after { content: ""; height: 1px; background: var(--border); flex: 1; }
 
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 22px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .card-body b { display: block; font-size: 18px; margin-bottom: 4px; }
-        .card-body span { font-size: 14px; color: var(--dim); }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+        .card-body b { display: block; font-size: 17px; margin-bottom: 4px; }
+        .card-body span { font-size: 13px; color: var(--dim); }
 
-        .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
+        .progress-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--accent); opacity: 0.4; }
+        .priority-indicator { width: 4px; position: absolute; left: 0; top: 0; bottom: 0; }
+
+        .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: 0.4s; backdrop-filter: blur(5px); }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-sheet { background: var(--card); color: var(--text); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 35px; padding-bottom: calc(var(--safe-bottom) + 30px); transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); overflow-y: auto; max-height: 90vh; }
+        .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: 35px 35px 0 0; padding: 30px; padding-bottom: calc(var(--safe-bottom) + 20px); transform: translateY(100%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
         .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
-        #settings-agendas-list { border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-top: 10px; }
-        .settings-item { background: var(--bg); padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .settings-item:last-child { border-bottom: none; }
-        .drag-handle { cursor: grab; padding: 10px; color: var(--dim); font-size: 20px; margin-right: 5px; }
-        .sortable-ghost { opacity: 0.1; background: var(--accent); }
+        .settings-item { background: var(--bg); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .drag-handle { cursor: grab; padding: 8px; color: var(--dim); font-size: 18px; }
 
-        footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 25px; padding-bottom: calc(var(--safe-bottom) + 20px); background: linear-gradient(to top, var(--bg) 80%, transparent); z-index: 50; }
-        .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 35px; padding: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
-        .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
-        input, select { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); padding: 16px; border-radius: 20px; font-size: 16px; width: 100%; outline: none; }
+        footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 15px); background: linear-gradient(to top, var(--bg) 90%, transparent); z-index: 50; }
+        .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 12px; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        input, select { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 18px; font-size: 15px; width: 100%; outline: none; }
 
-        .btn-prime { width: 100%; padding: 20px; border-radius: 22px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; }
+        .btn-prime { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         .btn-add { background: var(--text); color: var(--bg); }
         .btn-save { background: var(--accent); color: #000; }
 
-        .build-footer { text-align: center; margin-top: 30px; color: var(--dim); font-size: 11px; font-family: monospace; letter-spacing: 1.5px; opacity: 0.6; }
         #login-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
     </style>
 </head>
 <body class="theme-midnight">
 
     <div id="login-screen">
-        <h1 style="font-size:48px; margin-bottom:15px; color:white;">Agenda.</h1>
-        <button class="btn-prime" style="width:auto; padding: 20px 60px; background:white; color:black;" onclick="handleLogin()">Sign In with Google</button>
+        <h1 style="font-size:54px; margin-bottom:10px; color:white; letter-spacing:-3px;">Agenda.</h1>
+        <button class="btn-prime" style="width:auto; padding: 18px 50px; background:white; color:black;" onclick="handleLogin()">Get Started</button>
     </div>
 
     <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; margin-bottom:30px;">
-                <h2 style="margin:0; font-size:26px;">Settings</h2>
-                <span style="font-weight:800; color:var(--accent); cursor:pointer;" onclick="closeAllModals()">Done</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                <h2 style="margin:0;">Settings</h2>
+                <span style="font-weight:900; color:var(--accent); cursor:pointer;" onclick="closeAllModals()">DONE</span>
             </div>
 
-            <div style="margin-bottom:30px;">
-                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Themes</p>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                    <button class="tab-pill" style="font-size:11px;" onclick="setTheme('theme-midnight')">Dark</button>
-                    <button class="tab-pill" style="font-size:11px;" onclick="setTheme('theme-light')">Light</button>
-                    <button class="tab-pill" style="font-size:11px;" onclick="setTheme('theme-paper')">Paper</button>
-                </div>
+            <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">Themes</p>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:25px;">
+                <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
+                <button class="tab-pill" onclick="setTheme('theme-solar')">Solar</button>
+                <button class="tab-pill" onclick="setTheme('theme-cyber')">Cyber</button>
+                <button class="tab-pill" onclick="setTheme('theme-forest')">Forest</button>
+                <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
+                <button class="tab-pill" onclick="setTheme('theme-ruby')">Ruby</button>
             </div>
 
-            <div style="margin-bottom:30px;">
-                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:5px;">Agendas (Drag ≡ to reorder)</p>
-                <div id="settings-agendas-list"></div>
-            </div>
+            <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">Manage Agendas</p>
+            <div id="settings-agendas-list" style="border-radius:20px; border:1px solid var(--border); margin-bottom:25px;"></div>
 
             <button class="btn-prime" onclick="auth.signOut()" style="background:var(--error); color:white; font-size:12px;">Sign Out</button>
-
-            <div class="build-footer">
-                VERSION 2.6.0 <br>
-                BUILD 2026.02.15_RELEASE
-            </div>
         </div>
     </div>
 
     <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2 style="margin-bottom:25px;">New Agenda</h2>
-            <input type="text" id="n-list-name" placeholder="Name (e.g. Games, Work)" style="margin-bottom:15px;">
-            <select id="n-list-type" style="margin-bottom:25px;">
-                <option value="Standard">Standard List</option>
-                <option value="Countdown">Countdown Style</option>
+            <h2 style="margin-bottom:20px;">New Agenda</h2>
+            <input type="text" id="n-list-name" placeholder="Name (e.g. Games, Work)" style="margin-bottom:10px;">
+            <select id="n-list-type" style="margin-bottom:20px;">
+                <option value="Standard">Standard (Basic List)</option>
+                <option value="Countdown">Countdown (Days Remaining)</option>
+                <option value="Milestone">Milestone (Progress Tracking)</option>
+                <option value="Priority">Priority (Urgency Coloring)</option>
+                <option value="Finance">Finance (Price Tracking)</option>
+                <option value="Archive">Archive (Historical Events)</option>
             </select>
-            <button class="btn-prime btn-save" onclick="createNewAgenda()">Create Agenda</button>
+            <button class="btn-prime btn-save" onclick="createNewAgenda()">Create List</button>
         </div>
     </div>
 
@@ -152,13 +135,9 @@
         <header>
             <div class="header-top">
                 <h1>Agenda</h1>
-                <div style="display:flex; gap:20px; align-items:center;">
-                    <div class="icon-btn" onclick="openModal('modal-new-list')">
-                        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                    </div>
-                    <div class="icon-btn" onclick="openModal('modal-settings')">
-                        <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                    </div>
+                <div style="display:flex; gap:15px;">
+                    <div class="icon-btn" onclick="openModal('modal-new-list')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+                    <div class="icon-btn" onclick="openModal('modal-settings')"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
                 </div>
             </div>
             <div class="nav-scroller" id="tab-bar"></div>
@@ -169,11 +148,11 @@
         <footer>
             <div class="input-box">
                 <div class="input-row">
-                    <input type="text" id="t-input" placeholder="What's the plan?">
-                    <input type="date" id="d-input" style="width:150px;">
+                    <input type="text" id="t-input" placeholder="Add details...">
+                    <input type="date" id="d-input" style="width:140px;">
                 </div>
-                <button class="btn-prime btn-add" id="s-btn" onclick="handleTaskSubmit()">Add to Agenda</button>
-                <button class="btn-prime" id="cancel-edit" style="display:none; margin-top:10px; background:var(--dim); color:var(--bg);" onclick="resetForm()">Cancel Edit</button>
+                <button class="btn-prime btn-add" id="s-btn" onclick="handleTaskSubmit()">Add to List</button>
+                <button class="btn-prime" id="cancel-edit" style="display:none; margin-top:8px; background:var(--dim); color:white;" onclick="resetForm()">Cancel Edit</button>
             </div>
         </footer>
     </div>
@@ -193,7 +172,7 @@
 
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = JSON.parse(localStorage.getItem('agendas_v8')) || [{id:'General', type:'Standard'}, {id:'Releases', type:'Countdown'}];
+        let agendas = JSON.parse(localStorage.getItem('agendas_v10')) || [{id:'General', type:'Standard'}, {id:'Finance', type:'Finance'}];
         let editId = null;
         let sortableInstance = null;
 
@@ -214,7 +193,6 @@
             db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
                 allTasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 render();
-                if(document.getElementById('modal-settings').classList.contains('active')) renderSettingsList();
             });
         }
 
@@ -233,8 +211,8 @@
             setTimeout(() => document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'), 400);
         };
 
-        window.setTheme = (t) => { document.body.className = t; localStorage.setItem('theme_v8', t); };
-        if(localStorage.getItem('theme_v8')) setTheme(localStorage.getItem('theme_v8'));
+        window.setTheme = (t) => { document.body.className = t; localStorage.setItem('theme_v10', t); };
+        if(localStorage.getItem('theme_v10')) setTheme(localStorage.getItem('theme_v10'));
 
         window.createNewAgenda = () => {
             const n = document.getElementById('n-list-name').value.trim();
@@ -248,27 +226,14 @@
             render();
         };
 
-        window.renameAgenda = (oldId) => {
-            const newName = prompt("Rename agenda:", oldId);
-            if (!newName || newName === oldId) return;
-            const batch = db.batch();
-            allTasks.filter(t => t.category === oldId).forEach(t => {
-                batch.update(db.collection('tasks').doc(t.id), {category: newName});
-            });
-            batch.commit().then(() => {
-                agendas = agendas.map(a => a.id === oldId ? {...a, id: newName} : a);
-                if (activeTab === oldId) activeTab = newName;
-                saveAgendas();
-                render();
-                renderSettingsList();
-            });
-        };
-
         window.handleTaskSubmit = () => {
             const name = document.getElementById('t-input').value;
             const date = document.getElementById('d-input').value;
             if(!name || !date) return;
-            const data = { name, date, category: activeTab, uid: auth.currentUser.uid };
+            const data = { 
+                name, date, category: activeTab, uid: auth.currentUser.uid,
+                createdAt: editId ? undefined : Date.now() 
+            };
             if (editId) {
                 db.collection("tasks").doc(editId).update(data);
                 resetForm();
@@ -285,7 +250,7 @@
             document.getElementById('t-input').value = t.name;
             document.getElementById('d-input').value = t.date;
             editId = id;
-            document.getElementById('s-btn').innerText = "Update Event";
+            document.getElementById('s-btn').innerText = "Update";
             document.getElementById('s-btn').className = "btn-prime btn-save";
             document.getElementById('cancel-edit').style.display = "block";
         };
@@ -294,12 +259,12 @@
             editId = null;
             document.getElementById('t-input').value = '';
             document.getElementById('d-input').value = '';
-            document.getElementById('s-btn').innerText = "Add to Agenda";
+            document.getElementById('s-btn').innerText = "Add to List";
             document.getElementById('s-btn').className = "btn-prime btn-add";
             document.getElementById('cancel-edit').style.display = "none";
         };
 
-        function saveAgendas() { localStorage.setItem('agendas_v8', JSON.stringify(agendas)); }
+        function saveAgendas() { localStorage.setItem('agendas_v10', JSON.stringify(agendas)); }
 
         function renderSettingsList() {
             const setList = document.getElementById('settings-agendas-list');
@@ -307,37 +272,60 @@
                 <div class="settings-item" data-id="${a.id}">
                     <div style="display:flex; align-items:center;">
                         <span class="drag-handle">≡</span>
-                        <span style="font-weight:700;">${a.id}</span>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-weight:700;">${a.id}</span>
+                            <span style="font-size:10px; color:var(--dim);">${a.type}</span>
+                        </div>
                     </div>
                     <div style="display:flex; gap:12px;">
-                        <span style="color:var(--accent); font-size:12px; font-weight:900;" onclick="renameAgenda('${a.id}')">RENAME</span>
-                        <span style="color:var(--error); font-size:12px; font-weight:900;" onclick="if(confirm('Delete?')){agendas=agendas.filter(x=>x.id!=='${a.id}');saveAgendas();render();renderSettingsList();}">DELETE</span>
+                        <span style="color:var(--accent); font-size:11px; font-weight:900;" onclick="renameAgenda('${a.id}')">EDIT</span>
+                        <span style="color:var(--error); font-size:11px; font-weight:900;" onclick="if(confirm('Delete?')){agendas=agendas.filter(x=>x.id!=='${a.id}');saveAgendas();render();renderSettingsList();}">X</span>
                     </div>
                 </div>
             `).join('');
 
             if (sortableInstance) sortableInstance.destroy();
             sortableInstance = Sortable.create(setList, {
-                handle: '.drag-handle',
-                animation: 200,
+                handle: '.drag-handle', animation: 200,
                 onEnd: () => {
                     const newIds = Array.from(setList.querySelectorAll('.settings-item')).map(el => el.getAttribute('data-id'));
                     agendas = newIds.map(id => agendas.find(a => a.id === id));
-                    saveAgendas();
-                    render();
+                    saveAgendas(); render();
                 }
             });
         }
+
+        window.renameAgenda = (oldId) => {
+            const newName = prompt("Rename agenda:", oldId);
+            if (!newName || newName === oldId) return;
+            const batch = db.batch();
+            allTasks.filter(t => t.category === oldId).forEach(t => {
+                batch.update(db.collection('tasks').doc(t.id), {category: newName});
+            });
+            batch.commit().then(() => {
+                agendas = agendas.map(a => a.id === oldId ? {...a, id: newName} : a);
+                if (activeTab === oldId) activeTab = newName;
+                saveAgendas(); render(); renderSettingsList();
+            });
+        };
 
         function render() {
             document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
             const main = document.getElementById('main-content');
             main.innerHTML = '';
-            const current = agendas.find(a => a.id === activeTab) || agendas[0];
-            const filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
+            const cur = agendas.find(a => a.id === activeTab) || agendas[0];
+            
+            let filtered = allTasks.filter(t => t.category === activeTab);
+            
+            // ARCHIVE logic sorts newest to oldest, others sort by upcoming date
+            if(cur.type === 'Archive') {
+                filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+            } else {
+                filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
+            }
 
             const groups = {};
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             filtered.forEach(t => {
                 const d = new Date(t.date + "T00:00:00");
                 const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
@@ -347,15 +335,31 @@
 
             for (const key in groups) {
                 const sec = document.createElement('div');
-                sec.className = 'month-section';
+                sec.style.marginBottom = "30px";
                 sec.innerHTML = `<div class="month-label">${key}</div>`;
                 groups[key].forEach(task => {
-                    const diff = Math.ceil((new Date(task.date + "T00:00:00") - new Date()) / 86400000);
-                    const badge = current.type === 'Countdown' ? `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PASSED' : diff + ' DAYS'}</div>` : '';
+                    const target = new Date(task.date + "T00:00:00");
+                    const diff = Math.ceil((target - new Date()) / 86400000);
+                    let badge = '', pBar = '', pInd = '', displayTitle = task.name;
+
+                    if (cur.type === 'Countdown') {
+                        badge = `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PAST' : diff + 'd'}</div>`;
+                    } else if (cur.type === 'Milestone') {
+                        const start = task.createdAt || (target.getTime() - 2592000000);
+                        const perc = Math.min(Math.max(((Date.now() - start) / (target.getTime() - start)) * 100, 0), 100);
+                        pBar = `<div class="progress-bar" style="width:${perc}%"></div>`;
+                        badge = `<div style="font-size:11px; font-weight:900; color:var(--accent);">${Math.round(perc)}%</div>`;
+                    } else if (cur.type === 'Priority') {
+                        let color = '#34c759'; if(diff < 3) color = '#ff375f'; else if(diff < 10) color = '#ff9500';
+                        pInd = `<div class="priority-indicator" style="background:${color}"></div>`;
+                    } else if (cur.type === 'Finance') {
+                        displayTitle = `$${task.name}`;
+                    }
+
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.onclick = () => startEdit(task.id);
-                    card.innerHTML = `<div class="card-body"><b>${task.name}</b><span>${task.date}</span></div><div style="display:flex; align-items:center; gap:15px;">${badge}<span style="color:var(--error); font-weight:900; padding:10px;" onclick="event.stopPropagation(); if(confirm('Delete?')) db.collection('tasks').doc('${task.id}').delete();">✕</span></div>`;
+                    card.innerHTML = `${pBar}${pInd}<div class="card-body"><b>${displayTitle}</b><span>${task.date}</span></div><div style="display:flex; align-items:center; gap:12px;">${badge}<span style="color:var(--error); font-weight:900; padding:10px;" onclick="event.stopPropagation(); if(confirm('Delete?')) db.collection('tasks').doc('${task.id}').delete();">✕</span></div>`;
                     sec.appendChild(card);
                 });
                 main.appendChild(sec);
