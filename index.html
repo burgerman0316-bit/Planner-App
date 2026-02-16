@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | Full System Build</title>
+    <title>Agenda Pro | Full Build</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -18,12 +18,12 @@
             --dim: #8e8e93;
             --accent: #ffd60a;
             --error: #ff375f;
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-top: env(safe-area-inset-top, 20px);
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        /* Full Theme Library Logic */
-        body.theme-midnight { --bg: #000000; --card: #111111; --accent: #5856d6; --border: #1a1a1a; }
+        /* Themes */
+        body.theme-midnight { --bg: #000; --card: #111; --accent: #5856d6; --border: #1a1a1a; }
         body.theme-emerald { --bg: #040d06; --card: #0d1a10; --accent: #34c759; --border: #152a1a; }
         body.theme-sunset { --bg: #0d0404; --card: #1a0d0d; --accent: #ff375f; --border: #2a1515; }
         body.theme-ocean { --bg: #040b0d; --card: #0d161a; --accent: #0a84ff; --border: #15232a; }
@@ -42,18 +42,15 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: background 0.4s ease;
         }
 
-        /* App Animation Container */
         #app-shell {
-            display: none; /* Controlled by Auth */
+            display: none;
             flex-direction: column;
             height: 100vh;
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s;
         }
 
-        /* Premium "Shrink Back" Modal Effect */
         #app-shell.modal-active {
             transform: scale(0.92);
             filter: blur(15px);
@@ -61,9 +58,11 @@
             border-radius: 40px;
         }
 
+        /* FIXED HEADER: Increased padding to prevent cutoff */
         header {
-            padding: calc(var(--safe-top) + 20px) 0 15px;
-            background: rgba(0,0,0,0.6);
+            padding-top: calc(var(--safe-top) + 25px);
+            padding-bottom: 20px;
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(25px);
             border-bottom: 1px solid var(--border);
             z-index: 100;
@@ -73,97 +72,76 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 0 20px;
+            margin-bottom: 25px;
+            padding: 0 25px;
         }
 
-        .header-top h1 { margin: 0; font-size: 28px; font-weight: 800; }
+        .header-top h1 { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -1px; }
 
-        /* FIXED: Scrolling Tab Navigation */
+        /* SCROLLER: Fixed horizontal behavior */
         .nav-scroller {
             display: flex;
             gap: 12px;
             overflow-x: auto;
-            padding: 0 20px 8px;
+            padding: 0 25px 5px;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
         }
         .nav-scroller::-webkit-scrollbar { display: none; }
 
         .tab-pill {
-            flex-shrink: 0; /* Important: Prevents tabs from squishing */
-            padding: 10px 22px;
+            flex-shrink: 0;
+            padding: 12px 24px;
             border-radius: 50px;
             background: var(--card);
             color: var(--dim);
             font-size: 14px;
             font-weight: 700;
-            white-space: nowrap;
             border: 1px solid var(--border);
             transition: all 0.3s ease;
-            cursor: pointer;
         }
         .tab-pill.active {
             background: var(--accent);
             color: #000;
             border-color: var(--accent);
-            transform: scale(1.05);
         }
 
-        /* Content View */
-        main {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            padding-bottom: 280px;
-        }
-
-        .month-section { margin-bottom: 35px; }
-
+        main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 300px; }
+        
+        .month-section { margin-bottom: 40px; }
         .month-label {
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--accent);
             font-weight: 900;
-            margin-bottom: 18px;
-            padding-left: 5px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
-        .month-label::after {
-            content: "";
-            height: 1px;
-            background: var(--border);
-            flex: 1;
-        }
+        .month-label::after { content: ""; height: 1px; background: var(--border); flex: 1; }
 
         .card {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 20px;
-            margin-bottom: 14px;
+            border-radius: 24px;
+            padding: 22px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: cardAppear 0.5s ease backwards;
-        }
-        @keyframes cardAppear {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
-        .card-body b { display: block; font-size: 17px; margin-bottom: 4px; }
-        .card-body span { font-size: 13px; color: var(--dim); font-weight: 500; }
+        .card-body b { display: block; font-size: 18px; margin-bottom: 6px; }
+        .card-body span { font-size: 14px; color: var(--dim); }
 
-        /* Custom Modal Layering */
+        /* MODALS */
         .modal-overlay {
             position: fixed;
             inset: 0;
             z-index: 1000;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             display: none;
             align-items: flex-end;
             justify-content: center;
@@ -176,131 +154,84 @@
             background: #1c1c1e;
             width: 100%;
             max-width: 500px;
-            border-radius: 35px 35px 0 0;
-            padding: 30px;
+            border-radius: 40px 40px 0 0;
+            padding: 35px;
             padding-bottom: calc(var(--safe-bottom) + 30px);
             transform: translateY(100%);
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             border-top: 1px solid var(--border);
-            max-height: 90vh;
-            overflow-y: auto;
         }
         .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
-        /* Form Components */
-        .settings-section { margin-bottom: 30px; }
-        .settings-section label {
-            display: block;
-            font-size: 10px;
-            color: var(--dim);
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            margin-bottom: 12px;
-            font-weight: 800;
-        }
-
-        .settings-card { background: #2c2c2e; border-radius: 20px; overflow: hidden; }
+        /* SETTINGS UI */
         .settings-item {
-            padding: 16px 20px;
+            background: #2c2c2e;
+            padding: 18px 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #3a3a3c;
-            font-size: 15px;
+            font-size: 16px;
         }
-        .settings-item:last-child { border-bottom: none; }
+        .settings-item:first-child { border-radius: 20px 20px 0 0; }
+        .settings-item:last-child { border-radius: 0 0 20px 20px; border-bottom: none; }
 
-        /* Build Number Section */
         .build-footer {
             text-align: center;
-            padding: 20px 0;
+            margin-top: 30px;
             color: #555;
-            font-size: 10px;
+            font-size: 11px;
             font-family: monospace;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
 
-        /* Footer / Input Area */
+        /* FOOTER */
         footer {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 20px;
+            padding: 25px;
             padding-bottom: calc(var(--safe-bottom) + 20px);
-            background: linear-gradient(to top, var(--bg) 60%, transparent);
+            background: linear-gradient(to top, var(--bg) 70%, transparent);
             z-index: 50;
         }
 
         .input-box {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border-radius: 35px;
+            padding: 15px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.7);
         }
 
-        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        
-        input[type="text"], input[type="date"], select {
-            background: #000;
-            border: 1px solid var(--border);
-            color: #fff;
-            padding: 14px;
-            border-radius: 18px;
-            font-size: 16px;
-            width: 100%;
-        }
+        .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
+        input, select { background: #000; border: 1px solid var(--border); color: #fff; padding: 16px; border-radius: 20px; font-size: 16px; width: 100%; }
 
-        .btn-prime {
-            width: 100%;
-            padding: 18px;
-            border-radius: 20px;
-            border: none;
-            font-weight: 900;
-            font-size: 14px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .btn-prime { width: 100%; padding: 20px; border-radius: 22px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         .btn-add { background: #fff; color: #000; }
         .btn-save { background: var(--accent); color: #000; }
 
-        /* Login */
-        #login-screen {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 5000;
-        }
-
+        #login-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h1 style="font-size:42px; margin-bottom:10px;">Agenda.</h1>
-        <p style="color:var(--dim); margin-bottom:40px;">Manage everything by the month.</p>
-        <button class="btn-prime" style="width:auto; padding: 18px 50px;" onclick="handleLogin()">
-            Sign In with Google
-        </button>
+        <h1 style="font-size:48px; margin-bottom:15px;">Agenda.</h1>
+        <button class="btn-prime" style="width:auto; padding: 20px 60px;" onclick="handleLogin()">Sign In with Google</button>
     </div>
 
     <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                <h2 style="margin:0; font-size:24px;">Settings</h2>
+            <div style="display:flex; justify-content:space-between; margin-bottom:30px;">
+                <h2 style="margin:0; font-size:26px;">Settings</h2>
                 <span style="font-weight:800; color:var(--accent); cursor:pointer;" onclick="closeAllModals()">Done</span>
             </div>
 
-            <div class="settings-section">
-                <label>Theme</label>
-                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;">
+            <div style="margin-bottom:30px;">
+                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Appearance</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
                     <button class="tab-pill" onclick="setTheme('theme-emerald')">Emerald</button>
                     <button class="tab-pill" onclick="setTheme('theme-sunset')">Sunset</button>
@@ -308,25 +239,19 @@
                 </div>
             </div>
 
-            <div class="settings-section">
-                <label>Management</label>
-                <div class="settings-card" id="settings-agendas-list">
-                    </div>
+            <div>
+                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Manage Lists</p>
+                <div id="settings-agendas-list"></div>
             </div>
 
-            <div class="settings-section">
-                <label>Account</label>
-                <div class="settings-card">
-                    <div class="settings-item">
-                        <span id="user-display">User Name</span>
-                        <span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="auth.signOut()">Logout</span>
-                    </div>
-                </div>
+            <div class="settings-item" onclick="auth.signOut()" style="margin-top:20px; border-radius:20px; color:var(--error); font-weight:700;">
+                <span>Sign Out</span>
+                <span>→</span>
             </div>
 
             <div class="build-footer">
-                VERSION 2.1.4 <br>
-                BUILD: 2026.02.15.EXP
+                VERSION 2.2.0 <br>
+                BUILD 2026.02.15_RELEASE
             </div>
         </div>
     </div>
@@ -334,18 +259,12 @@
     <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
             <h2 style="margin-bottom:25px;">New Agenda</h2>
-            <div class="settings-section">
-                <label>Name</label>
-                <input type="text" id="new-list-name" placeholder="Work, Releases, Fitness...">
-            </div>
-            <div class="settings-section">
-                <label>Style</label>
-                <select id="new-list-type">
-                    <option value="Standard">Standard List</option>
-                    <option value="Countdown">Countdown (Days Remaining)</option>
-                </select>
-            </div>
-            <button class="btn-prime btn-save" onclick="createNewAgenda()">Create List</button>
+            <input type="text" id="n-list-name" placeholder="Name (e.g. Games, Work)" style="margin-bottom:15px;">
+            <select id="n-list-type" style="margin-bottom:25px;">
+                <option value="Standard">Standard List</option>
+                <option value="Countdown">Countdown Style</option>
+            </select>
+            <button class="btn-prime btn-save" onclick="createNewAgenda()">Create Agenda</button>
         </div>
     </div>
 
@@ -353,33 +272,28 @@
         <header>
             <div class="header-top">
                 <h1>Agenda</h1>
-                <div style="display:flex; gap:18px; align-items:center;">
-                    <span style="font-size:32px; font-weight:200; cursor:pointer;" onclick="openModal('modal-new-list')">+</span>
-                    <span style="font-size:20px; cursor:pointer;" onclick="openModal('modal-settings')">⚙️</span>
+                <div style="display:flex; gap:20px; align-items:center;">
+                    <span style="font-size:36px; font-weight:200; cursor:pointer;" onclick="openModal('modal-new-list')">+</span>
+                    <span style="font-size:22px; cursor:pointer;" onclick="openModal('modal-settings')">⚙️</span>
                 </div>
             </div>
-            <div class="nav-scroller" id="tab-bar">
-                </div>
+            <div class="nav-scroller" id="tab-bar"></div>
         </header>
 
-        <main id="main-content">
-            </main>
+        <main id="main-content"></main>
 
         <footer>
             <div class="input-box">
                 <div class="input-row">
-                    <input type="text" id="task-input" placeholder="What's next?">
-                    <input type="date" id="date-input" style="width:145px;">
+                    <input type="text" id="t-input" placeholder="What's the plan?">
+                    <input type="date" id="d-input" style="width:150px;">
                 </div>
-                <button class="btn-prime btn-add" id="submit-btn" onclick="handleTaskSubmit()">Add to Agenda</button>
+                <button class="btn-prime btn-add" id="s-btn" onclick="handleTaskSubmit()">Add to Agenda</button>
             </div>
         </footer>
     </div>
 
     <script>
-        // ---------------------------------------------------------
-        // 1. FIREBASE CONFIG
-        // ---------------------------------------------------------
         const firebaseConfig = {
             apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
             authDomain: "plannerapp-ff221.firebaseapp.com",
@@ -392,50 +306,31 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ---------------------------------------------------------
-        // 2. APP STATE
-        // ---------------------------------------------------------
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = [
-            {id: 'General', type: 'Standard'},
-            {id: 'Releases', type: 'Countdown'}
-        ];
+        let agendas = JSON.parse(localStorage.getItem('agendas_v3')) || [{id:'General', type:'Standard'}, {id:'Releases', type:'Countdown'}];
         let editId = null;
 
-        // Persist Agendas locally
-        const savedLists = localStorage.getItem('agendas_v2');
-        if (savedLists) agendas = JSON.parse(savedLists);
-
-        // ---------------------------------------------------------
-        // 3. AUTH / LOGIN
-        // ---------------------------------------------------------
-        function handleLogin() {
-            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(alert);
-        }
+        function handleLogin() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-shell').style.display = 'flex';
-                document.getElementById('user-display').innerText = user.displayName || user.email;
-                syncData(user.uid);
+                sync(user.uid);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-shell').style.display = 'none';
             }
         });
 
-        function syncData(uid) {
+        function sync(uid) {
             db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
-                allTasks = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                allTasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 render();
             });
         }
 
-        // ---------------------------------------------------------
-        // 4. UI LOGIC (MODALS / THEMES)
-        // ---------------------------------------------------------
         function openModal(id) {
             document.getElementById(id).style.display = 'flex';
             setTimeout(() => {
@@ -447,106 +342,60 @@
         function closeAllModals() {
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
             document.getElementById('app-shell').classList.remove('modal-active');
-            setTimeout(() => {
-                document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-            }, 400);
+            setTimeout(() => document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'), 400);
         }
 
-        function setTheme(t) {
-            document.body.className = t;
-            localStorage.setItem('theme_choice', t);
-        }
-        if(localStorage.getItem('theme_choice')) setTheme(localStorage.getItem('theme_choice'));
-
-        // ---------------------------------------------------------
-        // 5. DATA ACTIONS
-        // ---------------------------------------------------------
-        function handleTaskSubmit() {
-            const name = document.getElementById('task-input').value;
-            const date = document.getElementById('date-input').value;
-            if(!name || !date) return;
-
-            const payload = {
-                name, date, category: activeTab, uid: auth.currentUser.uid
-            };
-
-            if (editId) {
-                db.collection("tasks").doc(editId).update(payload);
-                editId = null;
-                document.getElementById('submit-btn').innerText = "Add to Agenda";
-                document.getElementById('submit-btn').className = "btn-prime btn-add";
-            } else {
-                db.collection("tasks").add(payload);
-            }
-
-            document.getElementById('task-input').value = '';
-            document.getElementById('date-input').value = '';
-        }
-
-        window.startEditing = (id) => {
-            const t = allTasks.find(x => x.id === id);
-            document.getElementById('task-input').value = t.name;
-            document.getElementById('date-input').value = t.date;
-            editId = id;
-            document.getElementById('submit-btn').innerText = "Update Event";
-            document.getElementById('submit-btn').className = "btn-prime btn-save";
-        };
+        function setTheme(t) { document.body.className = t; localStorage.setItem('theme_v3', t); }
+        if(localStorage.getItem('theme_v3')) setTheme(localStorage.getItem('theme_v3'));
 
         function createNewAgenda() {
-            const name = document.getElementById('new-list-name').value.trim();
-            const type = document.getElementById('new-list-type').value;
-            if (!name) return;
-            agendas.push({id: name, type});
-            activeTab = name;
-            localStorage.setItem('agendas_v2', JSON.stringify(agendas));
-            document.getElementById('new-list-name').value = '';
+            const n = document.getElementById('n-list-name').value.trim();
+            const t = document.getElementById('n-list-type').value;
+            if(!n) return;
+            agendas.push({id: n, type: t});
+            activeTab = n;
+            localStorage.setItem('agendas_v3', JSON.stringify(agendas));
+            document.getElementById('n-list-name').value = '';
             closeAllModals();
             render();
         }
 
-        window.removeAgenda = (id) => {
-            if (agendas.length <= 1) return;
-            if (!confirm("Delete this agenda and all its tasks?")) return;
-            agendas = agendas.filter(a => a.id !== id);
-            if (activeTab === id) activeTab = agendas[0].id;
-            localStorage.setItem('agendas_v2', JSON.stringify(agendas));
-            render();
+        function handleTaskSubmit() {
+            const name = document.getElementById('t-input').value;
+            const date = document.getElementById('d-input').value;
+            if(!name || !date) return;
+            const data = { name, date, category: activeTab, uid: auth.currentUser.uid };
+            if (editId) {
+                db.collection("tasks").doc(editId).update(data);
+                editId = null;
+                document.getElementById('s-btn').innerText = "Add to Agenda";
+            } else {
+                db.collection("tasks").add(data);
+            }
+            document.getElementById('t-input').value = '';
+            document.getElementById('d-input').value = '';
+        }
+
+        window.startEdit = (id) => {
+            const t = allTasks.find(x => x.id === id);
+            document.getElementById('t-input').value = t.name;
+            document.getElementById('d-input').value = t.date;
+            editId = id;
+            document.getElementById('s-btn').innerText = "Update Event";
         };
 
-        // ---------------------------------------------------------
-        // 6. RENDER ENGINE
-        // ---------------------------------------------------------
         function render() {
-            // Render Tab Bar
-            const bar = document.getElementById('tab-bar');
-            bar.innerHTML = agendas.map(a => `
-                <div class="tab-pill ${a.id === activeTab ? 'active' : ''}" 
-                     onclick="activeTab='${a.id}'; render();">
-                    ${a.id}
-                </div>
-            `).join('');
+            document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
+            document.getElementById('settings-agendas-list').innerHTML = agendas.map(a => `<div class="settings-item"><span>${a.id}</span><span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="agendas=agendas.filter(x=>x.id!=='${a.id}'); localStorage.setItem('agendas_v3',JSON.stringify(agendas)); render();">Delete</span></div>`).join('');
 
-            // Render Management List in Settings
-            const setList = document.getElementById('settings-agendas-list');
-            setList.innerHTML = agendas.map(a => `
-                <div class="settings-item">
-                    <span>${a.id}</span>
-                    <span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="removeAgenda('${a.id}')">Delete</span>
-                </div>
-            `).join('');
-
-            // Content Logic
             const main = document.getElementById('main-content');
             main.innerHTML = '';
-            
-            const currentType = agendas.find(a => a.id === activeTab).type;
-            const tasks = allTasks.filter(t => t.category === activeTab)
-                                  .sort((a,b) => new Date(a.date) - new Date(b.date));
+            const current = agendas.find(a => a.id === activeTab);
+            const filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
 
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const groups = {};
-
-            tasks.forEach(t => {
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            filtered.forEach(t => {
                 const d = new Date(t.date + "T00:00:00");
                 const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
                 if (!groups[key]) groups[key] = [];
@@ -557,26 +406,12 @@
                 const sec = document.createElement('div');
                 sec.className = 'month-section';
                 sec.innerHTML = `<div class="month-label">${key}</div>`;
-
                 groups[key].forEach(task => {
-                    let badge = '';
-                    if (currentType === 'Countdown') {
-                        const diff = Math.ceil((new Date(task.date + "T00:00:00") - new Date()) / 86400000);
-                        badge = `<div style="font-size:11px; font-weight:800; color:var(--accent);">${diff < 0 ? 'PAST' : diff + ' DAYS LEFT'}</div>`;
-                    }
-
+                    const diff = Math.ceil((new Date(task.date + "T00:00:00") - new Date()) / 86400000);
+                    const badge = current.type === 'Countdown' ? `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PASSED' : diff + ' DAYS'}</div>` : '';
                     const card = document.createElement('div');
                     card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-body" onclick="startEditing('${task.id}')">
-                            <b>${task.name}</b>
-                            <span>${task.date}</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:15px;">
-                            ${badge}
-                            <span style="color:var(--error); font-weight:900; padding:5px; cursor:pointer;" onclick="db.collection('tasks').doc('${task.id}').delete()">✕</span>
-                        </div>
-                    `;
+                    card.innerHTML = `<div class="card-body" onclick="startEdit('${task.id}')"><b>${task.name}</b><span>${task.date}</span></div><div style="display:flex; align-items:center; gap:15px;">${badge}<span style="color:var(--error); font-weight:900; cursor:pointer;" onclick="db.collection('tasks').doc('${task.id}').delete()">✕</span></div>`;
                     sec.appendChild(card);
                 });
                 main.appendChild(sec);
