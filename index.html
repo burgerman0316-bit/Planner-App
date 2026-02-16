@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.3.3</title>
+    <title>Agenda Pro | V3.3.5</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -34,11 +34,12 @@
         .auth-container.active { display: flex; }
         .auth-container h1 { font-size: 54px; letter-spacing: -4px; margin-bottom: 20px; }
         
-        .btn-prime { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
+        .btn-prime { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-prime:active { transform: scale(0.98); }
         .btn-add { background: var(--text); color: var(--bg); }
         .btn-save { background: var(--accent); color: #000; }
         .btn-ghost { background: transparent; color: var(--dim); border: 1px solid var(--border); margin-top: 10px; }
+        .btn-danger { background: rgba(255, 55, 95, 0.1); color: var(--error); border: 1px solid var(--error); }
 
         .error-msg { color: var(--error); font-size: 13px; font-weight: 600; min-height: 20px; }
 
@@ -69,7 +70,7 @@
 
         .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: 0.4s; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 30px; padding-bottom: calc(var(--safe-bottom) + 10px); transform: translateY(100%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); max-height: 95vh; display: flex; flex-direction: column; }
+        .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 30px; padding-bottom: calc(var(--safe-bottom) + 10px); transform: translateY(100%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); max-height: 95vh; display: flex; flex-direction: column; overflow-y: auto; }
         .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
         footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 15px); background: linear-gradient(to top, var(--bg) 90%, transparent); z-index: 50; }
@@ -86,7 +87,10 @@
             <button class="btn-prime btn-add" onclick="showAuth('auth-signup')">Sign Up</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-login')">Sign In</button>
             <div style="margin: 20px 0; color: var(--dim); font-size: 12px;">OR</div>
-            <button class="btn-prime" style="background:#fff; color:#000;" onclick="handleGoogleLogin()">Sign In with Google</button>
+            <button class="btn-prime" style="background:#fff; color:#000;" onclick="handleGoogleLogin()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="width:18px;">
+                Continue with Google
+            </button>
         </div>
 
         <div class="auth-container" id="auth-signup">
@@ -114,11 +118,10 @@
 
         <div class="auth-container" id="auth-verify">
             <h2>Verify Email</h2>
-            <p style="color:var(--dim); font-size:14px;">We sent a 6-digit code to your email.</p>
+            <p style="color:var(--dim); font-size:14px;">Check your inbox for the code.</p>
             <input type="text" id="v-code" placeholder="000000" maxlength="6" style="text-align:center; font-size:32px; letter-spacing:8px;">
             <div class="error-msg" id="v-error"></div>
             <button class="btn-prime btn-save" onclick="validateCode()">Verify Account</button>
-            <p id="v-attempts-ui" style="font-size:11px; color:var(--dim); margin-top:10px;"></p>
         </div>
     </div>
 
@@ -126,7 +129,6 @@
         <div class="auth-container active">
             <h2 id="intro-welcome">Welcome!</h2>
             <p style="color:var(--dim); margin-bottom:20px;">Personalize your workspace.</p>
-            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase; text-align:left;">Pick Theme</p>
             <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:25px;">
                 <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
                 <button class="tab-pill" onclick="setTheme('theme-solar')">Solar</button>
@@ -134,8 +136,7 @@
                 <button class="tab-pill" onclick="setTheme('theme-forest')">Forest</button>
                 <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
             </div>
-            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase; text-align:left;">First Agenda Tab</p>
-            <input type="text" id="intro-agenda-name" placeholder="e.g. Work">
+            <input type="text" id="intro-agenda-name" placeholder="First Tab Name (e.g. Work)">
             <button class="btn-prime btn-save" onclick="completeOnboarding()" style="margin-top:20px;">Finish Setup</button>
         </div>
     </div>
@@ -179,14 +180,16 @@
                 <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
             </div>
             <div id="settings-agendas-list"></div>
-            <button class="btn-prime" onclick="auth.signOut()" style="background:var(--error); margin-top:20px; color:white;">Log Out</button>
+            
+            <button class="btn-prime" onclick="auth.signOut()" style="background:var(--card); border:1px solid var(--border); margin-top:20px;">Log Out</button>
+            <button class="btn-prime btn-danger" onclick="handleDeleteAccount()" style="margin-top:10px;">Delete Account Forever</button>
         </div>
     </div>
 
     <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
             <h2>New Agenda</h2>
-            <input type="text" id="n-list-name" placeholder="Name">
+            <input type="text" id="n-list-name" placeholder="Agenda Name">
             <select id="n-list-type" style="margin: 15px 0;">
                 <option value="Standard">Standard</option>
                 <option value="Countdown">Countdown</option>
@@ -197,10 +200,10 @@
     </div>
 
     <script>
-        // --- CONFIG (ENTER YOUR EMAILJS KEYS HERE) ---
-        const EMAILJS_SERVICE_ID = "service_d9xk2qd";
-        const EMAILJS_TEMPLATE_ID = "template_7xhxmoi";
-        const EMAILJS_PUBLIC_KEY = "RsAYqiwym2mViUR8u";
+        // --- CONFIG ---
+        const EMAILJS_SERVICE_ID = "service_692c81g";
+        const EMAILJS_TEMPLATE_ID = "template_7046oas";
+        const EMAILJS_PUBLIC_KEY = "6M7A9OOfQp80r-qG0";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCEdkitaytyO0ZHL-bbU0R1p_oy8E1RhbY",
@@ -220,9 +223,7 @@
         let agendas = [];
         let editId = null;
         let vCode = "";
-        let vAttempts = 0;
         let signupTemp = null;
-        let lockoutEnd = null;
 
         const trashSvg = `<svg class="trash-icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>`;
 
@@ -232,12 +233,11 @@
         }
 
         async function sendVerificationEmail(targetEmail, code) {
-            const templateParams = {
+            return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                 to_email: targetEmail,
                 verification_code: code,
                 user_name: signupTemp.name
-            };
-            return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+            });
         }
 
         async function handleSignUpProcess() {
@@ -251,9 +251,8 @@
 
             if(!f || !l || !e || !p) return err.innerText = "All fields required";
             if(p !== rp) return err.innerText = "Passwords don't match";
-            if(lockoutEnd && Date.now() < lockoutEnd) return err.innerText = "Security lockout active.";
 
-            btn.innerText = "Sending Code...";
+            btn.innerText = "Sending...";
             btn.disabled = true;
 
             signupTemp = { email: e, pass: p, name: `${f} ${l}` };
@@ -261,11 +260,9 @@
 
             try {
                 await sendVerificationEmail(e, vCode);
-                vAttempts = 0;
                 showAuth('auth-verify');
             } catch (error) {
-                err.innerText = "Failed to send email. Check EmailJS Config.";
-                console.error(error);
+                err.innerText = "Error sending email.";
             } finally {
                 btn.innerText = "Sign Up";
                 btn.disabled = false;
@@ -274,29 +271,40 @@
 
         async function validateCode() {
             const input = document.getElementById('v-code').value;
-            const err = document.getElementById('v-error');
-            
             if(input === vCode) {
                 try {
                     const res = await auth.createUserWithEmailAndPassword(signupTemp.email, signupTemp.pass);
                     await res.user.updateProfile({ displayName: signupTemp.name });
-                } catch(e) { err.innerText = e.message; }
+                } catch(e) { document.getElementById('v-error').innerText = e.message; }
             } else {
-                vAttempts++;
-                document.getElementById('v-attempts-ui').innerText = `Attempts: ${vAttempts}/5`;
-                if(vAttempts >= 5) {
-                    lockoutEnd = Date.now() + 300000;
-                    err.innerText = "Locked out for 5 minutes.";
-                    setTimeout(() => showAuth('auth-main'), 2000);
-                } else {
-                    err.innerText = "Wrong code. Sending new one...";
-                    vCode = Math.floor(100000 + Math.random() * 900000).toString();
-                    await sendVerificationEmail(signupTemp.email, vCode);
-                }
+                document.getElementById('v-error').innerText = "Wrong code.";
             }
         }
 
-        // Firebase Auth State
+        async function handleDeleteAccount() {
+            const user = auth.currentUser;
+            if(!user) return;
+            const confirmDel = confirm("WARNING: This will permanently delete your account and all your data. Proceed?");
+            if(!confirmDel) return;
+
+            try {
+                // 1. Delete all user tasks
+                const taskSnap = await db.collection('tasks').where('uid', '==', user.uid).get();
+                const batch = db.batch();
+                taskSnap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+
+                // 2. Delete user profile doc
+                await db.collection('users').doc(user.uid).delete();
+
+                // 3. Delete Firebase Auth user
+                await user.delete();
+                alert("Account deleted.");
+            } catch (e) {
+                alert("Please log out and log back in to verify your identity before deleting.");
+            }
+        }
+
         auth.onAuthStateChanged(async user => {
             if (user) {
                 document.getElementById('screen-landing').style.display = 'none';
@@ -338,8 +346,8 @@
             document.getElementById('user-photo').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`;
             document.getElementById('user-name').innerText = user.displayName;
             document.getElementById('user-email').innerText = user.email;
-            agendas = data.agendas;
-            activeTab = agendas[0].id;
+            agendas = data.agendas || [];
+            if(agendas.length > 0) activeTab = agendas[0].id;
             setTheme(data.theme);
             sync(user.uid);
         }
@@ -382,9 +390,9 @@
             const name = document.getElementById('t-input').value;
             const date = document.getElementById('d-input').value;
             if(!name || !date) return;
-            const data = { name, date, category: activeTab, uid: auth.currentUser.uid, createdAt: editId ? undefined : Date.now() };
+            const data = { name, date, category: activeTab, uid: auth.currentUser.uid };
             if (editId) { db.collection("tasks").doc(editId).update(data); resetForm(); }
-            else { db.collection("tasks").add(data); document.getElementById('t-input').value = ''; document.getElementById('d-input').value = ''; }
+            else { db.collection("tasks").add(data); document.getElementById('t-input').value = ''; }
         };
 
         window.startEdit = (id) => {
@@ -407,7 +415,7 @@
 
         function renderSettingsList() {
             const setList = document.getElementById('settings-agendas-list');
-            setList.innerHTML = agendas.map(a => `<div class="settings-item" style="display:flex; justify-content:space-between; padding:15px; background:var(--bg); margin-bottom:5px; border-radius:12px;">
+            setList.innerHTML = agendas.map(a => `<div style="display:flex; justify-content:space-between; padding:15px; background:var(--bg); margin-bottom:5px; border-radius:12px;">
                 <span>${a.id}</span><div onclick="deleteAgenda('${a.id}')">${trashSvg}</div></div>`).join('');
         }
 
@@ -422,7 +430,7 @@
             document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
             const main = document.getElementById('main-content');
             main.innerHTML = '';
-            const cur = agendas.find(a => a.id === activeTab) || agendas[0];
+            const cur = agendas.find(a => a.id === activeTab);
             if(!cur) return;
             
             let filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
