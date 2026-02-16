@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.3.7</title>
+    <title>Agenda Pro | V3.3.8</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -169,10 +169,7 @@
 
     <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0;">Settings</h2>
-                <div class="icon-btn" onclick="closeAllModals()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-            </div>
+            <h2>Settings</h2>
             <div id="account-display" style="padding:15px; background:var(--bg); border-radius:20px; margin-bottom:20px; display:flex; align-items:center; gap:15px;">
                 <img id="user-photo" src="" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--accent);">
                 <div><b id="user-name">User</b><br><span id="user-email" style="font-size:12px; color:var(--dim);"></span></div>
@@ -192,8 +189,8 @@
 
     <div id="modal-confirm-delete" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2 style="color:var(--error); margin-bottom:10px;">Delete Account?</h2>
-            <p style="color:var(--dim); font-size:14px; margin-bottom:25px;">This will permanently wipe your agendas and data. This action cannot be undone.</p>
+            <h2 style="color:var(--error);">Delete Account?</h2>
+            <p style="color:var(--dim); font-size:14px; margin-bottom:25px;">This action is permanent. All your data will be wiped.</p>
             <button class="btn-prime btn-save" style="background:var(--error); color:#fff;" onclick="handleDeleteAccount()">Yes, Delete Forever</button>
             <button class="btn-prime btn-ghost" onclick="closeAllModals()">Cancel</button>
         </div>
@@ -213,10 +210,10 @@
     </div>
 
     <script>
-        // --- EMAILJS CONFIG (ENSURE THESE MATCH YOUR DASHBOARD) ---
-        const EMAILJS_SERVICE_ID = "service_692c81g";
-        const EMAILJS_TEMPLATE_ID = "template_7046oas";
-        const EMAILJS_PUBLIC_KEY = "6M7A9OOfQp80r-qG0";
+        // --- UPDATED EMAILJS CREDENTIALS ---
+        const EMAILJS_SERVICE_ID = "service_ow9m3kg";
+        const EMAILJS_TEMPLATE_ID = "template_7xhxmoi";
+        const EMAILJS_PUBLIC_KEY = "RsAYqiwym2mViUR8u";
 
         // --- FIREBASE SETUP ---
         const firebaseConfig = {
@@ -270,7 +267,6 @@
             if(p !== rp) return err.innerText = "Passwords don't match";
             if(lockoutEnd && Date.now() < lockoutEnd) return err.innerText = "Locked out. Try later.";
 
-            // SET TEMP DATA BEFORE SENDING EMAIL
             signupTemp = { email: e, pass: p, name: `${f} ${l}` };
             vCode = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -282,8 +278,8 @@
                 vAttempts = 0;
                 showAuth('auth-verify');
             } catch (error) {
-                err.innerText = "Email Error. Check configuration.";
-                console.error(error);
+                err.innerText = "Check Browser Console for Error Detail.";
+                console.error("EmailJS Error:", error);
             } finally {
                 btn.innerText = "Sign Up";
                 btn.disabled = false;
@@ -307,7 +303,7 @@
                     err.innerText = "5 failed attempts. Wait 5 minutes.";
                     setTimeout(() => showAuth('auth-main'), 2000);
                 } else {
-                    err.innerText = "Incorrect code. Check email.";
+                    err.innerText = "Incorrect code.";
                 }
             }
         }
@@ -315,26 +311,16 @@
         async function handleDeleteAccount() {
             const user = auth.currentUser;
             if(!user) return;
-            const btn = document.querySelector('#modal-confirm-delete .btn-save');
-            btn.innerText = "Deleting...";
-            btn.disabled = true;
-
             try {
-                // Wipe user's data from Firestore
                 const taskSnap = await db.collection('tasks').where('uid', '==', user.uid).get();
                 const batch = db.batch();
                 taskSnap.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
-                
                 await db.collection('users').doc(user.uid).delete();
-                
-                // Delete user auth
                 await user.delete();
                 closeAllModals();
             } catch (e) {
-                alert("Security re-authentication required. Please sign out and back in, then try again.");
-                btn.innerText = "Yes, Delete Forever";
-                btn.disabled = false;
+                alert("Please log out and back in to verify identity before deleting.");
                 closeAllModals();
             }
         }
@@ -381,7 +367,7 @@
             document.getElementById('user-name').innerText = user.displayName;
             document.getElementById('user-email').innerText = user.email;
             agendas = data.agendas || [];
-            activeTab = (agendas.length > 0) ? agendas[0].id : 'General';
+            activeTab = agendas[0]?.id || 'General';
             setTheme(data.theme);
             sync(user.uid);
         }
