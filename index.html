@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.3.2</title>
+    <title>Agenda Pro | V3.3.3</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -28,12 +28,11 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, system-ui, sans-serif; }
         body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; transition: 0.4s; }
 
-        /* TUTORIAL FIXED CSS */
+        /* TUTORIAL UI */
         #tutorial-overlay {
             position: fixed; inset: 0; z-index: 9999;
-            background: inherit; /* Inherits the body theme color */
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px; text-align: center;
+            background: var(--bg); display: none; flex-direction: column; 
+            align-items: center; justify-content: center; padding: 40px; text-align: center;
         }
         .tut-container { width: 100%; max-width: 400px; }
         .tut-step { display: none; }
@@ -42,56 +41,63 @@
 
         /* SHARED UI */
         .btn-prime { 
-            width: 100%; padding: 20px; border-radius: 22px; border: none; 
+            width: 100%; padding: 18px; border-radius: 20px; border: none; 
             font-weight: 900; text-transform: uppercase; cursor: pointer; 
             background: var(--accent); color: #000; margin-top: 20px;
         }
-        .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 25px 0; }
+        .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
         .theme-btn { 
-            padding: 15px; border-radius: 15px; border: 1px solid var(--border); 
+            padding: 14px; border-radius: 12px; border: 1px solid var(--border); 
             background: var(--card); color: var(--text); font-weight: 700; cursor: pointer;
         }
         
+        .input-wrap { position: relative; width: 100%; margin-top: 15px; }
+        .input-label { position: absolute; top: -8px; left: 15px; background: var(--card); padding: 0 5px; font-size: 10px; font-weight: 900; color: var(--accent); text-transform: uppercase; }
+
         input, select { 
-            width: 100%; padding: 18px; border-radius: 18px; border: 1px solid var(--border); 
-            background: var(--input-bg); color: var(--text); margin-top: 8px; font-size: 16px;
+            width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--border); 
+            background: var(--input-bg); color: var(--text); font-size: 16px; outline: none;
         }
 
         /* APP LAYOUT */
         #app-shell { display: none; flex-direction: column; height: 100vh; }
-        header { padding: var(--safe-top) 25px 15px; border-bottom: 1px solid var(--border); }
+        header { padding: var(--safe-top) 25px 15px; border-bottom: 1px solid var(--border); background: var(--bg); }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
-        h1 { margin: 0; font-size: 32px; letter-spacing: -1.5px; }
+        h1 { margin: 0; font-size: 32px; letter-spacing: -1.5px; font-weight: 900; }
         
-        .nav-scroller { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; }
-        .tab-pill { padding: 10px 20px; border-radius: 50px; background: var(--card); white-space: nowrap; font-size: 13px; font-weight: 700; border: 1px solid var(--border); }
-        .tab-pill.active { background: var(--accent); color: #000; }
+        .nav-scroller { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; scrollbar-width: none; }
+        .nav-scroller::-webkit-scrollbar { display: none; }
+        .tab-pill { padding: 10px 20px; border-radius: 50px; background: var(--card); white-space: nowrap; font-size: 13px; font-weight: 800; border: 1px solid var(--border); color: var(--dim); }
+        .tab-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-        main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 200px; }
-        .card { background: var(--card); padding: 20px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 12px; display: flex; justify-content: space-between; }
+        main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 250px; }
+        .month-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin: 20px 0 10px; }
+        .card { background: var(--card); padding: 20px; border-radius: 22px; border: 1px solid var(--border); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 
         #login-screen { position: fixed; inset: 0; z-index: 8888; background: #000; display: flex; align-items: center; justify-content: center; padding: 30px; }
         
-        footer { position: fixed; bottom: 0; width: 100%; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 15px); background: linear-gradient(transparent, var(--bg) 40%); }
+        footer { position: fixed; bottom: 0; width: 100%; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 10px); background: linear-gradient(transparent, var(--bg) 40%); z-index: 100; }
+        .entry-box { background: var(--card); padding: 15px; border-radius: 28px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body class="theme-midnight">
 
     <div id="login-screen">
         <div style="width:100%; max-width:350px; text-align:center;">
-            <h1 style="font-size:50px; margin-bottom:40px;">Agenda.</h1>
-            <input type="email" id="auth-email" placeholder="Email">
+            <h1 style="font-size:55px; margin-bottom:10px; letter-spacing:-4px;">Agenda.</h1>
+            <p style="color:#444; font-weight:700; margin-bottom:40px;">PRIVATE WORKSPACE</p>
+            <input type="email" id="auth-email" placeholder="Email Address">
             <input type="password" id="auth-pass" placeholder="Password" style="margin-top:10px;">
-            <button class="btn-prime" onclick="handleAuth()">Get Started</button>
-            <button class="btn-prime" style="background:white; color:black; margin-top:10px;" onclick="googleSignIn()">Google Sign In</button>
+            <button class="btn-prime" onclick="handleAuth()">Sign In / Join</button>
+            <button class="btn-prime" style="background:white; color:black; margin-top:12px;" onclick="googleSignIn()">Continue with Google</button>
         </div>
     </div>
 
     <div id="tutorial-overlay">
         <div class="tut-container">
             <div id="tut-1" class="tut-step active">
-                <h2 style="font-size:36px; letter-spacing:-1px;">Select a Vibe.</h2>
-                <p style="color:var(--dim);">Tap to preview the theme live.</p>
+                <h2 style="font-size:38px; font-weight:900; letter-spacing:-1px;">The Look.</h2>
+                <p style="color:var(--dim); margin-bottom:20px;">Choose a theme for your workspace.</p>
                 <div class="theme-grid">
                     <button class="theme-btn" onclick="setTheme('theme-midnight')">Midnight</button>
                     <button class="theme-btn" onclick="setTheme('theme-solar')">Solar</button>
@@ -99,19 +105,17 @@
                     <button class="theme-btn" onclick="setTheme('theme-forest')">Forest</button>
                     <button class="theme-btn" onclick="setTheme('theme-silver')">Silver</button>
                 </div>
-                <button class="btn-prime" onclick="nextTut(2)">Looks Good</button>
+                <button class="btn-prime" onclick="nextTut(2)">Apply & Continue</button>
             </div>
 
             <div id="tut-2" class="tut-step">
-                <h2 style="font-size:36px; letter-spacing:-1px;">First Agenda.</h2>
-                <p style="color:var(--dim);">Give your main list a name.</p>
-                <input type="text" id="tut-agenda-name" placeholder="e.g. My Life, University, Hustle">
-                <select id="tut-agenda-type">
-                    <option value="Standard">Standard</option>
-                    <option value="Countdown">Countdown</option>
-                    <option value="Milestone">Milestone</option>
-                </select>
-                <button class="btn-prime" onclick="finishTut()">Start Organizing</button>
+                <h2 style="font-size:38px; font-weight:900; letter-spacing:-1px;">The Focus.</h2>
+                <p style="color:var(--dim); margin-bottom:20px;">Name your primary agenda list.</p>
+                <div class="input-wrap">
+                    <span class="input-label">List Name</span>
+                    <input type="text" id="tut-agenda-name" placeholder="e.g. University, Work, General">
+                </div>
+                <button class="btn-prime" onclick="finishTut()">Finish Setup</button>
             </div>
         </div>
     </div>
@@ -120,37 +124,49 @@
         <header>
             <div class="header-top">
                 <h1>Agenda</h1>
-                <div style="display:flex; gap:10px;">
-                    <div onclick="openModal('modal-new-list')" style="font-size:24px; cursor:pointer;">⊕</div>
-                    <div onclick="openModal('modal-settings')" style="font-size:24px; cursor:pointer;">⚙️</div>
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <div onclick="openModal('modal-new-list')" style="font-size:28px; cursor:pointer; color:var(--accent)">+</div>
+                    <div onclick="openModal('modal-settings')" style="font-size:22px; cursor:pointer;">⚙️</div>
                 </div>
             </div>
             <div class="nav-scroller" id="tab-bar"></div>
         </header>
+
         <main id="main-content"></main>
+
         <footer>
-            <div style="background:var(--card); padding:12px; border-radius:30px; border:1px solid var(--border);">
-                <div style="display:flex; gap:8px;">
-                    <input type="text" id="t-input" placeholder="What's next?" style="margin:0; flex:1;">
-                    <input type="date" id="d-input" style="margin:0; width:130px;">
+            <div class="entry-box">
+                <div class="input-wrap" style="margin-top:0;">
+                    <span class="input-label">Event Name</span>
+                    <input type="text" id="t-input" placeholder="Enter title...">
                 </div>
-                <button class="btn-prime" style="margin-top:10px; padding:15px;" onclick="handleTaskSubmit()">Add Item</button>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <div class="input-wrap" style="flex:1; margin-top:0;">
+                        <span class="input-label">Due Date</span>
+                        <input type="date" id="d-input">
+                    </div>
+                    <button onclick="setToday()" style="background:var(--border); border:none; color:var(--text); border-radius:12px; padding:0 15px; font-weight:700; font-size:11px;">TODAY</button>
+                </div>
+                <button class="btn-prime" style="margin-top:15px; padding:15px;" onclick="handleTaskSubmit()">Add To List</button>
             </div>
         </footer>
     </div>
 
-    <div id="modal-settings" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:flex-end; z-index:10000;" onclick="this.style.display='none'">
-        <div style="background:var(--card); width:100%; padding:30px; border-radius:30px 30px 0 0;" onclick="event.stopPropagation()">
-            <h2>Settings</h2>
+    <div id="modal-settings" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:flex-end; z-index:10000; backdrop-filter:blur(10px);" onclick="this.style.display='none'">
+        <div style="background:var(--card); width:100%; padding:30px; border-radius:35px 35px 0 0; border-top:1px solid var(--border);" onclick="event.stopPropagation()">
+            <h2 style="margin:0 0 20px 0;">Settings</h2>
+            <div id="user-info" style="margin-bottom:20px; color:var(--dim); font-size:14px;"></div>
             <button class="btn-prime" style="background:var(--error); color:white;" onclick="auth.signOut(); location.reload();">Log Out</button>
+            <div style="height:30px;"></div>
         </div>
     </div>
 
-    <div id="modal-new-list" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:flex-end; z-index:10000;" onclick="this.style.display='none'">
-        <div style="background:var(--card); width:100%; padding:30px; border-radius:30px 30px 0 0;" onclick="event.stopPropagation()">
-            <h2>New Agenda</h2>
-            <input type="text" id="n-list-name" placeholder="Name">
-            <button class="btn-prime" onclick="createNewAgenda()">Create</button>
+    <div id="modal-new-list" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:flex-end; z-index:10000; backdrop-filter:blur(10px);" onclick="this.style.display='none'">
+        <div style="background:var(--card); width:100%; padding:30px; border-radius:35px 35px 0 0; border-top:1px solid var(--border);" onclick="event.stopPropagation()">
+            <h2 style="margin:0 0 20px 0;">Create List</h2>
+            <input type="text" id="n-list-name" placeholder="Agenda Name">
+            <button class="btn-prime" onclick="createNewAgenda()">Create Now</button>
+            <div style="height:30px;"></div>
         </div>
     </div>
 
@@ -169,11 +185,12 @@
 
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = JSON.parse(localStorage.getItem('agendas_v15')) || [{id:'General', type:'Standard'}];
+        let agendas = JSON.parse(localStorage.getItem('agendas_v16')) || [{id:'General', type:'Standard'}];
 
         async function handleAuth() {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
+            if(!email || !pass) return alert("Fill all fields");
             try { await auth.signInWithEmailAndPassword(email, pass); } 
             catch (e) { try { await auth.createUserWithEmailAndPassword(email, pass); } catch(err) { alert(err.message); } }
         }
@@ -183,8 +200,9 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-shell').style.display = 'flex';
+                document.getElementById('user-info').innerText = "Logged in as: " + user.email;
                 sync(user.uid);
-                if (!localStorage.getItem('tut_v15_' + user.uid)) {
+                if (!localStorage.getItem('tut_v16_' + user.uid)) {
                     document.getElementById('tutorial-overlay').style.display = 'flex';
                 }
             } else {
@@ -195,9 +213,13 @@
 
         window.setTheme = (t) => {
             document.body.className = t;
-            localStorage.setItem('theme_v15', t);
+            localStorage.setItem('theme_v16', t);
         };
-        if(localStorage.getItem('theme_v15')) setTheme(localStorage.getItem('theme_v15'));
+        if(localStorage.getItem('theme_v16')) setTheme(localStorage.getItem('theme_v16'));
+
+        window.setToday = () => {
+            document.getElementById('d-input').valueAsDate = new Date();
+        };
 
         window.nextTut = (step) => {
             document.querySelectorAll('.tut-step').forEach(s => s.classList.remove('active'));
@@ -206,8 +228,8 @@
 
         window.finishTut = () => {
             const name = document.getElementById('tut-agenda-name').value.trim();
-            if (name) { agendas = [{id: name, type: document.getElementById('tut-agenda-type').value}]; activeTab = name; saveAgendas(); }
-            localStorage.setItem('tut_v15_' + auth.currentUser.uid, 'true');
+            if (name) { agendas = [{id: name, type: 'Standard'}]; activeTab = name; saveAgendas(); }
+            localStorage.setItem('tut_v16_' + auth.currentUser.uid, 'true');
             document.getElementById('tutorial-overlay').style.display = 'none';
             render();
         };
@@ -222,17 +244,17 @@
         window.handleTaskSubmit = () => {
             const name = document.getElementById('t-input').value;
             const date = document.getElementById('d-input').value;
-            if(!name || !date) return;
+            if(!name || !date) return alert("Please set a name and date");
             db.collection("tasks").add({ name, date, category: activeTab, uid: auth.currentUser.uid });
             document.getElementById('t-input').value = '';
+            document.getElementById('d-input').value = '';
         };
 
-        function saveAgendas() { localStorage.setItem('agendas_v15', JSON.stringify(agendas)); }
-
+        function saveAgendas() { localStorage.setItem('agendas_v16', JSON.stringify(agendas)); }
         window.openModal = (id) => document.getElementById(id).style.display = 'flex';
         
         window.createNewAgenda = () => {
-            const n = document.getElementById('n-list-name').value;
+            const n = document.getElementById('n-list-name').value.trim();
             if(!n) return;
             agendas.push({id: n, type: 'Standard'});
             activeTab = n; saveAgendas(); render();
@@ -243,12 +265,27 @@
             document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
             const main = document.getElementById('main-content');
             main.innerHTML = '';
-            allTasks.filter(t => t.category === activeTab).forEach(t => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `<div><b>${t.name}</b><br><small>${t.date}</small></div><div onclick="db.collection('tasks').doc('${t.id}').delete()">✕</div>`;
-                main.appendChild(card);
+            
+            const filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
+            const groups = {};
+            filtered.forEach(t => {
+                const d = new Date(t.date + "T00:00:00");
+                const key = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(t);
             });
+
+            for (const key in groups) {
+                const sec = document.createElement('div');
+                sec.innerHTML = `<div class="month-label">${key}</div>`;
+                groups[key].forEach(task => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `<div><b style="font-size:17px;">${task.name}</b><br><small style="color:var(--dim); font-weight:600;">${task.date}</small></div><div style="padding:10px; cursor:pointer; color:var(--error); font-weight:bold;" onclick="db.collection('tasks').doc('${task.id}').delete()">✕</div>`;
+                    sec.appendChild(card);
+                });
+                main.appendChild(sec);
+            }
         }
     </script>
 </body>
