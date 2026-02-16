@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.4.1</title>
+    <title>Agenda Pro | V3.4.2</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -47,7 +47,7 @@
         .btn-add { background: var(--text); color: var(--bg); }
         .btn-save { background: var(--accent); color: #000; }
         .btn-ghost { background: transparent; color: var(--dim); border: 1px solid var(--border); margin-top: 10px; }
-        .btn-danger { background: rgba(255, 55, 95, 0.15); color: var(--error); border: 1px solid var(--error); }
+        .btn-danger { background: rgba(255, 55, 95, 0.1); color: var(--error); border: 1px solid var(--error); }
 
         .error-msg { color: var(--error); font-size: 13px; font-weight: 600; min-height: 20px; }
 
@@ -101,7 +101,7 @@
         <div class="subtitle">Private Workspace</div>
 
         <div class="auth-container active" id="auth-main">
-            <button class="btn-prime btn-save" style="background:#ffd60a; color:#000;" onclick="showAuth('auth-login')">Get Started</button>
+            <button class="btn-prime btn-save" onclick="showAuth('auth-login')">Sign In</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-signup')">Create Account</button>
             <div style="margin: 20px 0; color: var(--dim); font-size: 12px; font-weight:800;">OR</div>
             <button class="btn-prime" style="background:#fff; color:#000;" onclick="handleGoogleLogin()">
@@ -113,8 +113,8 @@
         <div class="auth-container" id="auth-signup">
             <h2>New Account</h2>
             <div style="display:flex; gap:10px;">
-                <input type="text" id="su-first" placeholder="First Name">
-                <input type="text" id="su-last" placeholder="Last Name">
+                <input type="text" id="su-first" placeholder="First">
+                <input type="text" id="su-last" placeholder="Last">
             </div>
             <input type="email" id="su-email" placeholder="Email Address">
             <input type="password" id="su-pass" placeholder="Password">
@@ -135,7 +135,7 @@
 
         <div class="auth-container" id="auth-verify">
             <h2>Verify Email</h2>
-            <p style="color:var(--dim); font-size:14px;">Code sent to your email.</p>
+            <p style="color:var(--dim); font-size:14px;">Verification code sent to email.</p>
             <input type="text" id="v-code" placeholder="000000" maxlength="6" style="text-align:center; font-size:32px; letter-spacing:8px;">
             <div class="error-msg" id="v-error"></div>
             <button class="btn-prime btn-save" onclick="validateCode()">Verify Account</button>
@@ -146,7 +146,7 @@
         <div class="auth-container active">
             <h2 id="intro-welcome">Welcome!</h2>
             <p style="color:var(--dim); margin-bottom:20px;">Let's set up your first agenda.</p>
-            <input type="text" id="intro-agenda-name" placeholder="e.g. Work, School, Finance">
+            <input type="text" id="intro-agenda-name" placeholder="e.g. Work, School">
             <button class="btn-prime btn-save" onclick="completeOnboarding()" style="margin-top:20px;">Complete Setup</button>
         </div>
     </div>
@@ -177,11 +177,17 @@
 
     <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2>Settings</h2>
+            <h2 style="margin-bottom:10px;">Settings</h2>
             <div id="account-display" style="padding:15px; background:var(--bg); border-radius:20px; margin-bottom:20px; display:flex; align-items:center; gap:15px;">
                 <img id="user-photo" src="" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--accent);">
                 <div><b id="user-name">User</b><br><span id="user-email" style="font-size:12px; color:var(--dim);"></span></div>
             </div>
+
+            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Accounts</p>
+            <button class="btn-prime" onclick="handleSwitchAccount()" style="background:var(--input-bg); border:1px solid var(--border); color:var(--text); margin-bottom:15px;">
+                Switch Account
+            </button>
+
             <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Theme</p>
             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:20px;">
                 <button class="tab-pill" onclick="updateTheme('theme-midnight')">Midnight</button>
@@ -190,18 +196,22 @@
                 <button class="tab-pill" onclick="updateTheme('theme-forest')">Forest</button>
                 <button class="tab-pill" onclick="updateTheme('theme-silver')">Silver</button>
             </div>
-            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Manage Agendas</p>
+            
+            <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">My Agendas</p>
             <div id="settings-agendas-list"></div>
-            <button class="btn-prime" onclick="auth.signOut()" style="background:var(--card); border:1px solid var(--border); margin-top:20px; color:var(--text);">Log Out</button>
+            
+            <button class="btn-prime" onclick="auth.signOut()" style="background:var(--card); border:1px solid var(--border); margin-top:25px; color:var(--text);">Log Out</button>
             <button class="btn-prime btn-danger" onclick="openModal('modal-confirm-delete')" style="margin-top:10px;">Delete Account</button>
         </div>
     </div>
 
     <div id="modal-confirm-delete" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2 style="color:var(--error);">Delete Account?</h2>
-            <p style="color:var(--dim); font-size:14px; margin-bottom:25px;">This will permanently erase all data, lists, and settings.</p>
-            <button class="btn-prime btn-save" style="background:var(--error); color:#fff;" onclick="handleDeleteAccount()">Delete Forever</button>
+            <h2 style="color:var(--error);">Final Warning</h2>
+            <p style="color:var(--dim); font-size:14px; margin-bottom:25px;">This will permanently wipe all your agendas and data. To confirm, please type your email below:</p>
+            <input type="email" id="delete-confirm-email" placeholder="Your Email Address" style="margin-bottom:20px; border-color:var(--error);">
+            <div class="error-msg" id="del-error"></div>
+            <button class="btn-prime btn-save" style="background:var(--error); color:#fff;" onclick="handleDeleteAccount()">Wipe Everything</button>
             <button class="btn-prime btn-ghost" onclick="closeAllModals()">Cancel</button>
         </div>
     </div>
@@ -221,7 +231,6 @@
     </div>
 
     <script>
-        // CREDENTIALS
         const EMAILJS_SERVICE_ID = "service_ow9m3kg";
         const EMAILJS_TEMPLATE_ID = "template_7xhxmoi";
         const EMAILJS_PUBLIC_KEY = "RsAYqiwym2mViUR8u";
@@ -249,7 +258,7 @@
 
         const trashSvg = `<svg class="trash-icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>`;
 
-        // UI STATE HANDLERS
+        // UI HELPERS
         function setVisibility(screen) {
             const loader = document.getElementById('global-loader');
             const landing = document.getElementById('screen-landing');
@@ -298,6 +307,12 @@
             try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } catch(e) {}
         }
 
+        async function handleSwitchAccount() {
+            await auth.signOut();
+            setVisibility('landing');
+            showAuth('auth-main');
+        }
+
         async function handleSignUpProcess() {
             const f = document.getElementById('su-first').value.trim();
             const l = document.getElementById('su-last').value.trim();
@@ -340,6 +355,43 @@
                 } catch(e) { document.getElementById('v-error').innerText = e.message; }
             } else {
                 document.getElementById('v-error').innerText = "Incorrect verification code.";
+            }
+        }
+
+        // ACCOUNT DELETION (FIXED)
+        async function handleDeleteAccount() {
+            const user = auth.currentUser;
+            const confirmEmail = document.getElementById('delete-confirm-email').value.trim();
+            const err = document.getElementById('del-error');
+
+            if (confirmEmail !== user.email) {
+                err.innerText = "Email does not match current user.";
+                return;
+            }
+
+            if (!confirm("Are you absolutely sure? This cannot be undone.")) return;
+
+            document.getElementById('global-loader').style.display = 'flex';
+            document.getElementById('global-loader').style.opacity = '1';
+
+            try {
+                // 1. Delete Firestore Data
+                const taskSnap = await db.collection('tasks').where('uid', '==', user.uid).get();
+                const batch = db.batch();
+                taskSnap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                await db.collection('users').doc(user.uid).delete();
+
+                // 2. Delete Auth User
+                await user.delete();
+                location.reload();
+            } catch (e) {
+                document.getElementById('global-loader').style.display = 'none';
+                if (e.code === 'auth/requires-recent-login') {
+                    err.innerText = "Security error: Please log out and back in, then try again immediately.";
+                } else {
+                    err.innerText = "Error: " + e.message;
+                }
             }
         }
 
@@ -448,7 +500,6 @@
             `).join('');
         }
 
-        // RENDER ENGINE
         function render() {
             const tabBar = document.getElementById('tab-bar');
             tabBar.innerHTML = agendas.map(a => `
