@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.4.9</title>
+    <title>Agenda Pro | V3.5.0</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -14,7 +14,7 @@
         :root {
             --bg: #000000; --card: #1c1c1e; --border: #2c2c2e; --text: #ffffff;
             --dim: #8e8e93; --accent: #ffd60a; --error: #ff375f;
-            --input-bg: #1c1c1e; --icon-color: #ffffff;
+            --input-bg: #1c1c1e;
             --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
@@ -83,13 +83,11 @@
 
     <div id="screen-landing" class="full-screen">
         <h1 style="font-size: 64px; letter-spacing: -4px;">Agenda.</h1>
-        <div style="font-size: 11px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; margin-bottom: 40px;">Private Workspace</div>
-        
         <div class="auth-container active" id="auth-main">
             <button class="btn-prime btn-save" onclick="showAuth('auth-login')">Sign In</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-signup')">Create Account</button>
-            <div style="margin: 20px 0; color: var(--dim); font-size: 10px; font-weight:800;">OR</div>
-            <button class="btn-prime" style="background:#fff; color:#000;" onclick="handleGoogleLogin()">Continue with Google</button>
+            <div style="margin: 15px 0; color: var(--dim); font-size: 10px; font-weight: 800;">OR</div>
+            <button class="btn-prime" style="background: #fff; color: #000;" onclick="handleGoogleLogin()">Continue with Google</button>
         </div>
 
         <div class="auth-container" id="auth-signup">
@@ -105,13 +103,14 @@
             <h2>Welcome Back</h2>
             <input type="email" id="li-email" placeholder="Email">
             <input type="password" id="li-pass" placeholder="Password">
+            <div id="li-error" style="color:var(--error); font-size:12px;"></div>
             <button class="btn-prime btn-save" onclick="handleEmailLogin()">Sign In</button>
             <button class="btn-prime btn-ghost" onclick="showAuth('auth-main')">Back</button>
         </div>
 
         <div class="auth-container" id="auth-verify">
             <h2>Check Email</h2>
-            <p id="v-email-info" style="font-size:12px; color:var(--dim);"></p>
+            <p id="v-info" style="font-size:12px; color:var(--dim);"></p>
             <input type="text" id="v-code" placeholder="000000" maxlength="6" style="text-align:center; font-size:32px; letter-spacing:8px;">
             <button class="btn-prime btn-save" onclick="validateCode()">Confirm</button>
             <button class="btn-prime btn-ghost" onclick="handleSignUpProcess()">Resend</button>
@@ -120,8 +119,8 @@
 
     <div id="screen-intro" class="full-screen">
         <div class="auth-container active">
-            <h2>First Workspace</h2>
-            <input type="text" id="intro-name" placeholder="Agenda Name (e.g. Daily)">
+            <h2>First Agenda</h2>
+            <input type="text" id="intro-name" placeholder="e.g. Daily Tasks">
             <button class="btn-prime btn-save" onclick="completeOnboarding()" style="margin-top:20px;">Get Started</button>
         </div>
     </div>
@@ -129,7 +128,7 @@
     <div id="app-shell">
         <header>
             <div class="header-top">
-                <h1 id="app-header-title">Agenda</h1>
+                <h1>Agenda</h1>
                 <div style="display:flex; gap:15px;">
                     <div onclick="openModal('modal-new-list')" style="color:var(--accent); font-weight:900; font-size:28px; cursor:pointer;">+</div>
                     <div onclick="openModal('modal-settings')" style="color:var(--accent); font-weight:900; font-size:24px; cursor:pointer;">⚙</div>
@@ -141,11 +140,11 @@
         <footer>
             <div class="input-box">
                 <div style="display:flex; gap:10px; margin-bottom:10px;">
-                    <input type="text" id="t-input" placeholder="Task Name">
+                    <input type="text" id="t-input" placeholder="What's the task?">
                     <input type="date" id="d-input" style="width:140px;">
                 </div>
-                <button class="btn-prime btn-save" id="s-btn" onclick="handleTaskSubmit()">Add Item</button>
-                <button id="cancel-edit" style="display:none; width:100%; border:none; background:none; color:var(--dim); padding-top:10px; font-weight:800;" onclick="resetForm()">CANCEL EDIT</button>
+                <button class="btn-prime btn-save" id="s-btn" onclick="handleTaskSubmit()">Save Item</button>
+                <button id="cancel-edit" style="display:none; width:100%; border:none; background:none; color:var(--dim); font-size:12px; margin-top:10px;" onclick="resetForm()">DISCARD EDIT</button>
             </div>
         </footer>
     </div>
@@ -157,10 +156,11 @@
             <div>
                 <b id="u-name" style="font-size:18px;">---</b><br>
                 <span id="u-email" style="font-size:12px; color:var(--dim);">---</span>
+                <div id="admin-badge" style="display:none; font-size:10px; color:var(--accent); font-weight:900; margin-top:4px;">SUPER ADMIN</div>
             </div>
         </div>
         
-        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Theme</p>
+        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase;">Personalization</p>
         <div class="theme-grid">
             <div class="theme-dot" style="background:#000; color:#ffd60a;" onclick="updateTheme('theme-midnight')">Dark</div>
             <div class="theme-dot" style="background:#05010d; color:#ff00ff;" onclick="updateTheme('theme-cyber')">Cyber</div>
@@ -172,18 +172,19 @@
             <div class="theme-dot" style="background:#120000; color:#ff3b3b;" onclick="updateTheme('theme-ruby')">Ruby</div>
         </div>
 
-        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase; margin-top:20px;">My Agendas</p>
+        <p style="font-size:10px; font-weight:900; color:var(--accent); text-transform:uppercase; margin-top:25px;">Agendas</p>
         <div id="agendas-list"></div>
         
-        <button class="btn-prime btn-ghost" onclick="handleSwitchAccount()" style="margin-top:20px;">Switch Account</button>
+        <button class="btn-prime btn-ghost" onclick="handleSwitchAccount()" style="margin-top:20px;">Switch User</button>
         <button class="btn-prime" onclick="auth.signOut()" style="margin-top:10px;">Sign Out</button>
+        <button id="del-btn" class="btn-prime btn-danger" onclick="handleDeleteAccount()" style="margin-top:10px;">Wipe Account</button>
     </div></div>
 
     <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()"><div class="modal-sheet" onclick="event.stopPropagation()">
-        <h2>Create Agenda</h2>
+        <h2>New Agenda</h2>
         <input type="text" id="n-name" placeholder="Name">
         <select id="n-type" style="margin:15px 0;"><option value="Standard">Standard</option><option value="Countdown">Countdown</option><option value="Finance">Finance</option></select>
-        <button class="btn-prime btn-save" onclick="createNewAgenda()">Save</button>
+        <button class="btn-prime btn-save" onclick="createNewAgenda()">Create</button>
     </div></div>
 
     <script>
@@ -194,6 +195,7 @@
         const auth = firebase.auth(), db = firebase.firestore();
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
+        const ADMIN_EMAIL = "burgerman0316@gmail.com";
         let activeTab = '', allTasks = [], agendas = [], editId = null, vCode = "", signupTemp = null;
 
         function setVisibility(s) {
@@ -222,6 +224,15 @@
             document.getElementById('u-name').innerText = user.displayName || "User";
             document.getElementById('u-email').innerText = user.email;
             document.getElementById('u-avatar').innerText = (user.displayName || "U")[0].toUpperCase();
+            
+            if(user.email === ADMIN_EMAIL) {
+                document.getElementById('admin-badge').style.display = 'block';
+                document.getElementById('del-btn').innerText = "ADMIN WIPE";
+            } else {
+                document.getElementById('admin-badge').style.display = 'none';
+                document.getElementById('del-btn').innerText = "Wipe Account";
+            }
+
             agendas = data.agendas || [];
             if(!activeTab && agendas.length > 0) activeTab = agendas[0].id;
             document.body.className = data.theme || 'theme-midnight';
@@ -232,6 +243,21 @@
             setVisibility('app');
         }
 
+        async function handleGoogleLogin() {
+            setVisibility('loading');
+            try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+            catch(e) { setVisibility('landing'); }
+        }
+
+        async function handleEmailLogin() {
+            setVisibility('loading');
+            const e = document.getElementById('li-email').value, p = document.getElementById('li-pass').value;
+            auth.signInWithEmailAndPassword(e, p).catch(err => {
+                setVisibility('landing');
+                document.getElementById('li-error').innerText = "Login Failed: " + err.message;
+            });
+        }
+
         async function handleSignUpProcess() {
             const e = document.getElementById('su-email').value, f = document.getElementById('su-first').value, p = document.getElementById('su-pass').value;
             if(!e || !f || !p) return;
@@ -239,22 +265,52 @@
             vCode = Math.floor(100000 + Math.random() * 900000).toString();
             try {
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: e, verification_code: vCode, user_name: f });
-                document.getElementById('v-email-info').innerText = `Sent to ${e}`;
+                document.getElementById('v-info').innerText = `Sent to ${e}`;
                 showAuth('auth-verify');
-            } catch(err) { alert("Email Send Failed"); }
+            } catch(err) { alert("Code delivery failed."); }
         }
 
         async function validateCode() {
             if(document.getElementById('v-code').value === vCode) {
+                setVisibility('loading');
                 try {
                     const res = await auth.createUserWithEmailAndPassword(signupTemp.email, signupTemp.pass);
                     await res.user.updateProfile({displayName: signupTemp.name});
-                } catch(e) { alert(e.message); }
+                } catch(e) { alert(e.message); setVisibility('landing'); }
+            }
+        }
+
+        async function handleSwitchAccount() {
+            await auth.signOut();
+            location.reload();
+        }
+
+        async function handleDeleteAccount() {
+            const u = auth.currentUser;
+            const isAdmin = u.email === ADMIN_EMAIL;
+            
+            if(!confirm(isAdmin ? "ADMIN: This will permanently purge this account data." : "Delete your account and all tasks?")) return;
+            
+            setVisibility('loading');
+            try {
+                // Delete user data first
+                const tasks = await db.collection('tasks').where('uid', '==', u.uid).get();
+                const batch = db.batch();
+                tasks.forEach(t => batch.delete(t.ref));
+                await batch.commit();
+                await db.collection('users').doc(u.uid).delete();
+                
+                // Finally delete auth profile
+                await u.delete();
+                location.reload();
+            } catch(e) {
+                alert("Security: Please sign out and sign back in before deleting.");
+                setVisibility('app');
             }
         }
 
         async function completeOnboarding() {
-            const n = document.getElementById('intro-name').value || "Work";
+            const n = document.getElementById('intro-name').value || "Agenda";
             const data = { theme: 'theme-midnight', agendas: [{id: n, type: 'Standard'}] };
             await db.collection('users').doc(auth.currentUser.uid).set(data);
             initApp(auth.currentUser, data);
@@ -321,29 +377,12 @@
             const t = allTasks.find(x => x.id === id);
             document.getElementById('t-input').value = t.name;
             document.getElementById('d-input').value = t.date;
-            editId = id; document.getElementById('s-btn').innerText = "Update";
+            editId = id; document.getElementById('s-btn').innerText = "Update Entry";
             document.getElementById('cancel-edit').style.display = 'block';
         }
 
-        function resetForm() { editId = null; document.getElementById('t-input').value = ''; document.getElementById('s-btn').innerText = "Add Item"; document.getElementById('cancel-edit').style.display = 'none'; }
-        
+        function resetForm() { editId = null; document.getElementById('t-input').value = ''; document.getElementById('s-btn').innerText = "Save Item"; document.getElementById('cancel-edit').style.display = 'none'; }
         async function updateTheme(t) { document.body.className = t; await db.collection('users').doc(auth.currentUser.uid).update({theme: t}); }
-        
-        async function handleGoogleLogin() { 
-            setVisibility('loading'); 
-            try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } 
-            catch(e) { setVisibility('landing'); } 
-        }
-
-        async function handleEmailLogin() {
-            setVisibility('loading');
-            auth.signInWithEmailAndPassword(document.getElementById('li-email').value, document.getElementById('li-pass').value).catch(() => setVisibility('landing'));
-        }
-
-        async function handleSwitchAccount() {
-            await auth.signOut();
-            location.reload();
-        }
     </script>
 </body>
 </html>
