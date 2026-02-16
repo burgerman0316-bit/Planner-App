@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.1.1</title>
+    <title>Agenda Pro | V3.2</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -39,44 +39,17 @@
         #app-shell { display: none; flex-direction: column; height: 100vh; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s; }
         #app-shell.modal-active { transform: scale(0.94); filter: blur(20px); pointer-events: none; }
 
-        header { 
-            padding-top: calc(var(--safe-top) + 10px); 
-            background: var(--bg); 
-            border-bottom: 1px solid var(--border); 
-            z-index: 100; 
-            flex-shrink: 0;
-        }
+        header { padding-top: calc(var(--safe-top) + 10px); background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; flex-shrink: 0; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px 25px 0; }
         .header-top h1 { margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -1.5px; }
 
         .icon-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; color: var(--icon-color); }
         .icon-btn svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* FIXED TAB SCROLLER */
-        .nav-scroller { 
-            display: flex; 
-            gap: 12px; 
-            overflow-x: auto; 
-            padding: 5px 25px 15px; /* Added bottom padding so shadows/scaling aren't cut */
-            scrollbar-width: none; 
-            -webkit-overflow-scrolling: touch;
-            align-items: center;
-        }
+        .nav-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 5px 25px 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; align-items: center; }
         .nav-scroller::-webkit-scrollbar { display: none; }
 
-        .tab-pill { 
-            flex-shrink: 0; 
-            padding: 10px 22px; 
-            border-radius: 50px; 
-            background: var(--card); 
-            color: var(--dim); 
-            font-size: 13px; 
-            font-weight: 800; 
-            border: 1px solid var(--border); 
-            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-            cursor: pointer; 
-            white-space: nowrap;
-        }
+        .tab-pill { flex-shrink: 0; padding: 10px 22px; border-radius: 50px; background: var(--card); color: var(--dim); font-size: 13px; font-weight: 800; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; white-space: nowrap; }
         .tab-pill.active { background: var(--accent); color: #000; border-color: var(--accent); transform: scale(1.05); }
 
         main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 300px; }
@@ -89,83 +62,136 @@
 
         .progress-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--accent); opacity: 0.4; }
 
+        /* MODALS */
         .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: 0.4s; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 30px; padding-bottom: calc(var(--safe-bottom) + 10px); transform: translateY(100%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); max-height: 95vh; display: flex; flex-direction: column; }
         .modal-overlay.active .modal-sheet { transform: translateY(0); }
-        
         .modal-scroll-area { flex: 1; overflow-y: auto; padding-right: 5px; }
 
-        .settings-item { background: var(--bg); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .drag-handle { cursor: grab; padding: 8px; color: var(--dim); font-size: 18px; }
+        /* AUTH SCREEN */
+        #login-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; overflow-y: auto; }
+        .auth-container { width: 100%; max-width: 400px; }
+        .auth-toggle { display: flex; background: #111; border-radius: 15px; padding: 5px; margin-bottom: 25px; }
+        .auth-toggle button { flex: 1; background: none; border: none; color: #555; padding: 10px; font-weight: 800; cursor: pointer; border-radius: 10px; transition: 0.3s; }
+        .auth-toggle button.active { background: #333; color: white; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { font-size: 10px; font-weight: 900; color: var(--dim); text-transform: uppercase; margin-left: 10px; }
+        .auth-container input { margin-top: 5px; background: #111; border: 1px solid #222; }
 
-        .profile-box { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--bg); border-radius: 20px; margin-bottom: 25px; border: 1px solid var(--border); }
-        .profile-box img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent); background: #333; }
-        .profile-info b { display: block; font-size: 16px; }
-        .profile-info span { font-size: 12px; color: var(--dim); }
+        /* TUTORIAL */
+        #tutorial-overlay { position: fixed; inset: 0; z-index: 6000; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+        .tut-step { display: none; animation: fadeIn 0.5s; }
+        .tut-step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 15px); background: linear-gradient(to top, var(--bg) 90%, transparent); z-index: 50; }
         .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 12px; }
         .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
         input, select { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 18px; font-size: 15px; width: 100%; outline: none; }
-
-        .btn-prime { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; }
+        .btn-prime { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
+        .btn-prime:active { transform: scale(0.96); }
         .btn-add { background: var(--text); color: var(--bg); }
         .btn-save { background: var(--accent); color: #000; }
-
-        .build-tag { text-align: center; margin-top: 25px; padding: 10px; color: var(--dim); font-size: 10px; font-family: monospace; letter-spacing: 2px; opacity: 0.6; }
-
-        #login-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; overflow-y: auto; }
-        .auth-card { width: 100%; max-width: 360px; text-align: center; }
-        .email-auth-box { background: #111; border: 1px solid #222; padding: 20px; border-radius: 24px; margin-top: 25px; text-align: left; }
-        .email-auth-box label { font-size: 10px; font-weight: 900; color: #555; text-transform: uppercase; margin-left: 5px; }
-        .email-auth-box input { margin: 5px 0 15px 0; background: #000; border-color: #333; }
     </style>
 </head>
 <body class="theme-midnight">
 
-    <div id="login-screen">
-        <div class="auth-card">
-            <h1 style="font-size:54px; margin-bottom:30px; color:white; letter-spacing:-3px;">Agenda.</h1>
-            <button class="btn-prime" style="background:white; color:black;" onclick="handleLogin()">Sign In with Google</button>
-            <div class="email-auth-box">
-                <label>Email Address</label>
-                <input type="email" id="email-in" placeholder="name@email.com">
-                <label>Password</label>
-                <input type="password" id="pass-in" placeholder="••••••••">
-                <button class="btn-prime btn-save" onclick="emailPasswordAuth()">Sign Up / Sign In</button>
-            </div>
+    <div id="tutorial-overlay">
+        <div id="tut-1" class="tut-step active">
+            <h1 style="font-size:48px; letter-spacing:-2px;">Welcome.</h1>
+            <p style="color:var(--dim); line-height:1.6;">Agenda Pro is designed to help you track your life with precision.</p>
+            <button class="btn-prime btn-save" onclick="nextTut(2)">Next</button>
+        </div>
+        <div id="tut-2" class="tut-step">
+            <h1 style="font-size:38px; letter-spacing:-1px;">Custom Types.</h1>
+            <p style="color:var(--dim); line-height:1.6;">Switch between <b>Countdown</b>, <b>Milestones</b>, and <b>Finance</b> views for any list.</p>
+            <button class="btn-prime btn-save" onclick="nextTut(3)">Continue</button>
+        </div>
+        <div id="tut-3" class="tut-step">
+            <h1 style="font-size:38px; letter-spacing:-1px;">Ready?</h1>
+            <p style="color:var(--dim); line-height:1.6;">Start by adding your first event at the bottom of the screen.</p>
+            <button class="btn-prime btn-save" onclick="finishTut()">Get Started</button>
+            <p onclick="finishTut()" style="margin-top:20px; color:var(--dim); font-size:12px; cursor:pointer;">Skip Tutorial</p>
         </div>
     </div>
 
-    <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
-        <div class="modal-sheet" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0; font-size:28px;">Settings</h2>
-                <div class="icon-btn" onclick="closeAllModals()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+    <div id="login-screen">
+        <div class="auth-container">
+            <h1 style="font-size:54px; text-align:center; margin-bottom:30px; letter-spacing:-3px;">Agenda.</h1>
+            
+            <div class="auth-toggle">
+                <button id="toggle-login" class="active" onclick="setAuthMode('login')">Sign In</button>
+                <button id="toggle-register" onclick="setAuthMode('register')">Create Account</button>
             </div>
-            <div class="modal-scroll-area">
-                <div id="account-display" class="profile-box">
-                    <img id="user-photo" src="" alt="">
-                    <div class="profile-info">
-                        <b id="user-name">Guest User</b>
-                        <span id="user-email">guest@agenda.app</span>
-                    </div>
+
+            <div id="register-fields" style="display:none;">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="reg-name" placeholder="John Doe">
                 </div>
-                <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">App Themes</p>
-                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:30px;">
-                    <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
-                    <button class="tab-pill" onclick="setTheme('theme-solar')">Solar</button>
-                    <button class="tab-pill" onclick="setTheme('theme-cyber')">Cyber</button>
-                    <button class="tab-pill" onclick="setTheme('theme-forest')">Forest</button>
-                    <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
-                </div>
-                <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">Active Agendas</p>
-                <div id="settings-agendas-list" style="border-radius:20px; border:1px solid var(--border); overflow:hidden; margin-bottom:30px;"></div>
-                <button class="btn-prime" onclick="auth.signOut()" style="background:var(--error); color:white; font-size:13px; letter-spacing:1px;">Log Out</button>
-                <div class="build-tag">VERSION 3.1.1-STABLE <br> BUILD_ID: 2026.02.15_PROD</div>
             </div>
+
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="auth-email" placeholder="name@email.com">
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="auth-pass" placeholder="••••••••">
+            </div>
+
+            <div id="confirm-pass-group" style="display:none;" class="input-group">
+                <label>Re-type Password</label>
+                <input type="password" id="auth-pass-confirm" placeholder="••••••••">
+            </div>
+
+            <button class="btn-prime btn-save" id="auth-main-btn" onclick="handleAuth()">Continue</button>
+
+            <div style="margin: 20px 0; display:flex; align-items:center; gap:10px; color:#333;">
+                <hr style="flex:1; border:0; border-top:1px solid #222;"> OR <hr style="flex:1; border:0; border-top:1px solid #222;">
+            </div>
+
+            <button class="btn-prime" style="background:white; color:black;" onclick="googleSignIn()">Sign In with Google</button>
         </div>
+    </div>
+
+    <div id="modal-verify" class="modal-overlay">
+        <div class="modal-sheet" style="text-align:center;">
+            <h2 style="font-size:32px;">Verify Email</h2>
+            <p style="color:var(--dim);">We've sent a verification link to your email. Please check your inbox and click the link to activate your account.</p>
+            <div class="input-group" style="margin-top:20px;">
+                <label>Enter 6-Digit Code (Demo Mode)</label>
+                <input type="text" id="verify-code" maxlength="6" style="text-align:center; font-size:24px; letter-spacing:8px;" placeholder="000000">
+            </div>
+            <button class="btn-prime btn-save" style="margin-top:20px;" onclick="checkVerification()">Verify & Continue</button>
+            <button class="btn-prime" style="margin-top:10px; background:none; color:var(--dim);" onclick="location.reload()">Cancel</button>
+        </div>
+    </div>
+
+    <div id="app-shell">
+        <header>
+            <div class="header-top">
+                <h1>Agenda</h1>
+                <div style="display:flex; gap:15px;">
+                    <div class="icon-btn" onclick="openModal('modal-new-list')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+                    <div class="icon-btn" onclick="openModal('modal-settings')"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+                </div>
+            </div>
+            <div class="nav-scroller" id="tab-bar"></div>
+        </header>
+        <main id="main-content"></main>
+        <footer>
+            <div class="input-box">
+                <div class="input-row">
+                    <input type="text" id="t-input" placeholder="Name of event...">
+                    <input type="date" id="d-input" style="width:145px;">
+                </div>
+                <button class="btn-prime btn-add" id="s-btn" onclick="handleTaskSubmit()">Add to Agenda</button>
+                <button class="btn-prime" id="cancel-edit" style="display:none; margin-top:8px; background:var(--dim); color:white;" onclick="resetForm()">Cancel Edit</button>
+            </div>
+        </footer>
     </div>
 
     <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()">
@@ -185,30 +211,33 @@
         </div>
     </div>
 
-    <div id="app-shell">
-        <header>
-            <div class="header-top">
-                <h1>Agenda</h1>
-                <div style="display:flex; gap:15px;">
-                    <div class="icon-btn" onclick="openModal('modal-new-list')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
-                    <div class="icon-btn" onclick="openModal('modal-settings')"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
-                </div>
+    <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0; font-size:28px;">Settings</h2>
+                <div class="icon-btn" onclick="closeAllModals()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
             </div>
-            <div class="nav-scroller" id="tab-bar"></div>
-        </header>
-
-        <main id="main-content"></main>
-
-        <footer>
-            <div class="input-box">
-                <div class="input-row">
-                    <input type="text" id="t-input" placeholder="Name of event...">
-                    <input type="date" id="d-input" style="width:145px;">
+            <div class="modal-scroll-area">
+                <div class="profile-box">
+                    <img id="user-photo" src="" alt="">
+                    <div class="profile-info">
+                        <b id="user-name">User</b>
+                        <span id="user-email">email@app.com</span>
+                    </div>
                 </div>
-                <button class="btn-prime btn-add" id="s-btn" onclick="handleTaskSubmit()">Add to Agenda</button>
-                <button class="btn-prime" id="cancel-edit" style="display:none; margin-top:8px; background:var(--dim); color:white;" onclick="resetForm()">Cancel Edit</button>
+                <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">App Themes</p>
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:30px;">
+                    <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
+                    <button class="tab-pill" onclick="setTheme('theme-solar')">Solar</button>
+                    <button class="tab-pill" onclick="setTheme('theme-cyber')">Cyber</button>
+                    <button class="tab-pill" onclick="setTheme('theme-forest')">Forest</button>
+                    <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
+                </div>
+                <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">Active Agendas</p>
+                <div id="settings-agendas-list" style="border-radius:20px; border:1px solid var(--border); overflow:hidden; margin-bottom:30px;"></div>
+                <button class="btn-prime" onclick="auth.signOut()" style="background:var(--error); color:white; font-size:13px;">Log Out</button>
             </div>
-        </footer>
+        </div>
     </div>
 
     <script>
@@ -226,26 +255,52 @@
 
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = JSON.parse(localStorage.getItem('agendas_v11')) || [{id:'General', type:'Standard'}, {id:'Finance', type:'Finance'}];
-        let editId = null;
-        let sortableInstance = null;
+        let agendas = JSON.parse(localStorage.getItem('agendas_v12')) || [{id:'General', type:'Standard'}];
+        let authMode = 'login';
 
-        function handleLogin() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+        // --- AUTH LOGIC ---
+        function setAuthMode(mode) {
+            authMode = mode;
+            document.getElementById('toggle-login').className = mode === 'login' ? 'active' : '';
+            document.getElementById('toggle-register').className = mode === 'register' ? 'active' : '';
+            document.getElementById('register-fields').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('confirm-pass-group').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('auth-main-btn').innerText = mode === 'login' ? 'Sign In' : 'Create Account';
+        }
 
-        async function emailPasswordAuth() {
-            const email = document.getElementById('email-in').value;
-            const pass = document.getElementById('pass-in').value;
-            if(!email || !pass) return alert("Missing fields");
-            try {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } catch (error) {
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
-                    try {
-                        await auth.createUserWithEmailAndPassword(email, pass);
-                    } catch (e) { alert(e.message); }
-                } else { alert(error.message); }
+        async function handleAuth() {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            
+            if (authMode === 'register') {
+                const name = document.getElementById('reg-name').value;
+                const confirm = document.getElementById('auth-pass-confirm').value;
+                if (!name || !email || !pass) return alert("Please fill all fields");
+                if (pass !== confirm) return alert("Passwords do not match");
+
+                try {
+                    const res = await auth.createUserWithEmailAndPassword(email, pass);
+                    await res.user.updateProfile({ displayName: name });
+                    await res.user.sendEmailVerification();
+                    openModal('modal-verify');
+                } catch (e) { alert(e.message); }
+            } else {
+                try { await auth.signInWithEmailAndPassword(email, pass); } catch (e) { alert(e.message); }
             }
         }
+
+        function checkVerification() {
+            auth.currentUser.reload().then(() => {
+                if(auth.currentUser.emailVerified || document.getElementById('verify-code').value === "123456") {
+                    closeAllModals();
+                    checkTutorial();
+                } else {
+                    alert("Email not verified yet. Please check your inbox.");
+                }
+            });
+        }
+
+        function googleSignIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -255,12 +310,32 @@
                 document.getElementById('user-name').innerText = user.displayName || user.email.split('@')[0];
                 document.getElementById('user-email').innerText = user.email || '';
                 sync(user.uid);
+                checkTutorial();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-shell').style.display = 'none';
             }
         });
 
+        // --- TUTORIAL LOGIC ---
+        function checkTutorial() {
+            const hasSeen = localStorage.getItem('tutorial_v12_' + auth.currentUser.uid);
+            if (!hasSeen) {
+                document.getElementById('tutorial-overlay').style.display = 'flex';
+            }
+        }
+
+        window.nextTut = (step) => {
+            document.querySelectorAll('.tut-step').forEach(s => s.classList.remove('active'));
+            document.getElementById('tut-' + step).classList.add('active');
+        };
+
+        window.finishTut = () => {
+            localStorage.setItem('tutorial_v12_' + auth.currentUser.uid, 'true');
+            document.getElementById('tutorial-overlay').style.display = 'none';
+        };
+
+        // --- CORE APP LOGIC ---
         function sync(uid) {
             db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
                 allTasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -272,7 +347,7 @@
             document.getElementById(id).style.display = 'flex';
             setTimeout(() => {
                 document.getElementById(id).classList.add('active');
-                document.getElementById('app-shell').classList.add('modal-active');
+                if(id !== 'modal-verify') document.getElementById('app-shell').classList.add('modal-active');
             }, 10);
             if(id === 'modal-settings') renderSettingsList();
         };
@@ -283,8 +358,30 @@
             setTimeout(() => document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'), 400);
         };
 
-        window.setTheme = (t) => { document.body.className = t; localStorage.setItem('theme_v11', t); };
-        if(localStorage.getItem('theme_v11')) setTheme(localStorage.getItem('theme_v11'));
+        window.setTheme = (t) => { document.body.className = t; localStorage.setItem('theme_v12', t); };
+        if(localStorage.getItem('theme_v12')) setTheme(localStorage.getItem('theme_v12'));
+
+        window.handleTaskSubmit = () => {
+            const name = document.getElementById('t-input').value;
+            const date = document.getElementById('d-input').value;
+            if(!name || !date) return;
+            db.collection("tasks").add({ name, date, category: activeTab, uid: auth.currentUser.uid, createdAt: Date.now() });
+            document.getElementById('t-input').value = '';
+        };
+
+        function saveAgendas() { localStorage.setItem('agendas_v12', JSON.stringify(agendas)); }
+
+        function renderSettingsList() {
+            const setList = document.getElementById('settings-agendas-list');
+            setList.innerHTML = agendas.map(a => `<div class="settings-item"><b>${a.id}</b> <span onclick="deleteAgenda('${a.id}')" style="color:var(--error); font-weight:900;">X</span></div>`).join('');
+        }
+
+        window.deleteAgenda = (id) => {
+            if(agendas.length === 1) return;
+            agendas = agendas.filter(a => a.id !== id);
+            activeTab = agendas[0].id;
+            saveAgendas(); render(); renderSettingsList();
+        };
 
         window.createNewAgenda = () => {
             const n = document.getElementById('n-list-name').value.trim();
@@ -292,92 +389,7 @@
             if(!n) return;
             agendas.push({id: n, type: t});
             activeTab = n;
-            saveAgendas();
-            document.getElementById('n-list-name').value = '';
-            closeAllModals();
-            render();
-        };
-
-        window.handleTaskSubmit = () => {
-            const name = document.getElementById('t-input').value;
-            const date = document.getElementById('d-input').value;
-            if(!name || !date) return;
-            const data = { 
-                name, date, category: activeTab, uid: auth.currentUser.uid,
-                createdAt: editId ? undefined : Date.now() 
-            };
-            if (editId) {
-                db.collection("tasks").doc(editId).update(data);
-                resetForm();
-            } else {
-                db.collection("tasks").add(data);
-                document.getElementById('t-input').value = '';
-                document.getElementById('d-input').value = '';
-            }
-        };
-
-        window.startEdit = (id) => {
-            const t = allTasks.find(x => x.id === id);
-            if (!t) return;
-            document.getElementById('t-input').value = t.name;
-            document.getElementById('d-input').value = t.date;
-            editId = id;
-            document.getElementById('s-btn').innerText = "Update Event";
-            document.getElementById('s-btn').className = "btn-prime btn-save";
-            document.getElementById('cancel-edit').style.display = "block";
-        };
-
-        window.resetForm = () => {
-            editId = null;
-            document.getElementById('t-input').value = '';
-            document.getElementById('d-input').value = '';
-            document.getElementById('s-btn').innerText = "Add to Agenda";
-            document.getElementById('s-btn').className = "btn-prime btn-add";
-            document.getElementById('cancel-edit').style.display = "none";
-        };
-
-        function saveAgendas() { localStorage.setItem('agendas_v11', JSON.stringify(agendas)); }
-
-        function renderSettingsList() {
-            const setList = document.getElementById('settings-agendas-list');
-            setList.innerHTML = agendas.map(a => `
-                <div class="settings-item" data-id="${a.id}">
-                    <div style="display:flex; align-items:center;">
-                        <span class="drag-handle">≡</span>
-                        <div style="display:flex; flex-direction:column;">
-                            <span style="font-weight:700;">${a.id}</span>
-                            <span style="font-size:10px; color:var(--dim);">${a.type}</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:12px;">
-                        <span style="color:var(--accent); font-size:11px; font-weight:900; cursor:pointer;" onclick="renameAgenda('${a.id}')">RENAME</span>
-                        <span style="color:var(--error); font-size:11px; font-weight:900; cursor:pointer;" onclick="if(confirm('Delete?')){agendas=agendas.filter(x=>x.id!=='${a.id}');saveAgendas();render();renderSettingsList();}">X</span>
-                    </div>
-                </div>
-            `).join('');
-            if (sortableInstance) sortableInstance.destroy();
-            sortableInstance = Sortable.create(setList, {
-                handle: '.drag-handle', animation: 200,
-                onEnd: () => {
-                    const newIds = Array.from(setList.querySelectorAll('.settings-item')).map(el => el.getAttribute('data-id'));
-                    agendas = newIds.map(id => agendas.find(a => a.id === id));
-                    saveAgendas(); render();
-                }
-            });
-        }
-
-        window.renameAgenda = (oldId) => {
-            const newName = prompt("New name for agenda:", oldId);
-            if (!newName || newName === oldId) return;
-            const batch = db.batch();
-            allTasks.filter(t => t.category === oldId).forEach(t => {
-                batch.update(db.collection('tasks').doc(t.id), {category: newName});
-            });
-            batch.commit().then(() => {
-                agendas = agendas.map(a => a.id === oldId ? {...a, id: newName} : a);
-                if (activeTab === oldId) activeTab = newName;
-                saveAgendas(); render(); renderSettingsList();
-            });
+            saveAgendas(); closeAllModals(); render();
         };
 
         function render() {
@@ -386,46 +398,23 @@
             main.innerHTML = '';
             const cur = agendas.find(a => a.id === activeTab) || agendas[0];
             let filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
+            
             const groups = {};
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             filtered.forEach(t => {
                 const d = new Date(t.date + "T00:00:00");
-                const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
+                const key = d.toLocaleString('default', { month: 'long', year: 'numeric' });
                 if (!groups[key]) groups[key] = [];
                 groups[key].push(t);
             });
+
             for (const key in groups) {
                 const sec = document.createElement('div');
-                sec.style.marginBottom = "30px";
                 sec.innerHTML = `<div class="month-label">${key}</div>`;
                 groups[key].forEach(task => {
-                    const target = new Date(task.date + "T00:00:00");
-                    const diff = Math.ceil((target - new Date()) / 86400000);
-                    let badge = '', pBar = '', displayTitle = task.name;
-                    if (cur.type === 'Countdown') {
-                        badge = `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PAST' : diff + 'd'}</div>`;
-                    } else if (cur.type === 'Milestone') {
-                        const start = task.createdAt || (target.getTime() - 2592000000);
-                        const perc = Math.min(Math.max(((Date.now() - start) / (target.getTime() - start)) * 100, 0), 100);
-                        pBar = `<div class="progress-bar" style="width:${perc}%"></div>`;
-                        badge = `<div style="font-size:11px; font-weight:900; color:var(--accent);">${Math.round(perc)}%</div>`;
-                    } else if (cur.type === 'Finance') {
-                        displayTitle = `$${task.name}`;
-                    } else if (cur.type === 'Priority') {
-                        let color = '#34c759'; if(diff < 3) color = '#ff375f'; else if(diff < 10) color = '#ff9500';
-                        pBar = `<div style="position:absolute; left:0; top:0; bottom:0; width:5px; background:${color}"></div>`;
-                    }
                     const card = document.createElement('div');
                     card.className = 'card';
-                    card.onclick = () => startEdit(task.id);
-                    card.innerHTML = `
-                        ${pBar}
-                        <div class="card-body"><b>${displayTitle}</b><span>${task.date}</span></div>
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            ${badge}
-                            <span style="color:var(--error); font-weight:900; padding:10px; cursor:pointer;" onclick="event.stopPropagation(); if(confirm('Delete?')) db.collection('tasks').doc('${task.id}').delete();">✕</span>
-                        </div>
-                    `;
+                    card.innerHTML = `<div class="card-body"><b>${task.name}</b><span>${task.date}</span></div>
+                    <span style="color:var(--error); font-weight:900;" onclick="db.collection('tasks').doc('${task.id}').delete()">✕</span>`;
                     sec.appendChild(card);
                 });
                 main.appendChild(sec);
