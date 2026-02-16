@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.3.3</title>
+    <title>Agenda Pro | V3.3.4</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -14,7 +14,8 @@
             --bg: #000000; --card: #1c1c1e; --border: #2c2c2e; --text: #ffffff;
             --dim: #8e8e93; --accent: #ffd60a; --error: #ff375f;
             --input-bg: #1c1c1e; --icon-color: #ffffff;
-            --safe-top: env(safe-area-inset-top, 20px);
+            /* Extra padding for Dynamic Island / Notches */
+            --safe-top: env(safe-area-inset-top, 44px); 
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
@@ -43,41 +44,57 @@
         .btn-prime { 
             width: 100%; padding: 18px; border-radius: 20px; border: none; 
             font-weight: 900; text-transform: uppercase; cursor: pointer; 
-            background: var(--accent); color: #000; margin-top: 20px;
-        }
-        .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .theme-btn { 
-            padding: 14px; border-radius: 12px; border: 1px solid var(--border); 
-            background: var(--card); color: var(--text); font-weight: 700; cursor: pointer;
+            background: var(--accent); color: #000; margin-top: 15px;
         }
         
         .input-wrap { position: relative; width: 100%; margin-top: 15px; }
-        .input-label { position: absolute; top: -8px; left: 15px; background: var(--card); padding: 0 5px; font-size: 10px; font-weight: 900; color: var(--accent); text-transform: uppercase; }
+        .input-label { position: absolute; top: -8px; left: 15px; background: var(--card); padding: 0 8px; font-size: 10px; font-weight: 900; color: var(--accent); text-transform: uppercase; z-index: 5; }
 
         input, select { 
-            width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--border); 
-            background: var(--input-bg); color: var(--text); font-size: 16px; outline: none;
+            width: 100%; padding: 18px; border-radius: 18px; border: 1px solid var(--border); 
+            background: var(--input-bg); color: var(--text); font-size: 16px; outline: none; appearance: none;
         }
 
-        /* APP LAYOUT */
+        /* APP LAYOUT - FIXED FOR DYNAMIC ISLAND */
         #app-shell { display: none; flex-direction: column; height: 100vh; }
-        header { padding: var(--safe-top) 25px 15px; border-bottom: 1px solid var(--border); background: var(--bg); }
+        header { 
+            padding: calc(var(--safe-top) + 10px) 25px 15px; 
+            border-bottom: 1px solid var(--border); 
+            background: var(--bg);
+            z-index: 100;
+        }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
         h1 { margin: 0; font-size: 32px; letter-spacing: -1.5px; font-weight: 900; }
         
         .nav-scroller { display: flex; gap: 10px; overflow-x: auto; padding: 15px 0; scrollbar-width: none; }
         .nav-scroller::-webkit-scrollbar { display: none; }
-        .tab-pill { padding: 10px 20px; border-radius: 50px; background: var(--card); white-space: nowrap; font-size: 13px; font-weight: 800; border: 1px solid var(--border); color: var(--dim); }
+        .tab-pill { padding: 10px 22px; border-radius: 50px; background: var(--card); white-space: nowrap; font-size: 13px; font-weight: 800; border: 1px solid var(--border); color: var(--dim); }
         .tab-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-        main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 250px; }
-        .month-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin: 20px 0 10px; }
-        .card { background: var(--card); padding: 20px; border-radius: 22px; border: 1px solid var(--border); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 300px; }
+        .month-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin: 25px 0 12px; }
+        .card { background: var(--card); padding: 20px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
 
         #login-screen { position: fixed; inset: 0; z-index: 8888; background: #000; display: flex; align-items: center; justify-content: center; padding: 30px; }
         
-        footer { position: fixed; bottom: 0; width: 100%; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 10px); background: linear-gradient(transparent, var(--bg) 40%); z-index: 100; }
-        .entry-box { background: var(--card); padding: 15px; border-radius: 28px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* FOOTER / INPUT AREA FIX */
+        footer { 
+            position: fixed; bottom: 0; width: 100%; 
+            padding: 20px 20px calc(var(--safe-bottom) + 10px); 
+            background: linear-gradient(transparent, var(--bg) 30%); 
+            z-index: 100; 
+        }
+        .entry-box { 
+            background: var(--card); padding: 20px; border-radius: 32px; 
+            border: 1px solid var(--border); box-shadow: 0 15px 40px rgba(0,0,0,0.6); 
+        }
+        .date-row { display: flex; gap: 10px; margin-top: 15px; align-items: stretch; }
+        .today-btn { 
+            background: var(--border); border: none; color: var(--text); 
+            border-radius: 16px; padding: 0 20px; font-weight: 800; font-size: 12px; 
+            cursor: pointer; transition: 0.2s;
+        }
+        .today-btn:active { transform: scale(0.95); opacity: 0.8; }
     </style>
 </head>
 <body class="theme-midnight">
@@ -85,11 +102,11 @@
     <div id="login-screen">
         <div style="width:100%; max-width:350px; text-align:center;">
             <h1 style="font-size:55px; margin-bottom:10px; letter-spacing:-4px;">Agenda.</h1>
-            <p style="color:#444; font-weight:700; margin-bottom:40px;">PRIVATE WORKSPACE</p>
+            <p style="color:#444; font-weight:700; margin-bottom:40px;">SECURE WORKSPACE</p>
             <input type="email" id="auth-email" placeholder="Email Address">
             <input type="password" id="auth-pass" placeholder="Password" style="margin-top:10px;">
-            <button class="btn-prime" onclick="handleAuth()">Sign In / Join</button>
-            <button class="btn-prime" style="background:white; color:black; margin-top:12px;" onclick="googleSignIn()">Continue with Google</button>
+            <button class="btn-prime" onclick="handleAuth()">Sign In</button>
+            <button class="btn-prime" style="background:white; color:black; margin-top:12px;" onclick="googleSignIn()">Google</button>
         </div>
     </div>
 
@@ -97,25 +114,23 @@
         <div class="tut-container">
             <div id="tut-1" class="tut-step active">
                 <h2 style="font-size:38px; font-weight:900; letter-spacing:-1px;">The Look.</h2>
-                <p style="color:var(--dim); margin-bottom:20px;">Choose a theme for your workspace.</p>
-                <div class="theme-grid">
-                    <button class="theme-btn" onclick="setTheme('theme-midnight')">Midnight</button>
-                    <button class="theme-btn" onclick="setTheme('theme-solar')">Solar</button>
-                    <button class="theme-btn" onclick="setTheme('theme-cyber')">Cyber</button>
-                    <button class="theme-btn" onclick="setTheme('theme-forest')">Forest</button>
-                    <button class="theme-btn" onclick="setTheme('theme-silver')">Silver</button>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:25px 0;">
+                    <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
+                    <button class="tab-pill" onclick="setTheme('theme-solar')">Solar</button>
+                    <button class="tab-pill" onclick="setTheme('theme-cyber')">Cyber</button>
+                    <button class="tab-pill" onclick="setTheme('theme-forest')">Forest</button>
+                    <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
                 </div>
-                <button class="btn-prime" onclick="nextTut(2)">Apply & Continue</button>
+                <button class="btn-prime" onclick="nextTut(2)">Continue</button>
             </div>
 
             <div id="tut-2" class="tut-step">
-                <h2 style="font-size:38px; font-weight:900; letter-spacing:-1px;">The Focus.</h2>
-                <p style="color:var(--dim); margin-bottom:20px;">Name your primary agenda list.</p>
+                <h2 style="font-size:38px; font-weight:900; letter-spacing:-1px;">Focus.</h2>
                 <div class="input-wrap">
-                    <span class="input-label">List Name</span>
-                    <input type="text" id="tut-agenda-name" placeholder="e.g. University, Work, General">
+                    <span class="input-label">Initial Agenda</span>
+                    <input type="text" id="tut-agenda-name" placeholder="e.g. University">
                 </div>
-                <button class="btn-prime" onclick="finishTut()">Finish Setup</button>
+                <button class="btn-prime" onclick="finishTut()">Get Started</button>
             </div>
         </div>
     </div>
@@ -125,8 +140,8 @@
             <div class="header-top">
                 <h1>Agenda</h1>
                 <div style="display:flex; gap:15px; align-items:center;">
-                    <div onclick="openModal('modal-new-list')" style="font-size:28px; cursor:pointer; color:var(--accent)">+</div>
-                    <div onclick="openModal('modal-settings')" style="font-size:22px; cursor:pointer;">⚙️</div>
+                    <div onclick="openModal('modal-new-list')" style="font-size:30px; cursor:pointer; color:var(--accent)">+</div>
+                    <div onclick="openModal('modal-settings')" style="font-size:24px; cursor:pointer;">⚙️</div>
                 </div>
             </div>
             <div class="nav-scroller" id="tab-bar"></div>
@@ -138,35 +153,32 @@
             <div class="entry-box">
                 <div class="input-wrap" style="margin-top:0;">
                     <span class="input-label">Event Name</span>
-                    <input type="text" id="t-input" placeholder="Enter title...">
+                    <input type="text" id="t-input" placeholder="Enter title..." onkeypress="if(event.key==='Enter')handleTaskSubmit()">
                 </div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <div class="input-wrap" style="flex:1; margin-top:0;">
+                <div class="date-row">
+                    <div class="input-wrap" style="flex:1; margin:0;">
                         <span class="input-label">Due Date</span>
                         <input type="date" id="d-input">
                     </div>
-                    <button onclick="setToday()" style="background:var(--border); border:none; color:var(--text); border-radius:12px; padding:0 15px; font-weight:700; font-size:11px;">TODAY</button>
+                    <button class="today-btn" onclick="setToday()">TODAY</button>
                 </div>
-                <button class="btn-prime" style="margin-top:15px; padding:15px;" onclick="handleTaskSubmit()">Add To List</button>
+                <button class="btn-prime" onclick="handleTaskSubmit()">Add to List</button>
             </div>
         </footer>
     </div>
 
     <div id="modal-settings" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:flex-end; z-index:10000; backdrop-filter:blur(10px);" onclick="this.style.display='none'">
-        <div style="background:var(--card); width:100%; padding:30px; border-radius:35px 35px 0 0; border-top:1px solid var(--border);" onclick="event.stopPropagation()">
-            <h2 style="margin:0 0 20px 0;">Settings</h2>
-            <div id="user-info" style="margin-bottom:20px; color:var(--dim); font-size:14px;"></div>
+        <div style="background:var(--card); width:100%; padding:30px calc(20px + env(safe-area-inset-left)) 60px; border-radius:35px 35px 0 0; border-top:1px solid var(--border);" onclick="event.stopPropagation()">
+            <h2>Settings</h2>
             <button class="btn-prime" style="background:var(--error); color:white;" onclick="auth.signOut(); location.reload();">Log Out</button>
-            <div style="height:30px;"></div>
         </div>
     </div>
 
     <div id="modal-new-list" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:flex-end; z-index:10000; backdrop-filter:blur(10px);" onclick="this.style.display='none'">
-        <div style="background:var(--card); width:100%; padding:30px; border-radius:35px 35px 0 0; border-top:1px solid var(--border);" onclick="event.stopPropagation()">
-            <h2 style="margin:0 0 20px 0;">Create List</h2>
+        <div style="background:var(--card); width:100%; padding:30px calc(20px + env(safe-area-inset-left)) 60px; border-radius:35px 35px 0 0; border-top:1px solid var(--border);" onclick="event.stopPropagation()">
+            <h2>New List</h2>
             <input type="text" id="n-list-name" placeholder="Agenda Name">
-            <button class="btn-prime" onclick="createNewAgenda()">Create Now</button>
-            <div style="height:30px;"></div>
+            <button class="btn-prime" onclick="createNewAgenda()">Create</button>
         </div>
     </div>
 
@@ -185,12 +197,12 @@
 
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = JSON.parse(localStorage.getItem('agendas_v16')) || [{id:'General', type:'Standard'}];
+        let agendas = JSON.parse(localStorage.getItem('agendas_v17')) || [{id:'General', type:'Standard'}];
 
         async function handleAuth() {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
-            if(!email || !pass) return alert("Fill all fields");
+            if(!email || !pass) return;
             try { await auth.signInWithEmailAndPassword(email, pass); } 
             catch (e) { try { await auth.createUserWithEmailAndPassword(email, pass); } catch(err) { alert(err.message); } }
         }
@@ -200,9 +212,8 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-shell').style.display = 'flex';
-                document.getElementById('user-info').innerText = "Logged in as: " + user.email;
                 sync(user.uid);
-                if (!localStorage.getItem('tut_v16_' + user.uid)) {
+                if (!localStorage.getItem('tut_v17_' + user.uid)) {
                     document.getElementById('tutorial-overlay').style.display = 'flex';
                 }
             } else {
@@ -213,9 +224,9 @@
 
         window.setTheme = (t) => {
             document.body.className = t;
-            localStorage.setItem('theme_v16', t);
+            localStorage.setItem('theme_v17', t);
         };
-        if(localStorage.getItem('theme_v16')) setTheme(localStorage.getItem('theme_v16'));
+        if(localStorage.getItem('theme_v17')) setTheme(localStorage.getItem('theme_v17'));
 
         window.setToday = () => {
             document.getElementById('d-input').valueAsDate = new Date();
@@ -229,7 +240,7 @@
         window.finishTut = () => {
             const name = document.getElementById('tut-agenda-name').value.trim();
             if (name) { agendas = [{id: name, type: 'Standard'}]; activeTab = name; saveAgendas(); }
-            localStorage.setItem('tut_v16_' + auth.currentUser.uid, 'true');
+            localStorage.setItem('tut_v17_' + auth.currentUser.uid, 'true');
             document.getElementById('tutorial-overlay').style.display = 'none';
             render();
         };
@@ -250,7 +261,7 @@
             document.getElementById('d-input').value = '';
         };
 
-        function saveAgendas() { localStorage.setItem('agendas_v16', JSON.stringify(agendas)); }
+        function saveAgendas() { localStorage.setItem('agendas_v17', JSON.stringify(agendas)); }
         window.openModal = (id) => document.getElementById(id).style.display = 'flex';
         
         window.createNewAgenda = () => {
