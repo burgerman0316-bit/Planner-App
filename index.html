@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.3</title>
+    <title>Agenda Pro | V3.3.1</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -34,7 +34,7 @@
 
         input { user-select: text; -webkit-user-select: text; }
 
-        body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; transition: 0.4s; }
+        body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; transition: background 0.4s, color 0.4s; }
 
         #app-shell { display: none; flex-direction: column; height: 100vh; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         #app-shell.modal-active { transform: scale(0.94); filter: blur(15px); pointer-events: none; }
@@ -44,9 +44,9 @@
         .header-top h1 { margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -1.5px; }
 
         .icon-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; color: var(--icon-color); }
-        .icon-btn svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-btn svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-        .nav-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 5px 25px 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; align-items: center; }
+        .nav-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 5px 25px 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .nav-scroller::-webkit-scrollbar { display: none; }
 
         .tab-pill { flex-shrink: 0; padding: 10px 22px; border-radius: 50px; background: var(--card); color: var(--dim); font-size: 13px; font-weight: 800; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; white-space: nowrap; }
@@ -56,85 +56,50 @@
         .month-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
         .month-label::after { content: ""; height: 1px; background: var(--border); flex: 1; }
 
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; position: relative; }
-        .card-body b { display: block; font-size: 17px; margin-bottom: 4px; }
-        .card-body span { font-size: 13px; color: var(--dim); }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* AUTH & TUTORIAL UI */
+        #login-screen, #tutorial-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 30px; color: var(--text); }
+        .auth-container, .tut-container { width: 100%; max-width: 380px; text-align: center; }
+        
+        .input-group { margin-bottom: 15px; text-align: left; width: 100%; }
+        .input-group label { font-size: 10px; font-weight: 900; color: var(--dim); text-transform: uppercase; margin-left: 10px; margin-bottom: 5px; display: block; }
+        
+        .btn-prime { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-save { background: var(--accent); color: #000; }
 
-        /* MODALS */
+        .tut-step { display: none; width: 100%; }
+        .tut-step.active { display: block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
         .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: 0.4s; backdrop-filter: blur(10px); }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 30px; padding-bottom: calc(var(--safe-bottom) + 10px); transform: translateY(100%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); max-height: 95vh; display: flex; flex-direction: column; }
         .modal-overlay.active .modal-sheet { transform: translateY(0); }
-
-        /* AUTH & TUTORIAL UI */
-        #login-screen, #tutorial-overlay { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 30px; color: white; }
-        .auth-container, .tut-container { width: 100%; max-width: 380px; }
         
-        .auth-toggle { display: flex; background: #111; border-radius: 15px; padding: 5px; margin-bottom: 25px; border: 1px solid #222; }
-        .auth-toggle button { flex: 1; background: none; border: none; color: #555; padding: 12px; font-weight: 800; cursor: pointer; border-radius: 10px; }
-        .auth-toggle button.active { background: #222; color: white; }
-
-        .input-group { margin-bottom: 15px; text-align: left; width: 100%; }
-        .input-group label { font-size: 10px; font-weight: 900; color: #555; text-transform: uppercase; margin-left: 10px; margin-bottom: 5px; display: block; }
-        input, select { background: #111; border: 1px solid #222; color: #fff; padding: 16px; border-radius: 18px; font-size: 15px; width: 100%; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--accent); }
-
-        .btn-prime { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-        .btn-prime:active { transform: scale(0.97); }
-        .btn-save { background: var(--accent); color: #000; }
-
-        .tut-step { display: none; width: 100%; text-align: center; animation: slideUp 0.4s ease-out; }
-        .tut-step.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
         footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; padding-bottom: calc(var(--safe-bottom) + 15px); background: linear-gradient(to top, var(--bg) 90%, transparent); z-index: 50; }
         .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 30px; padding: 12px; }
-        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        
-        .profile-box { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--bg); border-radius: 20px; margin-bottom: 25px; border: 1px solid var(--border); }
-        .profile-box img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent); background: #333; }
     </style>
 </head>
 <body class="theme-midnight">
 
     <div id="login-screen">
         <div class="auth-container">
-            <h1 style="font-size:54px; text-align:center; margin-bottom:10px; letter-spacing:-3px;">Agenda.</h1>
-            <p style="text-align:center; color:#555; margin-bottom:30px; font-weight:600;">Your life, organized.</p>
+            <h1 style="font-size:54px; margin-bottom:10px; letter-spacing:-3px;">Agenda.</h1>
+            <p style="color:var(--dim); margin-bottom:30px; font-weight:600;">Secure Sign In</p>
             
-            <div class="auth-toggle">
-                <button id="toggle-login" class="active" onclick="setAuthMode('login')">Sign In</button>
-                <button id="toggle-register" onclick="setAuthMode('register')">Create Account</button>
-            </div>
-
-            <div id="register-fields" style="display:none;">
+            <div id="auth-fields">
                 <div class="input-group">
-                    <label>First & Last Name</label>
-                    <input type="text" id="reg-name" placeholder="Alex Smith">
+                    <label>Email Address</label>
+                    <input type="email" id="auth-email" placeholder="name@email.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="auth-pass" placeholder="••••••••">
                 </div>
             </div>
 
-            <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="auth-email" placeholder="name@email.com">
-            </div>
-
-            <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="auth-pass" placeholder="••••••••">
-            </div>
-
-            <div id="confirm-pass-group" style="display:none;" class="input-group">
-                <label>Confirm Password</label>
-                <input type="password" id="auth-pass-confirm" placeholder="••••••••">
-            </div>
-
-            <button class="btn-prime btn-save" id="auth-main-btn" onclick="handleAuth()">Sign In</button>
-
-            <div style="margin: 20px 0; display:flex; align-items:center; gap:10px; color:#222;">
-                <hr style="flex:1; border:0; border-top:1px solid #222;"> OR <hr style="flex:1; border:0; border-top:1px solid #222;">
-            </div>
-
+            <button class="btn-prime btn-save" onclick="handleAuth()">Sign In / Sign Up</button>
             <button class="btn-prime" style="background:white; color:black;" onclick="googleSignIn()">Continue with Google</button>
         </div>
     </div>
@@ -142,33 +107,36 @@
     <div id="tutorial-overlay" style="display:none;">
         <div class="tut-container">
             <div id="tut-1" class="tut-step active">
-                <h2 style="font-size:38px; letter-spacing:-1px;">Personalize.</h2>
-                <p style="color:var(--dim); margin-bottom:30px;">Choose a look that fits your style.</p>
-                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom:30px;">
-                    <button class="tab-pill" style="width:100%" onclick="setTheme('theme-midnight')">Midnight</button>
-                    <button class="tab-pill" style="width:100%" onclick="setTheme('theme-solar')">Solar</button>
-                    <button class="tab-pill" style="width:100%" onclick="setTheme('theme-cyber')">Cyber</button>
-                    <button class="tab-pill" style="width:100%" onclick="setTheme('theme-silver')">Silver</button>
+                <h2 style="font-size:38px; letter-spacing:-1px;">Appearance.</h2>
+                <p style="color:var(--dim); margin-bottom:30px;">Tap a theme to preview it live.</p>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:40px;">
+                    <button class="tab-pill" style="width:100%" onclick="previewTheme('theme-midnight')">Midnight</button>
+                    <button class="tab-pill" style="width:100%" onclick="previewTheme('theme-solar')">Solar</button>
+                    <button class="tab-pill" style="width:100%" onclick="previewTheme('theme-cyber')">Cyber</button>
+                    <button class="tab-pill" style="width:100%" onclick="previewTheme('theme-silver')">Silver</button>
+                    <button class="tab-pill" style="width:100%" onclick="previewTheme('theme-forest')">Forest</button>
                 </div>
-                <button class="btn-prime btn-save" onclick="nextTut(2)">Next Step</button>
+                
+                <button class="btn-prime btn-save" onclick="nextTut(2)">I like this look</button>
             </div>
 
             <div id="tut-2" class="tut-step">
-                <h2 style="font-size:38px; letter-spacing:-1px;">Setup.</h2>
-                <p style="color:var(--dim); margin-bottom:30px;">What is your main focus right now?</p>
+                <h2 style="font-size:38px; letter-spacing:-1px;">Focus.</h2>
+                <p style="color:var(--dim); margin-bottom:30px;">Let's create your first workspace.</p>
                 <div class="input-group">
                     <label>Agenda Name</label>
-                    <input type="text" id="tut-agenda-name" placeholder="e.g. University, Gym, Work">
+                    <input type="text" id="tut-agenda-name" placeholder="e.g. Work, School, Personal">
                 </div>
-                <div class="input-group" style="margin-top:10px;">
-                    <label>View Type</label>
+                <div class="input-group">
+                    <label>Style</label>
                     <select id="tut-agenda-type">
                         <option value="Standard">Standard List</option>
                         <option value="Countdown">Countdown Days</option>
-                        <option value="Milestone">Percentage Progress</option>
+                        <option value="Milestone">Milestone %</option>
                     </select>
                 </div>
-                <button class="btn-prime btn-save" onclick="finishTut()">Start Organizing</button>
+                <button class="btn-prime btn-save" onclick="finishTut()">Go to my Agenda</button>
             </div>
         </div>
     </div>
@@ -178,12 +146,8 @@
             <div class="header-top">
                 <h1 id="app-title">Agenda</h1>
                 <div style="display:flex; gap:5px;">
-                    <div class="icon-btn" onclick="openModal('modal-new-list')">
-                        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                    </div>
-                    <div class="icon-btn" onclick="openModal('modal-settings')">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                    </div>
+                    <div class="icon-btn" onclick="openModal('modal-new-list')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+                    <div class="icon-btn" onclick="openModal('modal-settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="2"/></svg></div>
                 </div>
             </div>
             <div class="nav-scroller" id="tab-bar"></div>
@@ -193,49 +157,43 @@
 
         <footer>
             <div class="input-box">
-                <div class="input-row">
-                    <input type="text" id="t-input" placeholder="Event name...">
+                <div class="input-row" style="display:flex; gap:10px; margin-bottom:10px;">
+                    <input type="text" id="t-input" placeholder="Event name..." style="flex:1;">
                     <input type="date" id="d-input" style="width:140px;">
                 </div>
-                <button class="btn-prime btn-add" onclick="handleTaskSubmit()">Add to Agenda</button>
+                <button class="btn-prime btn-save" onclick="handleTaskSubmit()">Add to Agenda</button>
             </div>
         </footer>
     </div>
 
     <div id="modal-settings" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2 style="margin:0 0 20px 0; font-size:28px;">Settings</h2>
-            <div class="modal-scroll-area">
-                <div class="profile-box">
-                    <img id="user-photo" src="">
-                    <div class="profile-info">
-                        <b id="user-name" style="display:block;">User</b>
-                        <span id="user-email" style="color:var(--dim); font-size:12px;">email@app.com</span>
-                    </div>
-                </div>
-                <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">Switch Theme</p>
-                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:30px;">
-                    <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
-                    <button class="tab-pill" onclick="setTheme('theme-solar')">Solar</button>
-                    <button class="tab-pill" onclick="setTheme('theme-cyber')">Cyber</button>
-                    <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
-                </div>
-                <button class="btn-prime" onclick="auth.signOut()" style="background:var(--error); color:white;">Sign Out</button>
+            <h2 style="margin:0 0 20px 0;">Settings</h2>
+            <div class="input-group">
+                <label>Active User</label>
+                <div id="user-display" style="padding:15px; background:var(--bg); border-radius:15px; font-weight:bold;"></div>
             </div>
+            <p style="font-size:10px; font-weight:900; color:var(--dim); margin-bottom:10px;">THEME</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:30px;">
+                <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
+                <button class="tab-pill" onclick="setTheme('theme-solar')">Solar</button>
+                <button class="tab-pill" onclick="setTheme('theme-cyber')">Cyber</button>
+                <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
+            </div>
+            <button class="btn-prime" style="background:var(--error); color:white;" onclick="auth.signOut()">Log Out</button>
         </div>
     </div>
 
     <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()">
         <div class="modal-sheet" onclick="event.stopPropagation()">
-            <h2 style="margin-bottom:20px;">New Agenda</h2>
-            <input type="text" id="n-list-name" placeholder="Agenda Name" style="margin-bottom:12px;">
-            <select id="n-list-type" style="margin-bottom:25px;">
+            <h2>New Agenda</h2>
+            <input type="text" id="n-list-name" placeholder="Agenda Name">
+            <select id="n-list-type" style="margin-top:15px;">
                 <option value="Standard">Standard</option>
                 <option value="Countdown">Countdown</option>
                 <option value="Milestone">Milestone</option>
-                <option value="Finance">Finance</option>
             </select>
-            <button class="btn-prime btn-save" onclick="createNewAgenda()">Create</button>
+            <button class="btn-prime btn-save" style="margin-top:20px;" onclick="createNewAgenda()">Create</button>
         </div>
     </div>
 
@@ -254,57 +212,47 @@
 
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = JSON.parse(localStorage.getItem('agendas_v13')) || [{id:'General', type:'Standard'}];
-        let authMode = 'login';
+        let agendas = JSON.parse(localStorage.getItem('agendas_v14')) || [{id:'General', type:'Standard'}];
 
         // --- AUTH ---
-        function setAuthMode(mode) {
-            authMode = mode;
-            document.getElementById('toggle-login').className = mode === 'login' ? 'active' : '';
-            document.getElementById('toggle-register').className = mode === 'register' ? 'active' : '';
-            document.getElementById('register-fields').style.display = mode === 'register' ? 'block' : 'none';
-            document.getElementById('confirm-pass-group').style.display = mode === 'register' ? 'block' : 'none';
-            document.getElementById('auth-main-btn').innerText = mode === 'login' ? 'Sign In' : 'Create Account';
-        }
-
         async function handleAuth() {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
-            if (authMode === 'register') {
-                const name = document.getElementById('reg-name').value;
-                if (pass !== document.getElementById('auth-pass-confirm').value) return alert("Passwords mismatch");
-                try {
-                    const res = await auth.createUserWithEmailAndPassword(email, pass);
-                    await res.user.updateProfile({ displayName: name });
-                } catch (e) { alert(e.message); }
-            } else {
-                try { await auth.signInWithEmailAndPassword(email, pass); } catch (e) { alert(e.message); }
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+            } catch (e) {
+                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                    try { await auth.createUserWithEmailAndPassword(email, pass); } catch(err) { alert(err.message); }
+                } else { alert(e.message); }
             }
         }
-
         function googleSignIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-shell').style.display = 'flex';
-                document.getElementById('user-photo').src = user.photoURL || 'https://ui-avatars.com/api/?name=' + (user.displayName || 'U');
-                document.getElementById('user-name').innerText = user.displayName || 'User';
-                document.getElementById('user-email').innerText = user.email;
+                document.getElementById('user-display').innerText = user.email;
                 sync(user.uid);
-                checkTutorial(user.uid);
+                initTutorial(user.uid);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-shell').style.display = 'none';
             }
         });
 
-        // --- INTERACTIVE TUTORIAL ---
-        function checkTutorial(uid) {
-            if (!localStorage.getItem('tut_done_' + uid)) {
+        // --- TUTORIAL ---
+        function initTutorial(uid) {
+            if (!localStorage.getItem('tut_v14_' + uid)) {
                 document.getElementById('tutorial-overlay').style.display = 'flex';
             }
         }
+
+        window.previewTheme = (t) => {
+            document.body.className = t;
+            // Force a slight reflow for the tutorial overlay background
+            document.getElementById('tutorial-overlay').style.background = 'var(--bg)';
+        };
 
         window.nextTut = (step) => {
             document.querySelectorAll('.tut-step').forEach(s => s.classList.remove('active'));
@@ -319,12 +267,14 @@
                 activeTab = name;
                 saveAgendas();
             }
-            localStorage.setItem('tut_done_' + auth.currentUser.uid, 'true');
+            // Save the theme selected during preview
+            localStorage.setItem('theme_v14', document.body.className);
+            localStorage.setItem('tut_v14_' + auth.currentUser.uid, 'true');
             document.getElementById('tutorial-overlay').style.display = 'none';
             render();
         };
 
-        // --- APP LOGIC ---
+        // --- APP ENGINE ---
         function sync(uid) {
             db.collection("tasks").where("uid", "==", uid).onSnapshot(snap => {
                 allTasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -332,11 +282,8 @@
             });
         }
 
-        window.setTheme = (t) => { 
-            document.body.className = t; 
-            localStorage.setItem('theme_v13', t); 
-        };
-        if(localStorage.getItem('theme_v13')) setTheme(localStorage.getItem('theme_v13'));
+        window.setTheme = (t) => { document.body.className = t; localStorage.setItem('theme_v14', t); };
+        if(localStorage.getItem('theme_v14')) setTheme(localStorage.getItem('theme_v14'));
 
         window.openModal = (id) => {
             document.getElementById(id).style.display = 'flex';
@@ -360,7 +307,7 @@
             document.getElementById('t-input').value = '';
         };
 
-        function saveAgendas() { localStorage.setItem('agendas_v13', JSON.stringify(agendas)); }
+        function saveAgendas() { localStorage.setItem('agendas_v14', JSON.stringify(agendas)); }
 
         window.createNewAgenda = () => {
             const n = document.getElementById('n-list-name').value.trim();
@@ -391,7 +338,7 @@
                 groups[key].forEach(task => {
                     const card = document.createElement('div');
                     card.className = 'card';
-                    card.innerHTML = `<div class="card-body"><b>${task.name}</b><span>${task.date}</span></div>
+                    card.innerHTML = `<div class="card-body" style="flex:1;"><b>${task.name}</b><span style="font-size:12px;color:var(--dim)">${task.date}</span></div>
                     <span style="color:var(--error); font-weight:900; padding:10px; cursor:pointer;" onclick="db.collection('tasks').doc('${task.id}').delete()">✕</span>`;
                     sec.appendChild(card);
                 });
