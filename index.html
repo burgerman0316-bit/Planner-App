@@ -11,7 +11,6 @@
 
     <style>
         :root {
-            /* Default Dark (Midnight) */
             --bg: #000000;
             --card: #1c1c1e;
             --border: #2c2c2e;
@@ -21,28 +20,34 @@
             --error: #ff375f;
             --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --input-bg: #1c1c1e;
         }
 
         /* --- THEME LIBRARY --- */
         body.theme-light {
             --bg: #f2f2f7; --card: #ffffff; --border: #d1d1d6;
             --text: #000000; --dim: #636366; --accent: #007aff;
+            --input-bg: #e5e5ea;
         }
         body.theme-paper {
             --bg: #f9f5eb; --card: #ffffff; --border: #e4dccf;
             --text: #1c2b2d; --dim: #7d9d9c; --accent: #eb6440;
+            --input-bg: #f0ebe3;
         }
         body.theme-nord {
             --bg: #2e3440; --card: #3b4252; --border: #4c566a;
             --text: #eceff4; --dim: #a3be8c; --accent: #88c0d0;
+            --input-bg: #242933;
         }
         body.theme-emerald {
             --bg: #040d06; --card: #0d1a10; --border: #152a1a;
             --text: #e8f5e9; --dim: #81c784; --accent: #34c759;
+            --input-bg: #000000;
         }
         body.theme-sunset {
             --bg: #0d0404; --card: #1a0d0d; --border: #2a1515;
             --text: #fff5f5; --dim: #e57373; --accent: #ff375f;
+            --input-bg: #000000;
         }
 
         * { 
@@ -76,7 +81,6 @@
             border-radius: 40px;
         }
 
-        /* HEADER: Increased padding to ensure no cutoff */
         header {
             padding-top: calc(var(--safe-top) + 40px); 
             padding-bottom: 20px;
@@ -147,10 +151,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            cursor: pointer;
         }
 
-        .card-body b { display: block; font-size: 18px; margin-bottom: 6px; }
+        .card-body b { display: block; font-size: 18px; margin-bottom: 4px; }
         .card-body span { font-size: 14px; color: var(--dim); }
 
         /* MODALS */
@@ -186,7 +190,6 @@
             cursor: pointer; font-weight: 700; font-size: 13px;
         }
 
-        /* SETTINGS UI */
         .settings-item {
             background: var(--bg);
             padding: 18px 22px;
@@ -223,7 +226,7 @@
 
         .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
         input, select { 
-            background: var(--bg); border: 1px solid var(--border); 
+            background: var(--input-bg); border: 1px solid var(--border); 
             color: var(--text); padding: 16px; border-radius: 20px; 
             font-size: 16px; width: 100%; 
         }
@@ -272,7 +275,7 @@
             </div>
 
             <div class="build-footer">
-                VERSION 2.3.0 <br>
+                VERSION 2.3.5 <br>
                 BUILD 2026.02.15_RELEASE
             </div>
         </div>
@@ -296,7 +299,7 @@
                 <h1>Agenda</h1>
                 <div style="display:flex; gap:20px; align-items:center;">
                     <span style="font-size:36px; font-weight:200; cursor:pointer;" onclick="openModal('modal-new-list')">+</span>
-                    <span style="font-size:22px; cursor:pointer;" onclick="openModal('modal-settings')">⚙</span>
+                    <span style="font-size:22px; cursor:pointer;" onclick="openModal('modal-settings')">⚙️</span>
                 </div>
             </div>
             <div class="nav-scroller" id="tab-bar"></div>
@@ -311,6 +314,7 @@
                     <input type="date" id="d-input" style="width:150px;">
                 </div>
                 <button class="btn-prime btn-add" id="s-btn" onclick="handleTaskSubmit()">Add to Agenda</button>
+                <button class="btn-prime" id="cancel-edit" style="display:none; margin-top:10px; background:var(--dim); color:var(--bg);" onclick="resetForm()">Cancel Edit</button>
             </div>
         </footer>
     </div>
@@ -330,7 +334,7 @@
 
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = JSON.parse(localStorage.getItem('agendas_v4')) || [{id:'General', type:'Standard'}, {id:'Releases', type:'Countdown'}];
+        let agendas = JSON.parse(localStorage.getItem('agendas_v5')) || [{id:'General', type:'Standard'}, {id:'Releases', type:'Countdown'}];
         let editId = null;
 
         function handleLogin() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
@@ -353,62 +357,80 @@
             });
         }
 
-        function openModal(id) {
+        // --- EXPORT FUNCTIONS TO WINDOW ---
+        window.openModal = function(id) {
             document.getElementById(id).style.display = 'flex';
             setTimeout(() => {
                 document.getElementById(id).classList.add('active');
                 document.getElementById('app-shell').classList.add('modal-active');
             }, 10);
-        }
+        };
 
-        function closeAllModals() {
+        window.closeAllModals = function() {
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
             document.getElementById('app-shell').classList.remove('modal-active');
             setTimeout(() => document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'), 400);
-        }
+        };
 
-        function setTheme(t) { document.body.className = t; localStorage.setItem('theme_v4', t); }
-        if(localStorage.getItem('theme_v4')) setTheme(localStorage.getItem('theme_v4'));
+        window.setTheme = function(t) { document.body.className = t; localStorage.setItem('theme_v5', t); };
+        if(localStorage.getItem('theme_v5')) setTheme(localStorage.getItem('theme_v5'));
 
-        function createNewAgenda() {
+        window.createNewAgenda = function() {
             const n = document.getElementById('n-list-name').value.trim();
             const t = document.getElementById('n-list-type').value;
             if(!n) return;
             agendas.push({id: n, type: t});
             activeTab = n;
-            localStorage.setItem('agendas_v4', JSON.stringify(agendas));
+            localStorage.setItem('agendas_v5', JSON.stringify(agendas));
             document.getElementById('n-list-name').value = '';
             closeAllModals();
             render();
-        }
+        };
 
-        function handleTaskSubmit() {
+        window.handleTaskSubmit = function() {
             const name = document.getElementById('t-input').value;
             const date = document.getElementById('d-input').value;
             if(!name || !date) return;
             const data = { name, date, category: activeTab, uid: auth.currentUser.uid };
+            
             if (editId) {
                 db.collection("tasks").doc(editId).update(data);
-                editId = null;
-                document.getElementById('s-btn').innerText = "Add to Agenda";
+                resetForm();
             } else {
                 db.collection("tasks").add(data);
+                document.getElementById('t-input').value = '';
+                document.getElementById('d-input').value = '';
             }
-            document.getElementById('t-input').value = '';
-            document.getElementById('d-input').value = '';
-        }
+        };
 
-        window.startEdit = (id) => {
+        window.startEdit = function(id) {
             const t = allTasks.find(x => x.id === id);
+            if (!t) return;
             document.getElementById('t-input').value = t.name;
             document.getElementById('d-input').value = t.date;
             editId = id;
             document.getElementById('s-btn').innerText = "Update Event";
+            document.getElementById('s-btn').className = "btn-prime btn-save";
+            document.getElementById('cancel-edit').style.display = "block";
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        };
+
+        window.resetForm = function() {
+            editId = null;
+            document.getElementById('t-input').value = '';
+            document.getElementById('d-input').value = '';
+            document.getElementById('s-btn').innerText = "Add to Agenda";
+            document.getElementById('s-btn').className = "btn-prime btn-add";
+            document.getElementById('cancel-edit').style.display = "none";
+        };
+
+        window.deleteTask = function(id) {
+            if(confirm("Delete this event?")) db.collection('tasks').doc(id).delete();
         };
 
         function render() {
             document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
-            document.getElementById('settings-agendas-list').innerHTML = agendas.map(a => `<div class="settings-item"><span>${a.id}</span><span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="agendas=agendas.filter(x=>x.id!=='${a.id}'); localStorage.setItem('agendas_v4',JSON.stringify(agendas)); render();">Delete</span></div>`).join('');
+            document.getElementById('settings-agendas-list').innerHTML = agendas.map(a => `<div class="settings-item"><span>${a.id}</span><span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="agendas=agendas.filter(x=>x.id!=='${a.id}'); localStorage.setItem('agendas_v5',JSON.stringify(agendas)); render();">Delete</span></div>`).join('');
 
             const main = document.getElementById('main-content');
             main.innerHTML = '';
@@ -431,9 +453,20 @@
                 groups[key].forEach(task => {
                     const diff = Math.ceil((new Date(task.date + "T00:00:00") - new Date()) / 86400000);
                     const badge = current.type === 'Countdown' ? `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PASSED' : diff + ' DAYS'}</div>` : '';
+                    
                     const card = document.createElement('div');
                     card.className = 'card';
-                    card.innerHTML = `<div class="card-body" onclick="startEdit('${task.id}')"><b>${task.name}</b><span>${task.date}</span></div><div style="display:flex; align-items:center; gap:15px;">${badge}<span style="color:var(--error); font-weight:900; cursor:pointer;" onclick="db.collection('tasks').doc('${task.id}').delete()">✕</span></div>`;
+                    card.onclick = () => startEdit(task.id);
+                    card.innerHTML = `
+                        <div class="card-body">
+                            <b>${task.name}</b>
+                            <span>${task.date}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            ${badge}
+                            <span style="color:var(--error); font-weight:900; cursor:pointer; padding:10px;" onclick="event.stopPropagation(); deleteTask('${task.id}')">✕</span>
+                        </div>
+                    `;
                     sec.appendChild(card);
                 });
                 main.appendChild(sec);
