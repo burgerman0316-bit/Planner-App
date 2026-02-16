@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V4.6</title>
+    <title>Agenda Pro | V4.7</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -32,7 +32,7 @@
         .auth-container { width: 100%; max-width: 360px; text-align: center; }
         .logo { font-size: 52px; font-weight: 900; letter-spacing: -3.5px; margin: 0 0 30px 0; }
 
-        /* Provider Buttons with Logos */
+        /* Provider Buttons */
         .btn-stack { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
         .btn-auth { 
             width: 100%; padding: 15px 20px; border-radius: 14px; border: none; 
@@ -41,16 +41,19 @@
             transition: 0.2s;
         }
         
-        /* Branding Colors */
-        .btn-google { background: #fff; color: #000; }
+        /* Provider Specific Styles */
+        .btn-google { background: #ffffff; color: #000; }
         .btn-github { background: #24292e; color: #fff; }
         .btn-discord { background: #5865F2; color: #fff; }
         .btn-phone { background: #1a1a1a; color: #fff; border: 1px solid var(--border); }
         
-        .btn-auth i { width: 20px; height: 20px; } /* Icon Size */
+        /* Logo sizes */
+        .provider-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+        .google-logo { width: 18px; height: 18px; }
+
         .btn-auth:active { transform: scale(0.97); }
 
-        /* Form Styling */
+        /* Email Form */
         .email-form { 
             background: #0a0a0a; border: 1px solid var(--border); 
             padding: 24px; border-radius: 22px; text-align: left;
@@ -60,9 +63,9 @@
             width: 100%; background: #151515; border: 1px solid var(--border); 
             color: #fff; padding: 14px; border-radius: 12px; margin: 6px 0 16px 0; outline: none; font-size: 16px;
         }
-        .btn-login { width: 100%; background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-login { width: 100%; background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; }
 
-        /* App Shell */
+        /* App Interface */
         #app-shell { display: none; flex-direction: column; height: 100vh; }
         header { padding: calc(var(--safe-top) + 20px) 25px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         main { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 280px; }
@@ -93,16 +96,25 @@
             
             <div class="btn-stack">
                 <button class="btn-auth btn-google" onclick="socialAuth('google')">
-                    <i data-lucide="log-in"></i> Continue with Google
+                    <div class="provider-icon">
+                        <img class="google-logo" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Reference_Logo.svg" alt="Google">
+                    </div> 
+                    Continue with Google
                 </button>
+
                 <button class="btn-auth btn-github" onclick="socialAuth('github')">
-                    <i data-lucide="github"></i> Continue with GitHub
+                    <div class="provider-icon"><i data-lucide="github"></i></div>
+                    Continue with GitHub
                 </button>
+
                 <button class="btn-auth btn-discord" onclick="socialAuth('discord')">
-                    <i data-lucide="message-square"></i> Continue with Discord
+                    <div class="provider-icon"><i data-lucide="message-circle"></i></div>
+                    Continue with Discord
                 </button>
+
                 <button class="btn-auth btn-phone" onclick="phoneAuthFlow()">
-                    <i data-lucide="smartphone"></i> Continue with Phone
+                    <div class="provider-icon"><i data-lucide="smartphone"></i></div>
+                    Continue with Phone
                 </button>
             </div>
 
