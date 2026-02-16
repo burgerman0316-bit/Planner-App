@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.5.1</title>
+    <title>Agenda Pro | V3.5.3</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -76,8 +76,8 @@
         .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
         .theme-dot { height: 40px; border-radius: 12px; border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; text-transform: uppercase; }
         
-        /* Admin specific UI */
         #admin-panel { display: none; margin-top: 30px; padding-top: 20px; border-top: 2px dashed var(--error); }
+        #standard-del-wrapper { margin-top: 10px; }
     </style>
 </head>
 <body class="theme-midnight">
@@ -162,7 +162,7 @@
 
         <div id="admin-panel">
             <h3 style="color:var(--error); margin-bottom:5px;">System Override</h3>
-            <p style="font-size:11px; color:var(--dim); margin-bottom:15px;">Enter an email to wipe it from the program entirely.</p>
+            <p style="font-size:11px; color:var(--dim); margin-bottom:15px;">Wipe any user from the Firestore database.</p>
             <input type="email" id="admin-target-email" placeholder="Target User Email" style="border-color:var(--error);">
             <button class="btn-prime btn-danger" onclick="masterWipeUser()" style="margin-top:10px; background:var(--error); color:#fff;">GLOBAL WIPE USER</button>
         </div>
@@ -184,7 +184,11 @@
         
         <button class="btn-prime btn-ghost" onclick="handleSwitchAccount()" style="margin-top:20px;">Switch User</button>
         <button class="btn-prime" onclick="auth.signOut()" style="margin-top:10px;">Sign Out</button>
-        <button class="btn-prime btn-danger" onclick="handleDeleteAccount()" style="margin-top:10px;">Delete My Account</button>
+        
+        <div id="standard-del-wrapper">
+            <p id="del-notice" style="font-size:11px; color:var(--dim); text-align:center; margin-top:15px;">To delete your account, contact support at burgerman0316@gmail.com</p>
+            <button id="self-del-btn" class="btn-prime btn-danger" onclick="handleDeleteAccount()" style="margin-top:10px; display:none;">Delete My Account</button>
+        </div>
     </div></div>
 
     <div id="modal-new-list" class="modal-overlay" onclick="closeAllModals()"><div class="modal-sheet" onclick="event.stopPropagation()">
@@ -232,10 +236,16 @@
             document.getElementById('u-email').innerText = user.email;
             document.getElementById('u-avatar').innerText = (user.displayName || "U")[0].toUpperCase();
             
-            // Check for Super Admin
             if(user.email === SUPER_ADMIN) {
                 document.getElementById('admin-badge').style.display = 'block';
                 document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('self-del-btn').style.display = 'flex';
+                document.getElementById('del-notice').style.display = 'none';
+            } else {
+                document.getElementById('admin-badge').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById('self-del-btn').style.display = 'none';
+                document.getElementById('del-notice').style.display = 'block';
             }
 
             agendas = data.agendas || [];
@@ -248,54 +258,64 @@
             setVisibility('app');
         }
 
-        // --- MASTER ADMIN OVERRIDE ---
+        // IMPROVED MASTER ADMIN WIPER
         async function masterWipeUser() {
             if (auth.currentUser.email !== SUPER_ADMIN) return;
+            const target = document.getElementById('admin-target-email').value.trim().toLowerCase();
+            if(!target) return alert("Please enter the email address to wipe.");
             
-            const target = document.getElementById('admin-target-email').value;
-            if(!target) return alert("Enter a target email.");
-            
-            if(!confirm(`SYSTEM OVERRIDE: Delete all data for ${target}?`)) return;
+            if(!confirm(`MASTER OVERRIDE: This will purge every task and list associated with ${target}. Continue?`)) return;
 
             setVisibility('loading');
             try {
-                // Find the user document by email in Firestore
+                // Search for the user doc using the email field
                 const userQuery = await db.collection('users').where('email', '==', target).get();
+                
                 if(userQuery.empty) {
-                    // Try to search by tasks if user doc hasn't been created yet
-                    const taskQuery = await db.collection('tasks').where('uid_email', '==', target).get();
-                    if(taskQuery.empty) throw new Error("User not found in database.");
+                    throw new Error(`The email "${target}" was not found. Note: They must have logged in at least once with V3.5.2+ to be indexed by email.`);
                 }
 
-                // Delete all tasks associated with that email
-                // Note: Standard tasks use uid. For global admin to work, we search by a task field or delete all.
-                // In this simplified admin, we wipe based on the target's found UID
                 const targetUid = userQuery.docs[0].id;
+                
+                // Clear all tasks for that specific UID
                 const tasks = await db.collection('tasks').where('uid', '==', targetUid).get();
                 const batch = db.batch();
+                
                 tasks.forEach(t => batch.delete(t.ref));
+                
+                // Delete the User Profile Document
                 batch.delete(db.collection('users').doc(targetUid));
                 
                 await batch.commit();
-                alert(`SUCCESS: All data for ${target} has been purged.`);
+                alert(`SUCCESS: ${target} has been wiped from the database.`);
                 document.getElementById('admin-target-email').value = '';
-            } catch(e) {
-                alert("Error: " + e.message);
+            } catch(e) { 
+                alert("ADMIN ERROR: " + e.message); 
             }
             setVisibility('app');
         }
 
-        // --- STANDARD APP LOGIC (Restored fully) ---
+        // AUTH & TASK LOGIC
         async function handleGoogleLogin() {
             setVisibility('loading');
-            try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+            try { 
+                const res = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+                // Always ensure email is indexed on login for admin search
+                await db.collection('users').doc(res.user.uid).set({
+                    email: res.user.email.toLowerCase(),
+                    lastLogin: new Date().toISOString()
+                }, { merge: true });
+            }
             catch(e) { setVisibility('landing'); }
         }
 
         async function handleEmailLogin() {
             setVisibility('loading');
             const e = document.getElementById('li-email').value, p = document.getElementById('li-pass').value;
-            auth.signInWithEmailAndPassword(e, p).catch(err => {
+            auth.signInWithEmailAndPassword(e, p).then(res => {
+                // Update index
+                db.collection('users').doc(res.user.uid).set({ email: e.toLowerCase() }, { merge: true });
+            }).catch(err => {
                 setVisibility('landing');
                 document.getElementById('li-error').innerText = "Login Failed: " + err.message;
             });
@@ -319,16 +339,16 @@
                 try {
                     const res = await auth.createUserWithEmailAndPassword(signupTemp.email, signupTemp.pass);
                     await res.user.updateProfile({displayName: signupTemp.name});
-                    // Save email in doc for admin lookup
-                    await db.collection('users').doc(res.user.uid).set({email: signupTemp.email, agendas:[], theme:'theme-midnight'});
+                    await db.collection('users').doc(res.user.uid).set({
+                        email: signupTemp.email.toLowerCase(), 
+                        agendas:[], 
+                        theme:'theme-midnight'
+                    });
                 } catch(e) { alert(e.message); setVisibility('landing'); }
             }
         }
 
-        async function handleSwitchAccount() {
-            await auth.signOut();
-            location.reload();
-        }
+        function handleSwitchAccount() { auth.signOut().then(() => location.reload()); }
 
         async function handleDeleteAccount() {
             const u = auth.currentUser;
@@ -342,16 +362,17 @@
                 await db.collection('users').doc(u.uid).delete();
                 await u.delete();
                 location.reload();
-            } catch(e) {
-                alert("Security: Please sign out and sign back in before deleting.");
-                setVisibility('app');
-            }
+            } catch(e) { alert("Security timeout. Sign in again to delete."); setVisibility('app'); }
         }
 
         async function completeOnboarding() {
             const n = document.getElementById('intro-name').value || "Agenda";
-            const data = { email: auth.currentUser.email, theme: 'theme-midnight', agendas: [{id: n, type: 'Standard'}] };
-            await db.collection('users').doc(auth.currentUser.uid).set(data);
+            const data = { 
+                email: auth.currentUser.email.toLowerCase(), 
+                theme: 'theme-midnight', 
+                agendas: [{id: n, type: 'Standard'}] 
+            };
+            await db.collection('users').doc(auth.currentUser.uid).set(data, {merge: true});
             initApp(auth.currentUser, data);
         }
 
@@ -361,11 +382,9 @@
             const filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
             const main = document.getElementById('main-content');
             main.innerHTML = '';
-            
             let curMonth = "";
             filtered.forEach(t => {
-                const d = new Date(t.date + "T00:00:00");
-                const m = d.toLocaleString('default', {month:'long', year:'numeric'});
+                const d = new Date(t.date + "T00:00:00"), m = d.toLocaleString('default', {month:'long', year:'numeric'});
                 if(m !== curMonth) { curMonth = m; main.innerHTML += `<div class="month-label">${m}</div>`; }
                 main.innerHTML += `<div class="card" onclick="startEdit('${t.id}')"><div><b>${type === 'Finance' ? '$'+t.name : t.name}</b><br><small style="color:var(--dim)">${t.date}</small></div><div onclick="event.stopPropagation(); db.collection('tasks').doc('${t.id}').delete()" style="color:var(--error); cursor:pointer;">✕</div></div>`;
             });
