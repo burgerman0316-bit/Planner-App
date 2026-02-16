@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | V3.1</title>
+    <title>Agenda Pro | V3.1.1</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -39,17 +39,44 @@
         #app-shell { display: none; flex-direction: column; height: 100vh; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s; }
         #app-shell.modal-active { transform: scale(0.94); filter: blur(20px); pointer-events: none; }
 
-        header { padding-top: calc(var(--safe-top) + 20px); padding-bottom: 20px; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 25px; }
+        header { 
+            padding-top: calc(var(--safe-top) + 10px); 
+            background: var(--bg); 
+            border-bottom: 1px solid var(--border); 
+            z-index: 100; 
+            flex-shrink: 0;
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px 25px 0; }
         .header-top h1 { margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -1.5px; }
 
         .icon-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; color: var(--icon-color); }
         .icon-btn svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-        .nav-scroller { display: flex; gap: 10px; overflow-x: auto; padding: 0 25px 5px; scrollbar-width: none; }
+        /* FIXED TAB SCROLLER */
+        .nav-scroller { 
+            display: flex; 
+            gap: 12px; 
+            overflow-x: auto; 
+            padding: 5px 25px 15px; /* Added bottom padding so shadows/scaling aren't cut */
+            scrollbar-width: none; 
+            -webkit-overflow-scrolling: touch;
+            align-items: center;
+        }
         .nav-scroller::-webkit-scrollbar { display: none; }
 
-        .tab-pill { flex-shrink: 0; padding: 10px 22px; border-radius: 50px; background: var(--card); color: var(--dim); font-size: 13px; font-weight: 800; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; }
+        .tab-pill { 
+            flex-shrink: 0; 
+            padding: 10px 22px; 
+            border-radius: 50px; 
+            background: var(--card); 
+            color: var(--dim); 
+            font-size: 13px; 
+            font-weight: 800; 
+            border: 1px solid var(--border); 
+            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; 
+            white-space: nowrap;
+        }
         .tab-pill.active { background: var(--accent); color: #000; border-color: var(--accent); transform: scale(1.05); }
 
         main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 300px; }
@@ -88,7 +115,6 @@
 
         .build-tag { text-align: center; margin-top: 25px; padding: 10px; color: var(--dim); font-size: 10px; font-family: monospace; letter-spacing: 2px; opacity: 0.6; }
 
-        /* Login Screen Updates */
         #login-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; overflow-y: auto; }
         .auth-card { width: 100%; max-width: 360px; text-align: center; }
         .email-auth-box { background: #111; border: 1px solid #222; padding: 20px; border-radius: 24px; margin-top: 25px; text-align: left; }
@@ -101,9 +127,7 @@
     <div id="login-screen">
         <div class="auth-card">
             <h1 style="font-size:54px; margin-bottom:30px; color:white; letter-spacing:-3px;">Agenda.</h1>
-            
             <button class="btn-prime" style="background:white; color:black;" onclick="handleLogin()">Sign In with Google</button>
-            
             <div class="email-auth-box">
                 <label>Email Address</label>
                 <input type="email" id="email-in" placeholder="name@email.com">
@@ -120,7 +144,6 @@
                 <h2 style="margin:0; font-size:28px;">Settings</h2>
                 <div class="icon-btn" onclick="closeAllModals()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
             </div>
-
             <div class="modal-scroll-area">
                 <div id="account-display" class="profile-box">
                     <img id="user-photo" src="" alt="">
@@ -129,7 +152,6 @@
                         <span id="user-email">guest@agenda.app</span>
                     </div>
                 </div>
-
                 <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">App Themes</p>
                 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:30px;">
                     <button class="tab-pill" onclick="setTheme('theme-midnight')">Midnight</button>
@@ -138,16 +160,10 @@
                     <button class="tab-pill" onclick="setTheme('theme-forest')">Forest</button>
                     <button class="tab-pill" onclick="setTheme('theme-silver')">Silver</button>
                 </div>
-
                 <p style="font-size:10px; font-weight:900; color:var(--dim); text-transform:uppercase; margin-bottom:12px;">Active Agendas</p>
                 <div id="settings-agendas-list" style="border-radius:20px; border:1px solid var(--border); overflow:hidden; margin-bottom:30px;"></div>
-
                 <button class="btn-prime" onclick="auth.signOut()" style="background:var(--error); color:white; font-size:13px; letter-spacing:1px;">Log Out</button>
-
-                <div class="build-tag">
-                    VERSION 3.1.0-STABLE <br>
-                    BUILD_ID: 2026.02.15_PROD
-                </div>
+                <div class="build-tag">VERSION 3.1.1-STABLE <br> BUILD_ID: 2026.02.15_PROD</div>
             </div>
         </div>
     </div>
@@ -223,7 +239,7 @@
             try {
                 await auth.signInWithEmailAndPassword(email, pass);
             } catch (error) {
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
                     try {
                         await auth.createUserWithEmailAndPassword(email, pass);
                     } catch (e) { alert(e.message); }
@@ -235,11 +251,9 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-shell').style.display = 'flex';
-                
-                document.getElementById('user-photo').src = user.photoURL || 'https://ui-avatars.com/api/?name=' + (user.displayName || user.email);
+                document.getElementById('user-photo').src = user.photoURL || 'https://ui-avatars.com/api/?background=random&name=' + (user.displayName || user.email);
                 document.getElementById('user-name').innerText = user.displayName || user.email.split('@')[0];
                 document.getElementById('user-email').innerText = user.email || '';
-                
                 sync(user.uid);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -341,7 +355,6 @@
                     </div>
                 </div>
             `).join('');
-
             if (sortableInstance) sortableInstance.destroy();
             sortableInstance = Sortable.create(setList, {
                 handle: '.drag-handle', animation: 200,
@@ -372,9 +385,7 @@
             const main = document.getElementById('main-content');
             main.innerHTML = '';
             const cur = agendas.find(a => a.id === activeTab) || agendas[0];
-            
             let filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
-
             const groups = {};
             const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             filtered.forEach(t => {
@@ -383,7 +394,6 @@
                 if (!groups[key]) groups[key] = [];
                 groups[key].push(t);
             });
-
             for (const key in groups) {
                 const sec = document.createElement('div');
                 sec.style.marginBottom = "30px";
@@ -392,7 +402,6 @@
                     const target = new Date(task.date + "T00:00:00");
                     const diff = Math.ceil((target - new Date()) / 86400000);
                     let badge = '', pBar = '', displayTitle = task.name;
-
                     if (cur.type === 'Countdown') {
                         badge = `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PAST' : diff + 'd'}</div>`;
                     } else if (cur.type === 'Milestone') {
@@ -406,7 +415,6 @@
                         let color = '#34c759'; if(diff < 3) color = '#ff375f'; else if(diff < 10) color = '#ff9500';
                         pBar = `<div style="position:absolute; left:0; top:0; bottom:0; width:5px; background:${color}"></div>`;
                     }
-
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.onclick = () => startEdit(task.id);
