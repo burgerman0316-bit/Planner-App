@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Agenda Pro | Full System</title>
+    <title>Agenda Pro | V2.4</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 
     <style>
         :root {
@@ -44,197 +45,55 @@
             --text: #e8f5e9; --dim: #81c784; --accent: #34c759;
             --input-bg: #000000;
         }
-        body.theme-sunset {
-            --bg: #0d0404; --card: #1a0d0d; --border: #2a1515;
-            --text: #fff5f5; --dim: #e57373; --accent: #ff375f;
-            --input-bg: #000000;
-        }
 
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; transition: background 0.4s ease; }
 
-        body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--text);
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: background 0.4s ease, color 0.4s ease;
-        }
+        #app-shell { display: none; flex-direction: column; height: 100vh; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s; }
+        #app-shell.modal-active { transform: scale(0.92); filter: blur(15px); pointer-events: none; border-radius: 40px; }
 
-        #app-shell {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s;
-        }
-
-        #app-shell.modal-active {
-            transform: scale(0.92);
-            filter: blur(15px);
-            pointer-events: none;
-            border-radius: 40px;
-        }
-
-        header {
-            padding-top: calc(var(--safe-top) + 40px); 
-            padding-bottom: 20px;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-            z-index: 100;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding: 0 25px;
-        }
-
+        header { padding-top: calc(var(--safe-top) + 40px); padding-bottom: 20px; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 25px; }
         .header-top h1 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -1.2px; }
 
-        .nav-scroller {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 0 25px 5px;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-        }
+        .nav-scroller { display: flex; gap: 12px; overflow-x: auto; padding: 0 25px 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .nav-scroller::-webkit-scrollbar { display: none; }
 
-        .tab-pill {
-            flex-shrink: 0;
-            padding: 12px 24px;
-            border-radius: 50px;
-            background: var(--card);
-            color: var(--dim);
-            font-size: 14px;
-            font-weight: 700;
-            border: 1px solid var(--border);
-            transition: all 0.2s ease;
-        }
-        .tab-pill.active {
-            background: var(--accent);
-            color: #fff;
-            border-color: var(--accent);
-        }
+        .tab-pill { flex-shrink: 0; padding: 12px 24px; border-radius: 50px; background: var(--card); color: var(--dim); font-size: 14px; font-weight: 700; border: 1px solid var(--border); transition: 0.2s ease; cursor: pointer; }
+        .tab-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
         body:not(.theme-light):not(.theme-paper) .tab-pill.active { color: #000; }
 
         main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 320px; }
-        
         .month-section { margin-bottom: 40px; }
-        .month-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent);
-            font-weight: 900;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center; gap: 15px;
-        }
+        .month-label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
         .month-label::after { content: ""; height: 1px; background: var(--border); flex: 1; }
 
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 22px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 22px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .card-body b { display: block; font-size: 18px; margin-bottom: 4px; }
         .card-body span { font-size: 14px; color: var(--dim); }
 
         /* MODALS */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
+        .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
         .modal-overlay.active { display: flex; opacity: 1; }
-
-        .modal-sheet {
-            background: var(--card);
-            color: var(--text);
-            width: 100%;
-            max-width: 500px;
-            border-radius: 40px 40px 0 0;
-            padding: 35px;
-            padding-bottom: calc(var(--safe-bottom) + 30px);
-            transform: translateY(100%);
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            border-top: 1px solid var(--border);
-        }
+        .modal-sheet { background: var(--card); color: var(--text); width: 100%; max-width: 500px; border-radius: 40px 40px 0 0; padding: 35px; padding-bottom: calc(var(--safe-bottom) + 30px); transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-top: 1px solid var(--border); }
         .modal-overlay.active .modal-sheet { transform: translateY(0); }
 
-        .theme-btn {
-            height: 50px; border-radius: 15px; border: 2px solid var(--border);
-            cursor: pointer; font-weight: 700; font-size: 13px;
-        }
-
-        .settings-item {
-            background: var(--bg);
-            padding: 18px 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            font-size: 16px;
-        }
-        .settings-item:first-child { border-radius: 20px 20px 0 0; }
-        .settings-item:last-child { border-radius: 0 0 20px 20px; border-bottom: none; }
-
-        .build-footer {
-            text-align: center; margin-top: 30px;
-            color: var(--dim); font-size: 11px; font-family: monospace;
-            letter-spacing: 1.5px; opacity: 0.6;
-        }
+        /* SETTINGS LIST REORDERING */
+        .sortable-ghost { opacity: 0.3; background: var(--accent) !important; }
+        .settings-item { background: var(--bg); padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); cursor: default; }
+        .drag-handle { cursor: grab; padding: 10px; color: var(--dim); font-size: 20px; }
 
         /* FOOTER */
-        footer {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            padding: 25px; padding-bottom: calc(var(--safe-bottom) + 20px);
-            background: linear-gradient(to top, var(--bg) 80%, transparent);
-            z-index: 50;
-        }
-
-        .input-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 35px;
-            padding: 15px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
-        }
-
+        footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 25px; padding-bottom: calc(var(--safe-bottom) + 20px); background: linear-gradient(to top, var(--bg) 80%, transparent); z-index: 50; }
+        .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 35px; padding: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
         .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
-        input, select { 
-            background: var(--input-bg); border: 1px solid var(--border); 
-            color: var(--text); padding: 16px; border-radius: 20px; 
-            font-size: 16px; width: 100%; 
-        }
+        input, select { background: var(--input-bg); border: 1px solid var(--border); color: var(--text); padding: 16px; border-radius: 20px; font-size: 16px; width: 100%; }
 
         .btn-prime { width: 100%; padding: 20px; border-radius: 22px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         .btn-add { background: var(--text); color: var(--bg); }
         .btn-save { background: var(--accent); color: #fff; }
 
+        .build-footer { text-align: center; margin-top: 30px; color: var(--dim); font-size: 11px; font-family: monospace; letter-spacing: 1.5px; opacity: 0.6; }
         #login-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
     </style>
 </head>
@@ -253,29 +112,23 @@
             </div>
 
             <div style="margin-bottom:30px;">
-                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Full Themes</p>
+                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Themes</p>
                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                    <button class="theme-btn" style="background:#000; color:#fff;" onclick="setTheme('theme-midnight')">Dark</button>
-                    <button class="theme-btn" style="background:#f2f2f7; color:#000;" onclick="setTheme('theme-light')">Light</button>
-                    <button class="theme-btn" style="background:#f9f5eb; color:#1c2b2d;" onclick="setTheme('theme-paper')">Paper</button>
-                    <button class="theme-btn" style="background:#2e3440; color:#eceff4;" onclick="setTheme('theme-nord')">Nord</button>
-                    <button class="theme-btn" style="background:#040d06; color:#e8f5e9;" onclick="setTheme('theme-emerald')">Green</button>
-                    <button class="theme-btn" style="background:#0d0404; color:#fff5f5;" onclick="setTheme('theme-sunset')">Red</button>
+                    <button class="tab-pill" style="font-size:10px;" onclick="setTheme('theme-midnight')">Dark</button>
+                    <button class="tab-pill" style="font-size:10px;" onclick="setTheme('theme-light')">Light</button>
+                    <button class="tab-pill" style="font-size:10px;" onclick="setTheme('theme-paper')">Paper</button>
                 </div>
             </div>
 
             <div style="margin-bottom:30px;">
-                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Manage Lists</p>
+                <p style="font-size:11px; color:var(--dim); text-transform:uppercase; font-weight:800; margin-bottom:15px;">Reorder / Manage Lists (Drag ≡)</p>
                 <div id="settings-agendas-list" style="border: 1px solid var(--border); border-radius:20px; overflow:hidden;"></div>
             </div>
 
-            <div class="settings-item" onclick="auth.signOut()" style="border-radius:20px; color:var(--error); font-weight:700; background: var(--bg); cursor:pointer;">
-                <span>Sign Out</span>
-                <span>→</span>
-            </div>
+            <button class="btn-prime" onclick="auth.signOut()" style="background:var(--error); color:white; font-size:12px;">Sign Out</button>
 
             <div class="build-footer">
-                VERSION 2.3.5 <br>
+                VERSION 2.4.0 <br>
                 BUILD 2026.02.15_RELEASE
             </div>
         </div>
@@ -334,7 +187,7 @@
 
         let activeTab = 'General';
         let allTasks = [];
-        let agendas = JSON.parse(localStorage.getItem('agendas_v5')) || [{id:'General', type:'Standard'}, {id:'Releases', type:'Countdown'}];
+        let agendas = JSON.parse(localStorage.getItem('agendas_v6')) || [{id:'General', type:'Standard'}, {id:'Releases', type:'Countdown'}];
         let editId = null;
 
         function handleLogin() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
@@ -357,8 +210,7 @@
             });
         }
 
-        // --- EXPORT FUNCTIONS TO WINDOW ---
-        window.openModal = function(id) {
+        window.openModal = (id) => {
             document.getElementById(id).style.display = 'flex';
             setTimeout(() => {
                 document.getElementById(id).classList.add('active');
@@ -366,33 +218,32 @@
             }, 10);
         };
 
-        window.closeAllModals = function() {
+        window.closeAllModals = () => {
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
             document.getElementById('app-shell').classList.remove('modal-active');
             setTimeout(() => document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'), 400);
         };
 
-        window.setTheme = function(t) { document.body.className = t; localStorage.setItem('theme_v5', t); };
-        if(localStorage.getItem('theme_v5')) setTheme(localStorage.getItem('theme_v5'));
+        window.setTheme = (t) => { document.body.className = t; localStorage.setItem('theme_v6', t); };
+        if(localStorage.getItem('theme_v6')) setTheme(localStorage.getItem('theme_v6'));
 
-        window.createNewAgenda = function() {
+        window.createNewAgenda = () => {
             const n = document.getElementById('n-list-name').value.trim();
             const t = document.getElementById('n-list-type').value;
             if(!n) return;
             agendas.push({id: n, type: t});
             activeTab = n;
-            localStorage.setItem('agendas_v5', JSON.stringify(agendas));
+            saveAgendas();
             document.getElementById('n-list-name').value = '';
             closeAllModals();
             render();
         };
 
-        window.handleTaskSubmit = function() {
+        window.handleTaskSubmit = () => {
             const name = document.getElementById('t-input').value;
             const date = document.getElementById('d-input').value;
             if(!name || !date) return;
             const data = { name, date, category: activeTab, uid: auth.currentUser.uid };
-            
             if (editId) {
                 db.collection("tasks").doc(editId).update(data);
                 resetForm();
@@ -403,7 +254,7 @@
             }
         };
 
-        window.startEdit = function(id) {
+        window.startEdit = (id) => {
             const t = allTasks.find(x => x.id === id);
             if (!t) return;
             document.getElementById('t-input').value = t.name;
@@ -412,10 +263,9 @@
             document.getElementById('s-btn').innerText = "Update Event";
             document.getElementById('s-btn').className = "btn-prime btn-save";
             document.getElementById('cancel-edit').style.display = "block";
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         };
 
-        window.resetForm = function() {
+        window.resetForm = () => {
             editId = null;
             document.getElementById('t-input').value = '';
             document.getElementById('d-input').value = '';
@@ -424,17 +274,46 @@
             document.getElementById('cancel-edit').style.display = "none";
         };
 
-        window.deleteTask = function(id) {
-            if(confirm("Delete this event?")) db.collection('tasks').doc(id).delete();
-        };
+        function saveAgendas() { localStorage.setItem('agendas_v6', JSON.stringify(agendas)); }
+
+        function initSortable() {
+            const el = document.getElementById('settings-agendas-list');
+            Sortable.create(el, {
+                handle: '.drag-handle',
+                animation: 150,
+                onEnd: function () {
+                    const newOrder = [];
+                    el.querySelectorAll('.settings-item').forEach(item => {
+                        const id = item.getAttribute('data-id');
+                        const found = agendas.find(a => a.id === id);
+                        if(found) newOrder.push(found);
+                    });
+                    agendas = newOrder;
+                    saveAgendas();
+                    render();
+                }
+            });
+        }
 
         function render() {
             document.getElementById('tab-bar').innerHTML = agendas.map(a => `<div class="tab-pill ${a.id === activeTab ? 'active' : ''}" onclick="activeTab='${a.id}'; render();">${a.id}</div>`).join('');
-            document.getElementById('settings-agendas-list').innerHTML = agendas.map(a => `<div class="settings-item"><span>${a.id}</span><span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="agendas=agendas.filter(x=>x.id!=='${a.id}'); localStorage.setItem('agendas_v5',JSON.stringify(agendas)); render();">Delete</span></div>`).join('');
+            
+            const setList = document.getElementById('settings-agendas-list');
+            setList.innerHTML = agendas.map(a => `
+                <div class="settings-item" data-id="${a.id}">
+                    <div style="display:flex; align-items:center;">
+                        <span class="drag-handle">≡</span>
+                        <span style="margin-left:10px; font-weight:600;">${a.id}</span>
+                    </div>
+                    <span style="color:var(--error); font-weight:700; cursor:pointer;" onclick="agendas=agendas.filter(x=>x.id!=='${a.id}'); saveAgendas(); render();">Delete</span>
+                </div>
+            `).join('');
+            
+            initSortable();
 
             const main = document.getElementById('main-content');
             main.innerHTML = '';
-            const current = agendas.find(a => a.id === activeTab);
+            const current = agendas.find(a => a.id === activeTab) || agendas[0];
             const filtered = allTasks.filter(t => t.category === activeTab).sort((a,b) => new Date(a.date) - new Date(b.date));
 
             const groups = {};
@@ -453,20 +332,10 @@
                 groups[key].forEach(task => {
                     const diff = Math.ceil((new Date(task.date + "T00:00:00") - new Date()) / 86400000);
                     const badge = current.type === 'Countdown' ? `<div style="font-size:12px; font-weight:900; color:var(--accent);">${diff < 0 ? 'PASSED' : diff + ' DAYS'}</div>` : '';
-                    
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.onclick = () => startEdit(task.id);
-                    card.innerHTML = `
-                        <div class="card-body">
-                            <b>${task.name}</b>
-                            <span>${task.date}</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:15px;">
-                            ${badge}
-                            <span style="color:var(--error); font-weight:900; cursor:pointer; padding:10px;" onclick="event.stopPropagation(); deleteTask('${task.id}')">✕</span>
-                        </div>
-                    `;
+                    card.innerHTML = `<div class="card-body"><b>${task.name}</b><span>${task.date}</span></div><div style="display:flex; align-items:center; gap:15px;">${badge}<span style="color:var(--error); font-weight:900; cursor:pointer; padding:10px;" onclick="event.stopPropagation(); if(confirm('Delete?')) db.collection('tasks').doc('${task.id}').delete();">✕</span></div>`;
                     sec.appendChild(card);
                 });
                 main.appendChild(sec);
